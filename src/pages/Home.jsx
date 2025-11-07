@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -52,7 +53,7 @@ export default function HomePage() {
     },
     {
       icon: Sparkles,
-      title: 'AR Experiences',
+      title: 'Creative Tech Solutions', // Changed from 'AR Experiences'
       description: 'Cutting-edge augmented reality solutions to make your marketing campaigns truly interactive.',
       color: 'bg-orange-500'
     },
@@ -118,7 +119,7 @@ export default function HomePage() {
           }}
         >
           {/* Overlay for opacity control */}
-          <div className="absolute inset-0 bg-[#2053E6] opacity-90"></div>
+          <div className="absolute inset-0 bg-[#2053E6] opacity-100"></div> {/* Changed from opacity-90 to opacity-100 */}
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -187,7 +188,7 @@ export default function HomePage() {
                 className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group hover:border-[#2053E6]/30"
               >
                 <CardContent className="p-6">
-                  <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
                     <service.icon className="w-6 h-6 text-white" />
                   </div>
                   <h4 className="text-xl font-semibold text-gray-900 mb-3">
