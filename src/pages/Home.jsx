@@ -86,15 +86,15 @@ export default function HomePage() {
 
               <div>
                 <h1 className="text-xl font-bold text-white">MCTS</h1>
-                <p className="text-xs text-white/90">Printing & Design Solutions</p>
+                <p className="text-xs text-white/90">Marasigan Creative and Tech Solutions</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <a href="#services" className="text-white/90 hover:text-white transition-colors hidden md:block">
-                Services
+              <a href="#services" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Services
+
               </a>
-              <a href="#contact" className="text-white/90 hover:text-white transition-colors hidden md:block">
-                Contact
+              <a href="#contact" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Contact
+
               </a>
               <Button onClick={handleLogin} variant="outline" className="border-white/30 text-white hover:bg-white/10">
                 Team Login
@@ -112,12 +112,12 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
         {/* Background Image with Overlay */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ 
+          style={{
             backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png)'
-          }}
-        >
+          }}>
+
           {/* Overlay for opacity control */}
           <div className="absolute inset-0 bg-[#2053E6] opacity-30"></div>
         </div>
@@ -144,15 +144,15 @@ export default function HomePage() {
 
             {/* Feature Pills */}
             <div className="flex flex-wrap gap-4 justify-center mt-12">
-              {features.map((feature, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-white/30"
-                >
+              {features.map((feature, index) =>
+              <div
+                key={index}
+                className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-white/30">
+
                   <feature.icon className="w-4 h-4 text-white" />
                   <span className="text-sm font-medium text-white">{feature.text}</span>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -277,8 +277,8 @@ export default function HomePage() {
                 <img
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
                   alt="MCTS Logo"
-                  className="h-8 w-auto"
-                />
+                  className="h-8 w-auto" />
+
                 <span className="text-white font-bold text-lg">MCTS</span>
               </div>
               <p className="text-gray-400 text-sm">
@@ -323,6 +323,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
