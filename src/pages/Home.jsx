@@ -119,7 +119,7 @@ export default function HomePage() {
           }}
         >
           {/* Overlay for opacity control */}
-          <div className="absolute inset-0 bg-[#2053E6] opacity-100"></div>
+          <div className="absolute inset-0 bg-[#2053E6] opacity-30"></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -328,7 +328,7 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h4 className="text-white font-semibold mb-4">For Team Members</h4>
+              <h4 className="text-white font-semibold mb-4}>For Team Members</h4>
               <p className="text-gray-400 text-sm mb-4">
                 Access the internal management system.
               </p>
