@@ -29,6 +29,7 @@ import QuotationPrintView from './pages/QuotationPrintView';
 import ClientOrderForm from './pages/ClientOrderForm';
 import PurchaseOrderPrintView from './pages/PurchaseOrderPrintView';
 import Home from './pages/Home';
+import NotFound from './pages/NotFound';
 import Layout from './Layout.jsx';
 
 
@@ -64,6 +65,7 @@ export const PAGES = {
     "ClientOrderForm": ClientOrderForm,
     "PurchaseOrderPrintView": PurchaseOrderPrintView,
     "Home": Home,
+    "NotFound": NotFound,
 }
 
 export const pagesConfig = {
