@@ -134,9 +134,9 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="text-xl text-white/90 mb-8">
-              From digital printing to creative design and AR experiences, we deliver excellence in every project. 
-              Fast turnaround, competitive pricing, and unmatched quality.
+              From creative design to printable outputs, kami ang bahala sa inyo!
             </p>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href={createPageUrl('ClientOrderForm')}>
                 <Button size="lg" className="bg-white text-[#2053E6] hover:bg-gray-100 px-8 py-6 text-lg shadow-xl">
@@ -174,7 +174,7 @@ export default function HomePage() {
               Our Services
             </Badge>
             <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need, All in One Place
+              Designed to help you with your creative needs
             </h3>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Comprehensive printing and design solutions tailored to your business needs
@@ -262,8 +262,8 @@ export default function HomePage() {
                   <Mail className="w-6 h-6 text-white" />
                 </div>
                 <h4 className="font-semibold text-gray-900 mb-2">Email</h4>
-                <a href="mailto:info@mcts.com" className="text-indigo-600 hover:underline">
-                  info@mcts.com
+                <a href="mailto:marasigancts@gmail.com" className="text-indigo-600 hover:underline">
+                  marasigancts@gmail.com
                 </a>
               </CardContent>
             </Card>
@@ -275,7 +275,7 @@ export default function HomePage() {
                 </div>
                 <h4 className="font-semibold text-gray-900 mb-2">Visit Us</h4>
                 <p className="text-gray-600 text-sm">
-                  Your trusted printing partner
+                  Dasmarinas, Cavite
                 </p>
               </CardContent>
             </Card>
