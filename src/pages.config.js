@@ -28,6 +28,7 @@ import Dashboard from './pages/Dashboard';
 import QuotationPrintView from './pages/QuotationPrintView';
 import ClientOrderForm from './pages/ClientOrderForm';
 import PurchaseOrderPrintView from './pages/PurchaseOrderPrintView';
+import Home from './pages/Home';
 import Layout from './Layout.jsx';
 
 
@@ -62,6 +63,7 @@ export const PAGES = {
     "QuotationPrintView": QuotationPrintView,
     "ClientOrderForm": ClientOrderForm,
     "PurchaseOrderPrintView": PurchaseOrderPrintView,
+    "Home": Home,
 }
 
 export const pagesConfig = {

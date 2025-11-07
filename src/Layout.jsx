@@ -83,7 +83,9 @@ export default function Layout({ children, currentPageName }) {
     return saved !== null ? JSON.parse(saved) : true; // Initialize to true (collapsed) if no value is saved
   });
 
-  const isPublicPage = location.pathname.startsWith(createPageUrl("ClientQuote")) || 
+  const isPublicPage = location.pathname === createPageUrl("Home") ||
+                       location.pathname === '/' ||
+                       location.pathname.startsWith(createPageUrl("ClientQuote")) || 
                        location.pathname.startsWith(createPageUrl("PublicContentView")) ||
                        location.pathname.startsWith(createPageUrl("ARView")) ||
                        location.pathname.startsWith(createPageUrl("ReimbursementPrintView")) ||
