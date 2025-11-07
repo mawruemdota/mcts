@@ -46,7 +46,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="px-6 py-6 space-y-6 bg-background min-h-screen w-full">
+    <div className="space-y-6 bg-background min-h-screen w-full">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Production Queue */}
         <div className="lg:col-span-2">
