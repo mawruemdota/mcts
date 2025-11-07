@@ -101,7 +101,7 @@ export default function HomePage() {
               </Button>
               <a href={createPageUrl('ClientOrderForm')}>
                 <Button className="bg-white text-[#2053E6] hover:bg-gray-100">
-                  Order Now
+                  Place Your Order
                 </Button>
               </a>
             </div>
@@ -296,7 +296,7 @@ export default function HomePage() {
                 </li>
                 <li>
                   <a href={createPageUrl('ClientOrderForm')} className="text-gray-400 hover:text-white transition-colors">
-                    Order Now
+                    Place Your Order
                   </a>
                 </li>
                 <li>
