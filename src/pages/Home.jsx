@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
 import {
   Printer,
@@ -22,10 +20,6 @@ import {
 'lucide-react';
 
 export default function HomePage() {
-  const handleLogin = () => {
-    base44.auth.redirectToLogin(createPageUrl('Dashboard'));
-  };
-
   const services = [
   {
     icon: Printer,
@@ -90,15 +84,8 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <a href="#services" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Services
-
-              </a>
-              <a href="#contact" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Contact
-
-              </a>
-              <Button onClick={handleLogin} variant="outline" className="border-white/30 text-white hover:bg-white/10">
-                Team Login
-              </Button>
+              <a href="#services" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Services</a>
+              <a href="#contact" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Contact</a>
               <a href={createPageUrl('ClientOrderForm')}>
                 <Button className="bg-white text-[#2053E6] hover:bg-gray-100">
                   Place Your Order
@@ -312,9 +299,11 @@ export default function HomePage() {
               <p className="text-gray-400 text-sm mb-4">
                 Access the internal management system.
               </p>
-              <Button onClick={handleLogin} variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
-                Team Login
-              </Button>
+              <a href={createPageUrl('Dashboard')}>
+                <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
+                  Go to Dashboard
+                </Button>
+              </a>
             </div>
           </div>
 
