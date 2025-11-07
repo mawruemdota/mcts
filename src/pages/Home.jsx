@@ -1,16 +1,15 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '@/utils';
-import { 
-  Printer, 
-  Palette, 
-  Package, 
-  Zap, 
-  Users, 
+import {
+  Printer,
+  Palette,
+  Package,
+  Zap,
+  Users,
   CheckCircle,
   Mail,
   Phone,
@@ -18,59 +17,59 @@ import {
   ArrowRight,
   Sparkles,
   FileText,
-  Image as ImageIcon
-} from 'lucide-react';
+  Image as ImageIcon } from
+'lucide-react';
 
 export default function HomePage() {
   const handleLogin = () => {
-    window.location.href = createPageUrl('Login');
+    base44.auth.redirectToLogin(createPageUrl('Dashboard'));
   };
 
   const services = [
-    {
-      icon: Printer,
-      title: 'Digital Printing',
-      description: 'High-quality tarpaulins, stickers, banners, and large format printing for all your business needs.',
-      color: 'bg-blue-500'
-    },
-    {
-      icon: FileText,
-      title: 'Business Cards & IDs',
-      description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
-      color: 'bg-green-500'
-    },
-    {
-      icon: ImageIcon,
-      title: 'Promotional Materials',
-      description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
-      color: 'bg-purple-500'
-    },
-    {
-      icon: Palette,
-      title: 'Creative Design',
-      description: 'Expert graphic design services, social media content creation, and brand identity development.',
-      color: 'bg-pink-500'
-    },
-    {
-      icon: Sparkles,
-      title: 'AR Experiences',
-      description: 'Cutting-edge augmented reality solutions to make your marketing campaigns truly interactive.',
-      color: 'bg-orange-500'
-    },
-    {
-      icon: Package,
-      title: 'Rush Orders',
-      description: 'Need it fast? We offer rush services to meet your urgent deadlines without compromising quality.',
-      color: 'bg-red-500'
-    }
-  ];
+  {
+    icon: Printer,
+    title: 'Digital Printing',
+    description: 'High-quality tarpaulins, stickers, banners, and large format printing for all your business needs.',
+    color: 'bg-blue-500'
+  },
+  {
+    icon: FileText,
+    title: 'Business Cards & IDs',
+    description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
+    color: 'bg-green-500'
+  },
+  {
+    icon: ImageIcon,
+    title: 'Promotional Materials',
+    description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
+    color: 'bg-purple-500'
+  },
+  {
+    icon: Palette,
+    title: 'Creative Design',
+    description: 'Expert graphic design services, social media content creation, and brand identity development.',
+    color: 'bg-pink-500'
+  },
+  {
+    icon: Sparkles,
+    title: 'AR Experiences',
+    description: 'Cutting-edge augmented reality solutions to make your marketing campaigns truly interactive.',
+    color: 'bg-orange-500'
+  },
+  {
+    icon: Package,
+    title: 'Rush Orders',
+    description: 'Need it fast? We offer rush services to meet your urgent deadlines without compromising quality.',
+    color: 'bg-red-500'
+  }];
+
 
   const features = [
-    { icon: Zap, text: 'Fast Turnaround' },
-    { icon: CheckCircle, text: 'Quality Guaranteed' },
-    { icon: Users, text: 'Expert Team' },
-    { icon: Package, text: 'Competitive Pricing' }
-  ];
+  { icon: Zap, text: 'Fast Turnaround' },
+  { icon: CheckCircle, text: 'Quality Guaranteed' },
+  { icon: Users, text: 'Expert Team' },
+  { icon: Package, text: 'Competitive Pricing' }];
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -79,14 +78,14 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <img 
+              <img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
                 alt="MCTS Logo"
-                className="h-10 w-auto"
-              />
+                className="h-10 w-auto" />
+
               <div>
                 <h1 className="text-xl font-bold text-gray-900">MCTS</h1>
-                <p className="text-xs text-gray-600">Printing & Design Solutions</p>
+                <p className="text-slate-100 text-xl font-bold">MCTS</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -112,7 +111,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-indigo-600/10" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="bg-slate-100 absolute inset-0 from-blue-600/10 to-indigo-600/10">
           <div className="text-center max-w-3xl mx-auto">
             <Badge className="mb-4 bg-blue-100 text-blue-700 border-blue-200">
               Professional Printing & Design Services
@@ -142,15 +141,15 @@ export default function HomePage() {
 
             {/* Feature Pills */}
             <div className="flex flex-wrap gap-4 justify-center mt-12">
-              {features.map((feature, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200"
-                >
+              {features.map((feature, index) =>
+              <div
+                key={index}
+                className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
+
                   <feature.icon className="w-4 h-4 text-blue-600" />
                   <span className="text-sm font-medium text-gray-700">{feature.text}</span>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -172,11 +171,11 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <Card 
-                key={index}
-                className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group"
-              >
+            {services.map((service, index) =>
+            <Card
+              key={index}
+              className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group">
+
                 <CardContent className="p-6">
                   <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                     <service.icon className="w-6 h-6 text-white" />
@@ -189,7 +188,7 @@ export default function HomePage() {
                   </p>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -279,11 +278,11 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img 
+                <img
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
                   alt="MCTS Logo"
-                  className="h-8 w-auto"
-                />
+                  className="h-8 w-auto" />
+
                 <span className="text-white font-bold text-lg">MCTS</span>
               </div>
               <p className="text-gray-400 text-sm">
@@ -333,6 +332,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
