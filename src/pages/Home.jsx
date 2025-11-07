@@ -300,11 +300,6 @@ export default function HomePage() {
                   </a>
                 </li>
                 <li>
-                  <a href={createPageUrl('ClientQuote')} className="text-gray-400 hover:text-white transition-colors">
-                    Get a Quote
-                  </a>
-                </li>
-                <li>
                   <a href="#contact" className="text-gray-400 hover:text-white transition-colors">
                     Contact Us
                   </a>
