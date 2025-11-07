@@ -292,8 +292,8 @@ export default function HomePage() {
                 <img
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
                   alt="MCTS Logo"
-                  className="h-8 w-auto" />
-
+                  className="h-8 w-auto"
+                />
                 <span className="text-white font-bold text-lg">MCTS</span>
               </div>
               <p className="text-gray-400 text-sm">
@@ -328,11 +328,11 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h4 className="text-white font-semibold mb-4}>For Team Members</h4>
+              <h4 className="text-white font-semibold mb-4">For Team Members</h4>
               <p className="text-gray-400 text-sm mb-4">
                 Access the internal management system.
               </p>
-              <Button onClick={handleLogin} variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+              <Button onClick={handleLogin} variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
                 Team Login
               </Button>
             </div>
@@ -343,6 +343,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-    </div>);
-
+    </div>
+  );
 }
