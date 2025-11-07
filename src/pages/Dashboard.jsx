@@ -46,19 +46,17 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 bg-background min-h-screen w-full">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Production Queue */}
-        <div className="lg:col-span-2">
-          <ProductionQueue user={user} initialFilter={filter} />
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Main Production Queue */}
+      <div className="lg:col-span-2">
+        <ProductionQueue user={user} initialFilter={filter} />
+      </div>
 
-        {/* Sidebar with Calendar, Reminders and Alerts */}
-        <div className="space-y-6">
-          <DashboardCalendar user={user} />
-          <RemindersSummary user={user} />
-          <InventoryAlerts user={user} />
-        </div>
+      {/* Sidebar with Calendar, Reminders and Alerts */}
+      <div className="space-y-6">
+        <DashboardCalendar user={user} />
+        <RemindersSummary user={user} />
+        <InventoryAlerts user={user} />
       </div>
     </div>
   );
