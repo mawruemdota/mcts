@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -52,7 +53,7 @@ export default function HomePage() {
   },
   {
     icon: Sparkles,
-    title: 'AR Experiences',
+    title: 'Creative Tech Solutions',
     description: 'Cutting-edge augmented reality solutions to make your marketing campaigns truly interactive.',
     color: 'bg-orange-500'
   },
@@ -74,7 +75,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-[#2053E6] border-b border-[#1a45c4] sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
@@ -84,22 +85,22 @@ export default function HomePage() {
                 className="h-10 w-auto" />
 
               <div>
-                <h1 className="text-xl font-bold text-gray-900">MCTS</h1>
-                <p className="text-slate-200 text-xs font-normal">Printing & Design Solutions</p>
+                <h1 className="text-xl font-bold text-white">MCTS</h1>
+                <p className="text-xs text-white/90">Printing & Design Solutions</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <a href="#services" className="text-gray-700 hover:text-blue-600 transition-colors hidden md:block">
+              <a href="#services" className="text-white/90 hover:text-white transition-colors hidden md:block">
                 Services
               </a>
-              <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors hidden md:block">
+              <a href="#contact" className="text-white/90 hover:text-white transition-colors hidden md:block">
                 Contact
               </a>
-              <Button onClick={handleLogin} variant="outline">
+              <Button onClick={handleLogin} variant="outline" className="border-white/30 text-white hover:bg-white/10">
                 Team Login
               </Button>
               <a href={createPageUrl('ClientOrderForm')}>
-                <Button className="bg-blue-600 hover:bg-blue-700">
+                <Button className="bg-white text-[#2053E6] hover:bg-gray-100">
                   Order Now
                 </Button>
               </a>
@@ -110,30 +111,40 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-indigo-600/10" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        {/* Background Image with Overlay */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png)'
+          }}
+        >
+          {/* Overlay for opacity control */}
+          <div className="absolute inset-0 bg-[#2053E6] opacity-100"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <Badge className="mb-4 bg-blue-100 text-blue-700 border-blue-200">
+            <Badge className="mb-4 bg-white/20 text-white border-white/30 backdrop-blur-sm">
               Professional Printing & Design Services
             </Badge>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
               Bring Your Ideas to{' '}
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                 Life
               </span>
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-white/90 mb-8">
               From digital printing to creative design and AR experiences, we deliver excellence in every project. 
               Fast turnaround, competitive pricing, and unmatched quality.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href={createPageUrl('ClientOrderForm')}>
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg">
+                <Button size="lg" className="bg-white text-[#2053E6] hover:bg-gray-100 px-8 py-6 text-lg shadow-xl">
                   Get Started <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </a>
               <a href={createPageUrl('ClientQuote')}>
-                <Button size="lg" variant="outline" className="px-8 py-6 text-lg">
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg backdrop-blur-sm">
                   Get a Quote
                 </Button>
               </a>
@@ -141,15 +152,15 @@ export default function HomePage() {
 
             {/* Feature Pills */}
             <div className="flex flex-wrap gap-4 justify-center mt-12">
-              {features.map((feature, index) =>
-              <div
-                key={index}
-                className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
-
-                  <feature.icon className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-700">{feature.text}</span>
+              {features.map((feature, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-white/30"
+                >
+                  <feature.icon className="w-4 h-4 text-white" />
+                  <span className="text-sm font-medium text-white">{feature.text}</span>
                 </div>
-              )}
+              ))}
             </div>
           </div>
         </div>
