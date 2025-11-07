@@ -137,12 +137,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href={createPageUrl('ClientOrderForm')}>
                 <Button size="lg" className="bg-white text-[#2053E6] hover:bg-gray-100 px-8 py-6 text-lg shadow-xl">
-                  Get Started <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </a>
-              <a href={createPageUrl('ClientQuote')}>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg backdrop-blur-sm">
-                  Get a Quote
+                  Place Your Order <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </a>
             </div>
@@ -208,20 +203,13 @@ export default function HomePage() {
             Ready to Get Started?
           </h3>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Place your order now or request a custom quote. Our team is ready to bring your vision to life.
+            Place your order now and our team will contact you to finalize the details and bring your vision to life.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href={createPageUrl('ClientOrderForm')}>
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg">
-                Place an Order
-              </Button>
-            </a>
-            <a href={createPageUrl('ClientQuote')}>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg">
-                Request a Quote
-              </Button>
-            </a>
-          </div>
+          <a href={createPageUrl('ClientOrderForm')}>
+            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg">
+              Place Your Order
+            </Button>
+          </a>
         </div>
       </section>
 
