@@ -124,9 +124,6 @@ export default function HomePage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <Badge className="mb-4 bg-white/20 text-white border-white/30 backdrop-blur-sm">
-              Professional Printing & Design Services
-            </Badge>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
               Bring Your Ideas to{' '}
               <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
