@@ -85,6 +85,7 @@ export default function Layout({ children, currentPageName }) {
 
   const isPublicPage = location.pathname === createPageUrl("Home") ||
                        location.pathname === '/' ||
+                       location.pathname === '/Home' ||
                        location.pathname === createPageUrl("Login") ||
                        location.pathname === createPageUrl("NotFound") ||
                        location.pathname.startsWith(createPageUrl("ClientQuote")) || 
