@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useCallback } from "react";
-import { User, Team, Department } from "@/entities/all"; // Added Department entity
+import { User, Team, Department } from "@/entities/all";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,31 +20,31 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea"; // Added Textarea
-import { Checkbox } from "@/components/ui/checkbox"; // Added Checkbox
-import { Users, Mail, Phone, Briefcase, Plus, Edit, Trash2, User as UserIcon, Loader2, UserCheck, UserX, MoreVertical, Building2 } from "lucide-react"; // Added MoreVertical, Building2
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Users, Mail, Phone, Briefcase, Plus, Edit, Trash2, User as UserIcon, Loader2, UserCheck, UserX, MoreVertical, Building2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { UploadFile } from "@/integrations/Core";
 import {
     Table, TableHeader, TableRow, TableBody, TableCell
-} from "@/components/ui/table"; // Added Table imports
+} from "@/components/ui/table";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"; // Added DropdownMenu imports
+} from "@/components/ui/dropdown-menu";
 
 
 export default function TeamPage() {
     const [users, setUsers] = useState([]);
     const [teams, setTeams] = useState([]);
-    const [departments, setDepartments] = useState([]); // New state for departments
+    const [departments, setDepartments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showTeamForm, setShowTeamForm] = useState(false);
-    const [showDepartmentForm, setShowDepartmentForm] = useState(false); // New state for department form visibility
+    const [showDepartmentForm, setShowDepartmentForm] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
-    const [editingDepartment, setEditingDepartment] = useState(null); // New state for editing department
+    const [editingDepartment, setEditingDepartment] = useState(null);
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [teamSearchQuery, setTeamSearchQuery] = useState('');
     const { toast } = useToast();
@@ -53,14 +52,14 @@ export default function TeamPage() {
     const loadData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const [userData, teamData, departmentData] = await Promise.all([ // Added departmentData
+            const [userData, teamData, departmentData] = await Promise.all([
                 User.list(),
                 Team.list(),
-                Department.list() // Fetch department data
+                Department.list()
             ]);
             setUsers(userData);
             setTeams(teamData);
-            setDepartments(departmentData); // Set department state
+            setDepartments(departmentData);
         } catch (error) {
             toast({ variant: "destructive", title: "Error", description: "Failed to load data." });
         } finally {
@@ -112,15 +111,14 @@ export default function TeamPage() {
         }
     };
 
-    // New function for deleting a department
     const handleDeleteDepartment = async (deptId, deptName) => {
-        const usersInDept = users.filter(u => u.departments?.includes(deptName)); // Check for users assigned to this department
+        const usersInDept = users.filter(u => u.departments?.includes(deptName));
         if (usersInDept.length > 0) {
             toast({ variant: "destructive", title: "Cannot Delete", description: `${usersInDept.length} users are assigned to this department. Please reassign them first.` });
             return;
         }
 
-        if (window.confirm(`Are you sure you want to delete the department "${deptName}"?`)) { // Confirmation before deleting
+        if (window.confirm(`Are you sure you want to delete the department "${deptName}"?`)) {
             try {
                 await Department.delete(deptId);
                 toast({ title: "Success", description: "Department deleted successfully." });
@@ -192,7 +190,6 @@ export default function TeamPage() {
         );
     };
 
-    // DepartmentForm component updated from outline
     const DepartmentForm = ({ department, onSubmitted }) => {
         const [departmentData, setDepartmentData] = useState({
             name: department?.name || '',
@@ -261,11 +258,11 @@ export default function TeamPage() {
             full_name: user?.full_name || '',
             nickname: user?.nickname || '',
             team_name: user?.team_name || '',
-            departments: user?.departments || [], // Changed from 'department' to 'departments' array
+            departments: user?.departments || [],
             position: user?.position || '',
             profile_picture_url: user?.profile_picture_url || '',
-            is_active: user?.is_active !== false, // Default to true if undefined or null
-            is_authorized_access: user?.is_authorized_access !== false // Add authorization field
+            is_active: user?.is_active !== false,
+            is_authorized_access: user?.is_authorized_access !== false
         });
         const [isUploading, setIsUploading] = useState(false);
         const { toast } = useToast();
@@ -286,7 +283,6 @@ export default function TeamPage() {
             }
         };
 
-        // New function to toggle department selection
         const toggleDepartment = (deptName) => {
             setUserData(prev => {
                 const currentDepts = prev.departments || [];
@@ -306,7 +302,6 @@ export default function TeamPage() {
                 return;
             }
 
-            // New validation for departments
             if (!userData.departments || userData.departments.length === 0) {
                 toast({ variant: "destructive", title: "Department required", description: "Please select at least one department." });
                 return;
@@ -323,10 +318,8 @@ export default function TeamPage() {
             }
 
             try {
-                // Use User.update for admin updating other users
                 await User.update(user.id, userData);
                 toast({ title: "Success", description: "User updated successfully." });
-                // Refresh the users list to show updated data
                 await loadData();
                 onSubmitted();
             } catch (error) {
@@ -392,7 +385,6 @@ export default function TeamPage() {
                         </SelectContent>
                     </Select>
                 </div>
-                {/* Department selection with checkboxes */}
                 <div className="space-y-2">
                     <Label>Departments (Select one or more)</Label>
                     <div className="grid grid-cols-2 gap-2 p-3 border border-border rounded-md">
@@ -477,7 +469,7 @@ export default function TeamPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Team Management</h1>
-                        <p className="text-muted-foreground mt-1">Manage teams, departments, and assign members.</p> {/* Updated description */}
+                        <p className="text-muted-foreground mt-1">Manage teams, departments, and assign members.</p>
                     </div>
                 </div>
 
@@ -511,7 +503,6 @@ export default function TeamPage() {
                                      user.full_name?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
                                      user.email?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
                                      user.position?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-                                     // Updated search to include departments array
                                      user.departments?.some(d => d.toLowerCase().includes(userSearchQuery.toLowerCase())) ||
                                      user.team_name?.toLowerCase().includes(userSearchQuery.toLowerCase()))
                                 ).length})</CardTitle>
@@ -528,7 +519,7 @@ export default function TeamPage() {
                                                 <TableRow>
                                                     <TableCell className="w-[200px] min-w-[150px]">Member</TableCell>
                                                     <TableCell className="min-w-[100px]">Position</TableCell>
-                                                    <TableCell className="min-w-[100px]">Departments</TableCell> {/* Updated header */}
+                                                    <TableCell className="min-w-[100px]">Departments</TableCell>
                                                     <TableCell className="min-w-[100px]">Team</TableCell>
                                                     <TableCell className="min-w-[100px]">Phone</TableCell>
                                                     <TableCell className="text-right min-w-[150px]">Actions</TableCell>
@@ -540,7 +531,6 @@ export default function TeamPage() {
                                                      user.full_name?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
                                                      user.email?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
                                                      user.position?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-                                                     // Updated search to include departments array
                                                      user.departments?.some(d => d.toLowerCase().includes(userSearchQuery.toLowerCase())) ||
                                                      user.team_name?.toLowerCase().includes(userSearchQuery.toLowerCase()))
                                                 ).map(user => (
@@ -564,7 +554,6 @@ export default function TeamPage() {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="whitespace-nowrap">{user.position}</TableCell>
-                                                        {/* Display departments as colored badges */}
                                                         <TableCell className="whitespace-nowrap">
                                                             <div className="flex flex-wrap gap-1">
                                                                 {user.departments && user.departments.length > 0 ? (
@@ -729,14 +718,14 @@ export default function TeamPage() {
                                                         <span className="text-sm text-muted-foreground">No members yet.</span>
                                                     )}
                                                 </div>
-                                            </CardContent>
+                                            </div>
+                                        </CardContent>
                                     </Card>
                                 );
                             })}
                         </div>
                     </TabsContent>
 
-                    {/* New Departments TabContent */}
                     <TabsContent value="departments" className="space-y-6">
                         <div className="flex justify-between items-center flex-wrap gap-4">
                             <div>
