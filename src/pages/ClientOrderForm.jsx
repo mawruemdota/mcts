@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   ClipboardList,
   CheckCircle,
@@ -13,7 +15,9 @@ import {
   X,
   Plus,
   Minus,
-  ShoppingCart
+  ShoppingCart,
+  Search,
+  Tag
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -27,41 +31,99 @@ export default function ClientOrderFormPage() {
     items: []
   });
   const [pricelist, setPricelist] = useState([]);
+  const [discountCodes, setDiscountCodes] = useState([]);
+  const [appliedCode, setAppliedCode] = useState(null);
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [promoCodeError, setPromoCodeError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
 
   useEffect(() => {
-    const loadPricelist = async () => {
+    const loadData = async () => {
       try {
-        const items = await base44.entities.PriceListItem.list();
-        // Sort items alphabetically
+        const [items, codes] = await Promise.all([
+          base44.entities.PriceListItem.list(),
+          base44.entities.DiscountCode.filter({ is_active: true })
+        ]);
         const sortedItems = items.sort((a, b) => a.item_name.localeCompare(b.item_name));
         setPricelist(sortedItems);
+        setDiscountCodes(codes);
       } catch (error) {
-        console.error('Error loading price list:', error);
+        console.error('Error loading data:', error);
         setError('Failed to load items. Please refresh the page.');
       }
     };
-    loadPricelist();
+    loadData();
   }, []);
+
+  const applyPromoCode = () => {
+    setPromoCodeError('');
+    const code = discountCodes.find(c => c.code.toUpperCase() === promoCodeInput.toUpperCase());
+    
+    if (!code) {
+      setPromoCodeError('Invalid promo code');
+      return;
+    }
+    
+    setAppliedCode(code);
+    setPromoCodeError('');
+    
+    // Update all items in cart with new pricing
+    const updatedItems = formData.items.map(item => {
+      const pricelistItem = pricelist.find(p => p.id === item.item_id);
+      if (!pricelistItem) return item;
+      
+      let newPrice;
+      if (code.type === 'aggressive_pricing') {
+        newPrice = pricelistItem.price_aggressive || pricelistItem.price_conservative;
+      } else {
+        newPrice = pricelistItem.price_conservative;
+      }
+      
+      return { ...item, price: newPrice };
+    });
+    
+    setFormData({ ...formData, items: updatedItems });
+  };
+
+  const removePromoCode = () => {
+    setAppliedCode(null);
+    setPromoCodeInput('');
+    setPromoCodeError('');
+    
+    // Reset all items to conservative pricing
+    const updatedItems = formData.items.map(item => {
+      const pricelistItem = pricelist.find(p => p.id === item.item_id);
+      if (!pricelistItem) return item;
+      return { ...item, price: pricelistItem.price_conservative };
+    });
+    
+    setFormData({ ...formData, items: updatedItems });
+  };
 
   const addItemToOrder = (pricelistItem) => {
     const existingItemIndex = formData.items.findIndex(i => i.item_id === pricelistItem.id);
     
+    let itemPrice;
+    if (appliedCode && appliedCode.type === 'aggressive_pricing') {
+      itemPrice = pricelistItem.price_aggressive || pricelistItem.price_conservative;
+    } else {
+      itemPrice = pricelistItem.price_conservative;
+    }
+    
     if (existingItemIndex !== -1) {
-      // Item already in order, increase quantity
       const newItems = [...formData.items];
       newItems[existingItemIndex].quantity += 1;
       setFormData({ ...formData, items: newItems });
     } else {
-      // Add new item to order
       const newItem = {
         item_id: pricelistItem.id,
         item_name: pricelistItem.item_name,
         quantity: 1,
-        price: pricelistItem.price_conservative || 0,
+        price: itemPrice,
         unit: pricelistItem.unit
       };
       setFormData({ ...formData, items: [...formData.items, newItem] });
@@ -73,7 +135,6 @@ export default function ClientOrderFormPage() {
     const newQuantity = newItems[index].quantity + delta;
     
     if (newQuantity <= 0) {
-      // Remove item if quantity would be 0 or less
       newItems.splice(index, 1);
     } else {
       newItems[index].quantity = newQuantity;
@@ -87,10 +148,22 @@ export default function ClientOrderFormPage() {
     setFormData({ ...formData, items: newItems });
   };
 
-  const calculateTotal = () => {
+  const calculateSubtotal = () => {
     return formData.items.reduce((total, item) => {
       return total + (item.price * item.quantity);
     }, 0);
+  };
+
+  const calculateDiscount = () => {
+    if (!appliedCode) return 0;
+    if (appliedCode.type === 'percentage_off') {
+      return calculateSubtotal() * (appliedCode.value / 100);
+    }
+    return 0;
+  };
+
+  const calculateTotal = () => {
+    return calculateSubtotal() - calculateDiscount();
   };
 
   const handleSubmit = async (e) => {
@@ -110,13 +183,11 @@ export default function ClientOrderFormPage() {
     setError('');
     
     try {
-      // Generate order number using timestamp
       const year = new Date().getFullYear();
       const timestamp = Date.now();
       const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
       const generatedOrderNumber = `ORD-${year}-${timestamp}-${randomSuffix}`;
 
-      // Create order
       await base44.entities.Order.create({
         order_number: generatedOrderNumber,
         client_name: formData.client_name,
@@ -126,6 +197,7 @@ export default function ClientOrderFormPage() {
         items: formData.items,
         total_amount: calculateTotal(),
         special_instructions: formData.special_instructions || null,
+        promo_code: appliedCode ? appliedCode.code : null,
         status: 'new'
       });
 
@@ -157,6 +229,9 @@ export default function ClientOrderFormPage() {
               <p><strong>Order Number:</strong> {orderNumber}</p>
               <p><strong>Total:</strong> ₱{calculateTotal().toFixed(2)}</p>
               <p><strong>Items:</strong> {formData.items.length}</p>
+              {appliedCode && (
+                <p><strong>Promo Code Applied:</strong> {appliedCode.code}</p>
+              )}
             </div>
             <p className="text-xs text-gray-500 mt-4">
               Please keep your order number for reference. We'll reach out to you at {formData.client_phone} soon.
@@ -167,7 +242,17 @@ export default function ClientOrderFormPage() {
     );
   }
 
+  const subtotal = calculateSubtotal();
+  const discount = calculateDiscount();
   const total = calculateTotal();
+
+  const filteredItems = pricelist.filter(item =>
+    item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const itemProducts = filteredItems.filter(item => item.category === 'item');
+  const itemServices = filteredItems.filter(item => item.category === 'service');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -188,39 +273,98 @@ export default function ClientOrderFormPage() {
         )}
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left side - Product List */}
+          {/* Left side - Product/Service List */}
           <div className="lg:col-span-2 space-y-4">
             <Card className="shadow-lg border-none bg-white text-gray-800">
               <CardHeader>
                 <CardTitle className="text-gray-900">Available Items & Services</CardTitle>
-                <p className="text-sm text-gray-500">Click on any item to add it to your order</p>
+                <div className="relative mt-2">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search items..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="grid sm:grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-2">
-                  {pricelist.map(item => (
-                    <div
-                      key={item.id}
-                      onClick={() => addItemToOrder(item)}
-                      className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition-all group"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">
-                          {item.item_name}
-                        </h3>
-                        <Badge variant="outline" className="ml-2">
-                          {item.category === 'item' ? 'Item' : 'Service'}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{item.description || 'No description'}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-blue-600">
-                          ₱{item.price_conservative?.toFixed(2) || '0.00'}
-                        </span>
-                        <span className="text-xs text-gray-500">per {item.unit}</span>
-                      </div>
+                <Tabs defaultValue="products" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="products">Products ({itemProducts.length})</TabsTrigger>
+                    <TabsTrigger value="services">Services ({itemServices.length})</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="products" className="mt-4">
+                    <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Item Name</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead className="text-right">Price</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {itemProducts.map(item => (
+                            <TableRow key={item.id} className="cursor-pointer hover:bg-blue-50" onClick={() => addItemToOrder(item)}>
+                              <TableCell className="font-medium">{item.item_name}</TableCell>
+                              <TableCell className="text-sm text-gray-600">{item.description || 'No description'}</TableCell>
+                              <TableCell className="text-right">
+                                <div className="font-bold text-blue-600">₱{item.price_conservative?.toFixed(2) || '0.00'}</div>
+                                <div className="text-xs text-gray-500">per {item.unit}</div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); addItemToOrder(item); }}>
+                                  <Plus className="w-4 h-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      {itemProducts.length === 0 && (
+                        <p className="text-center text-gray-500 py-8">No products found</p>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="services" className="mt-4">
+                    <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Service Name</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead className="text-right">Price</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {itemServices.map(item => (
+                            <TableRow key={item.id} className="cursor-pointer hover:bg-blue-50" onClick={() => addItemToOrder(item)}>
+                              <TableCell className="font-medium">{item.item_name}</TableCell>
+                              <TableCell className="text-sm text-gray-600">{item.description || 'No description'}</TableCell>
+                              <TableCell className="text-right">
+                                <div className="font-bold text-blue-600">₱{item.price_conservative?.toFixed(2) || '0.00'}</div>
+                                <div className="text-xs text-gray-500">per {item.unit}</div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); addItemToOrder(item); }}>
+                                  <Plus className="w-4 h-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      {itemServices.length === 0 && (
+                        <p className="text-center text-gray-500 py-8">No services found</p>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </div>
@@ -234,7 +378,7 @@ export default function ClientOrderFormPage() {
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Order Items */}
-                  <div className="space-y-2 max-h-[250px] overflow-y-auto">
+                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
                     {formData.items.length === 0 ? (
                       <p className="text-sm text-gray-500 text-center py-4">
                         No items added yet. Click on items to add them to your order.
@@ -281,9 +425,57 @@ export default function ClientOrderFormPage() {
                     )}
                   </div>
 
+                  {/* Promo Code Section */}
+                  <div className="pt-2 border-t space-y-2">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Tag className="w-4 h-4" />
+                      Promo Code
+                    </Label>
+                    {!appliedCode ? (
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Enter code"
+                          value={promoCodeInput}
+                          onChange={(e) => setPromoCodeInput(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button type="button" size="sm" onClick={applyPromoCode}>
+                          Apply
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded">
+                        <div>
+                          <p className="text-sm font-medium text-green-800">{appliedCode.code}</p>
+                          <p className="text-xs text-green-600">
+                            {appliedCode.type === 'aggressive_pricing' 
+                              ? 'Special pricing applied' 
+                              : `${appliedCode.value}% off`}
+                          </p>
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" onClick={removePromoCode}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                    {promoCodeError && (
+                      <p className="text-xs text-red-500">{promoCodeError}</p>
+                    )}
+                  </div>
+
                   {/* Total */}
-                  <div className="pt-2 border-t">
-                    <div className="flex justify-between items-center">
+                  <div className="pt-2 border-t space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Subtotal:</span>
+                      <span className="font-medium">₱{subtotal.toFixed(2)}</span>
+                    </div>
+                    {discount > 0 && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>Discount:</span>
+                        <span>-₱{discount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-2 border-t">
                       <span className="font-semibold text-gray-900">Total Amount:</span>
                       <span className="text-2xl font-bold text-blue-600">₱{total.toFixed(2)}</span>
                     </div>
