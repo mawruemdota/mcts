@@ -46,7 +46,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Main Production Queue */}
       <div className="lg:col-span-2">
         <ProductionQueue user={user} initialFilter={filter} />
