@@ -256,7 +256,7 @@ export default function TeamPage() {
         );
     };
 
-    const EditUserForm = ({ user, allUsers, onSubmitted }) => {
+    const EditUserForm = ({ user, allUsers, onSubmitted, loadData }) => {
         const [userData, setUserData] = useState({
             full_name: user?.full_name || '',
             nickname: user?.nickname || '',
@@ -264,7 +264,8 @@ export default function TeamPage() {
             departments: user?.departments || [], // Changed from 'department' to 'departments' array
             position: user?.position || '',
             profile_picture_url: user?.profile_picture_url || '',
-            is_active: user?.is_active !== false // Default to true if undefined or null
+            is_active: user?.is_active !== false, // Default to true if undefined or null
+            is_authorized_access: user?.is_authorized_access !== false // Add authorization field
         });
         const [isUploading, setIsUploading] = useState(false);
         const { toast } = useToast();
@@ -441,6 +442,25 @@ export default function TeamPage() {
                     </div>
                 </div>
 
+                <div className="flex items-center justify-between p-4 border border-amber-200 bg-amber-50 rounded-lg">
+                    <div className="space-y-1">
+                        <Label htmlFor="authorizedAccess" className="font-medium text-amber-900">Access Authorization</Label>
+                        <p className="text-sm text-amber-700">
+                            {userData.is_authorized_access ? 'User is authorized to access the application' : 'User requires admin approval to access the application'}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            id="authorizedAccess"
+                            checked={userData.is_authorized_access}
+                            onCheckedChange={v => setUserData({...userData, is_authorized_access: v})}
+                        />
+                        <Label htmlFor="authorizedAccess" className="text-sm text-amber-900">
+                            {userData.is_authorized_access ? 'Authorized' : 'Pending'}
+                        </Label>
+                    </div>
+                </div>
+
                 <div className="flex justify-end gap-2 mt-4">
                     <Button type="button" variant="outline" onClick={onSubmitted}>Cancel</Button>
                     <Button type="submit" disabled={isUploading}>
@@ -587,7 +607,7 @@ export default function TeamPage() {
                                                                         <DialogHeader>
                                                                             <DialogTitle className="text-card-foreground">Edit Team Member</DialogTitle>
                                                                         </DialogHeader>
-                                                                        {editingUser && <EditUserForm user={editingUser} allUsers={users} onSubmitted={() => { setEditingUser(null); }} />}
+                                                                        {editingUser && <EditUserForm user={editingUser} allUsers={users} onSubmitted={() => { setEditingUser(null); }} loadData={loadData} />}
                                                                     </DialogContent>
                                                                 </Dialog>
                                                                 <AlertDialog>
@@ -709,8 +729,7 @@ export default function TeamPage() {
                                                         <span className="text-sm text-muted-foreground">No members yet.</span>
                                                     )}
                                                 </div>
-                                            </div>
-                                        </CardContent>
+                                            </CardContent>
                                     </Card>
                                 );
                             })}
