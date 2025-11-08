@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -89,6 +90,9 @@ export default function Layout({ children, currentPageName }) {
       const currentUser = await User.me();
       
       if (currentUser.is_active === false) {
+        setIsInactiveUser(true);
+        setUser(null);
+      } else if (currentUser.is_authorized_access === false) { // Reuse this state for unauthorized users
         setIsInactiveUser(true);
         setUser(null);
       } else {
@@ -232,8 +236,8 @@ export default function Layout({ children, currentPageName }) {
               <div className="w-16 h-16 bg-gradient-to-r from-red-600 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <UserX className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">Account Inactive</h1>
-              <p className="text-gray-600 mt-2">Your account has been deactivated. Please contact your administrator for assistance.</p>
+              <h1 className="text-2xl font-bold text-gray-900">Access Pending Authorization</h1>
+              <p className="text-gray-600 mt-2">Your account requires administrator approval before you can access this application. Please contact your administrator for assistance.</p>
             </div>
             <Button
               onClick={handleLogout}
