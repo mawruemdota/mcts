@@ -280,6 +280,17 @@ export default function Layout({ children, currentPageName }) {
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Bai+Jamjuree:wght@400;500;600;700&display=swap');
+        
+        .font-oswald {
+          font-family: 'Oswald', sans-serif;
+          font-weight: 700;
+        }
+        
+        .font-bai-jamjuree {
+          font-family: 'Bai Jamjuree', sans-serif;
+        }
+        
         :root.dark {
           --background: 222.2 84% 4.9%;
           --foreground: 210 40% 98%;
