@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -219,8 +220,14 @@ export default function Layout({ children, currentPageName }) {
   if (!user) {
     if (isInactiveUser) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-100">
-          <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+        <div 
+          className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
+          style={{
+            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png)'
+          }}
+        >
+          <div className="absolute inset-0 bg-red-900/40 backdrop-blur-sm"></div>
+          <div className="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 relative z-10">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-r from-red-600 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <UserX className="w-8 h-8 text-white" />
@@ -240,8 +247,14 @@ export default function Layout({ children, currentPageName }) {
     }
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+      <div 
+        className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
+        style={{
+          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png)'
+        }}
+      >
+        <div className="absolute inset-0 bg-blue-900/40 backdrop-blur-sm"></div>
+        <div className="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 relative z-10">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <ClipboardList className="w-8 h-8 text-white" />
@@ -250,7 +263,7 @@ export default function Layout({ children, currentPageName }) {
             <p className="text-gray-600 mt-2">Internal Management System</p>
           </div>
           <Button
-            onClick={() => User.login()}
+            onClick={() => base44.auth.redirectToLogin()}
             className="w-full bg-blue-600 hover:bg-blue-700"
           >
             Sign In to Continue
