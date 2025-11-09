@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { createPageUrl } from '@/utils';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 import {
   Printer,
   Palette,
@@ -79,11 +80,12 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <img
+              <OptimizedImage
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png"
                 alt="MCTS Logo"
-                className="h-14 w-auto" />
-
+                className="h-14 w-auto"
+                priority={true}
+              />
               <h1 className="text-2xl font-bold text-white">MCTS</h1>
             </div>
             <div className="flex items-center gap-4">
@@ -102,12 +104,14 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
         {/* Background Image with Overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/b878ac35a_bg.png)'
-          }}>
-
+        <div className="absolute inset-0">
+          <OptimizedImage
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/b878ac35a_bg.png"
+            alt="Background"
+            className="w-full h-full"
+            objectFit="cover"
+            priority={true}
+          />
           {/* Overlay for opacity control */}
           <div className="absolute inset-0 bg-[#2053E6] opacity-30"></div>
         </div>
@@ -146,14 +150,14 @@ export default function HomePage() {
       {/* Services Section */}
       <section id="services" className="py-20 bg-white relative">
         {/* Background Pattern */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/ad1abef0a_pattern2.png)',
-            backgroundRepeat: 'repeat',
-            backgroundSize: 'auto'
-          }}
-        />
+        <div className="absolute inset-0 opacity-5">
+          <OptimizedImage
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/ad1abef0a_pattern2.png"
+            alt="Pattern"
+            className="w-full h-full"
+            objectFit="repeat"
+          />
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
@@ -172,15 +176,17 @@ export default function HomePage() {
                 key={index}
                 className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group overflow-hidden">
 
-                <CardContent className="bg-[#2053E6] p-6 relative">
+                <CardContent className="bg-[#2053E6] p-6 relative min-h-[200px]">
                   {/* Background Image with Opacity */}
                   {service.backgroundImage && (
-                    <div
-                      className="absolute inset-0 bg-cover bg-center opacity-30"
-                      style={{
-                        backgroundImage: `url(${service.backgroundImage})`
-                      }}
-                    />
+                    <div className="absolute inset-0 opacity-30">
+                      <OptimizedImage
+                        src={service.backgroundImage}
+                        alt={service.title}
+                        className="w-full h-full"
+                        objectFit="cover"
+                      />
+                    </div>
                   )}
 
                   {/* Content */}
@@ -224,12 +230,14 @@ export default function HomePage() {
         {/* Background Pattern */}
         <div
           className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/ad1abef0a_pattern2.png)',
-            backgroundRepeat: 'repeat',
-            backgroundSize: 'auto'
-          }}
-        />
+        >
+          <OptimizedImage
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/ad1abef0a_pattern2.png"
+            alt="Contact Pattern"
+            className="w-full h-full"
+            objectFit="repeat"
+          />
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
@@ -323,10 +331,11 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img
+                <OptimizedImage
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png"
                   alt="MCTS Logo"
-                  className="h-8 w-auto" />
+                  className="h-8 w-auto"
+                />
                 <span className="text-white font-bold text-lg">MCTS</span>
               </div>
               <p className="text-gray-400 text-sm">
