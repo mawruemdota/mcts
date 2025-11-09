@@ -36,14 +36,14 @@ export default function HomePage() {
       title: 'Business Cards & IDs',
       description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
       color: 'bg-green-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/9c22c69df_1.png'
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/9c22c69df_1.png'
     },
     {
       icon: ImageIcon,
       title: 'Promotional Materials',
       description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
       color: 'bg-purple-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/2216363cc_IMG_9573.jpg'
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/2216363cc_IMG_9573.jpg'
     },
     {
       icon: Palette,
@@ -80,7 +80,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <img
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png"
                 alt="MCTS Logo"
                 className="h-14 w-auto" />
 
@@ -105,7 +105,7 @@ export default function HomePage() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png)'
+            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/b878ac35a_bg.png)'
           }}>
 
           {/* Overlay for opacity control */}
@@ -149,7 +149,7 @@ export default function HomePage() {
         <div
           className="absolute inset-0 opacity-5"
           style={{
-            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png)',
+            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/ad1abef0a_pattern2.png)',
             backgroundRepeat: 'repeat',
             backgroundSize: 'auto'
           }}
@@ -225,7 +225,7 @@ export default function HomePage() {
         <div
           className="absolute inset-0 opacity-5"
           style={{
-            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png)',
+            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/ad1abef0a_pattern2.png)',
             backgroundRepeat: 'repeat',
             backgroundSize: 'auto'
           }}
@@ -242,64 +242,75 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
-            <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-100">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Phone className="w-6 h-6 text-white" />
-                </div>
-                <h4 className="text-gray-900 mb-2 font-black lowercase">Phone</h4>
-                <a href="tel:09778270150" className="text-blue-600 hover:underline">
-                  0977 827 0150
-                </a>
-              </CardContent>
-            </Card>
+          <div className="max-w-2xl mx-auto">
+            <Card className="bg-white border-gray-200 shadow-lg">
+              <CardContent className="p-8">
+                <div className="space-y-6">
+                  {/* Phone */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Phone</p>
+                      <a href="tel:09778270150" className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
+                        0977 827 0150
+                      </a>
+                    </div>
+                  </div>
 
-            <Card className="bg-gradient-to-br from-indigo-50 to-white border-indigo-100">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Mail className="w-6 h-6 text-white" />
-                </div>
-                <h4 className="text-gray-900 mb-2 font-black lowercase">Email</h4>
-                <a href="mailto:marasigancts@gmail.com" className="text-indigo-600 hover:underline">
-                  marasigancts@gmail.com
-                </a>
-              </CardContent>
-            </Card>
+                  {/* Email */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <a href="mailto:marasigancts@gmail.com" className="text-gray-900 font-medium hover:text-indigo-600 transition-colors">
+                        marasigancts@gmail.com
+                      </a>
+                    </div>
+                  </div>
 
-            <Card className="bg-gradient-to-br from-purple-50 to-white border-purple-100">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-6 h-6 text-white" />
-                </div>
-                <h4 className="text-gray-900 mb-2 font-black lowercase">Visit Us</h4>
-                <p className="text-gray-600 text-sm">
-                  Dasmarinas, Cavite
-                </p>
-              </CardContent>
-            </Card>
+                  {/* Location */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Location</p>
+                      <p className="text-gray-900 font-medium">Dasmarinas, Cavite</p>
+                    </div>
+                  </div>
 
-            <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-100">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Facebook className="w-6 h-6 text-white" />
-                </div>
-                <h4 className="text-gray-900 mb-2 font-black lowercase">Facebook</h4>
-                <a href="https://facebook.com/marasigancts" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                  marasigancts
-                </a>
-              </CardContent>
-            </Card>
+                  {/* Divider */}
+                  <div className="border-t border-gray-200 my-6"></div>
 
-            <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
-              <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Instagram className="w-6 h-6 text-white" />
+                  {/* Social Media */}
+                  <div>
+                    <p className="text-sm text-gray-500 mb-3">Follow Us</p>
+                    <div className="flex items-center gap-3">
+                      <a
+                        href="https://facebook.com/marasigancts"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                      >
+                        <Facebook className="w-5 h-5 text-blue-600" />
+                        <span className="text-sm font-medium text-gray-900">Facebook</span>
+                      </a>
+                      <a
+                        href="https://www.instagram.com/marasigancts"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors"
+                      >
+                        <Instagram className="w-5 h-5 text-pink-600" />
+                        <span className="text-sm font-medium text-gray-900">Instagram</span>
+                      </a>
+                    </div>
+                  </div>
                 </div>
-                <h4 className="text-gray-900 mb-2 font-black lowercase">Instagram</h4>
-                <a href="https://www.instagram.com/marasigancts" target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:underline">
-                  marasigancts
-                </a>
               </CardContent>
             </Card>
           </div>
@@ -313,7 +324,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <img
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png"
                   alt="MCTS Logo"
                   className="h-8 w-auto" />
                 <span className="text-white font-bold text-lg">MCTS</span>
