@@ -80,12 +80,9 @@ export default function HomePage() {
               <img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
                 alt="MCTS Logo"
-                className="h-10 w-auto" />
+                className="h-14 w-auto" />
 
-              <div>
-                <h1 className="text-xl font-bold text-white">MCTS</h1>
-                <p className="text-xs text-white/90">Marasigan Creative and Tech Solutions</p>
-              </div>
+              <h1 className="text-2xl font-bold text-white">MCTS</h1>
             </div>
             <div className="flex items-center gap-4">
               <a href="#services" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Services</a>
