@@ -2008,8 +2008,27 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
     const [showConvertModal, setShowConvertModal] = useState(false);
     const [viewingOrder, setViewingOrder] = useState(null);
     const [showViewModal, setShowViewModal] = useState(false);
+    
+    // Enhanced conversion state
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [taskDeadline, setTaskDeadline] = useState(format(addDays(new Date(), 7), 'yyyy-MM-dd'));
+    const [assignedTo, setAssignedTo] = useState('');
+    const [teamMembers, setTeamMembers] = useState([]);
 
     const publicFormUrl = `${window.location.origin}${createPageUrl('ClientOrderForm')}`;
+
+    // Load team members when component mounts
+    useEffect(() => {
+        const loadTeam = async () => {
+            try {
+                const users = await User.list();
+                setTeamMembers(users);
+            } catch (error) {
+                console.error('Error loading team:', error);
+            }
+        };
+        loadTeam();
+    }, []);
 
     const getStatusBadge = (status) => {
         const statusConfig = {
@@ -2052,6 +2071,12 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
 
     const handleConvertToTask = (order) => {
         setConvertingOrder(order);
+        // Pre-select all items by default
+        setSelectedItems(order.items?.map((_, idx) => idx) || []);
+        // Set default deadline
+        setTaskDeadline(format(addDays(new Date(), 7), 'yyyy-MM-dd'));
+        // Reset assignee
+        setAssignedTo('');
         setShowConvertModal(true);
     };
 
@@ -2060,24 +2085,92 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
         setShowViewModal(true);
     };
 
+    const handleItemToggle = (itemIndex) => {
+        setSelectedItems(prev => {
+            if (prev.includes(itemIndex)) {
+                return prev.filter(idx => idx !== itemIndex);
+            } else {
+                return [...prev, itemIndex];
+            }
+        });
+    };
+
+    const handleSelectAllItems = () => {
+        if (selectedItems.length === convertingOrder?.items?.length) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(convertingOrder?.items?.map((_, idx) => idx) || []);
+        }
+    };
+
     const confirmConvertToTask = async () => {
         if (!convertingOrder) return;
 
+        if (selectedItems.length === 0) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Please select at least one item to convert.' });
+            return;
+        }
+
         try {
-            // Create a new job from the order
-            const newJob = await Job.create({
-                title: `Order from ${convertingOrder.client_name}`,
+            // Get selected items
+            const itemsToConvert = selectedItems.map(idx => convertingOrder.items[idx]);
+            
+            // Calculate total for selected items
+            const totalAmount = itemsToConvert.reduce((sum, item) => 
+                sum + (item.quantity * item.price), 0
+            );
+
+            // Map order items to job format
+            const jobItems = itemsToConvert.map(item => ({
+                item_id: item.item_id,
+                item_name: item.item_name,
+                quantity: item.quantity,
+                price: item.price
+            }));
+
+            // Create job title from selected items
+            const jobTitle = itemsToConvert.length === 1 
+                ? itemsToConvert[0].item_name
+                : `Order from ${convertingOrder.client_name} (${itemsToConvert.length} items)`;
+
+            // Prepare job data with proper field mapping
+            const jobData = {
+                // Core identification
+                title: jobTitle,
+                job_id: `MCTS-${Date.now().toString().slice(-6)}`,
+                
+                // Client information
                 client_name: convertingOrder.client_name,
                 client_phone: convertingOrder.client_phone,
                 client_email: convertingOrder.client_email || '',
-                job_id: `MCTS-${Date.now().toString().slice(-6)}`,
-                items: convertingOrder.items,
-                estimated_price: convertingOrder.total_amount,
-                actual_price: convertingOrder.total_amount,
-                special_instructions: convertingOrder.special_instructions || '',
+                
+                // Order reference for tracking
+                order_id: convertingOrder.id,
+                order_number: convertingOrder.order_number,
+                
+                // Items and pricing
+                items: jobItems,
+                job_type: itemsToConvert.map(i => i.item_name).join(', '),
+                quantity: itemsToConvert.reduce((sum, i) => sum + i.quantity, 0),
+                estimated_price: totalAmount,
+                actual_price: totalAmount,
+                
+                // Special instructions from order
+                special_instructions: convertingOrder.special_instructions 
+                    ? `Order #${convertingOrder.order_number}\n\n${convertingOrder.special_instructions}`
+                    : `Converted from Order #${convertingOrder.order_number}`,
+                
+                // Assignment and scheduling
+                assigned_to: assignedTo || null,
+                deadline: taskDeadline,
+                
+                // Status
                 status: 'pending_approval',
-                deadline: format(addDays(new Date(), 7), 'yyyy-MM-dd')
-            });
+                priority_level: 'normal'
+            };
+
+            // Create the new job
+            const newJob = await Job.create(jobData);
 
             // Update order status and link to job
             await Order.update(convertingOrder.id, {
@@ -2085,15 +2178,25 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
                 converted_job_id: newJob.id
             });
 
-            toast({ title: 'Success!', description: 'Order converted to task successfully.' });
+            toast({ 
+                title: 'Success!', 
+                description: `Task created${assignedTo ? ' and assigned' : ''} from order ${convertingOrder.order_number}.` 
+            });
+            
             setShowConvertModal(false);
             setConvertingOrder(null);
+            setSelectedItems([]);
             onRefresh();
         } catch (error) {
             console.error('Error converting order to task:', error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to convert order to task.' });
         }
     };
+
+    const selectedItemsTotal = selectedItems.reduce((sum, idx) => {
+        const item = convertingOrder?.items?.[idx];
+        return sum + (item ? item.quantity * item.price : 0);
+    }, 0);
 
     return (
         <div className="space-y-6">
@@ -2343,26 +2446,154 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
                 </DialogContent>
             </Dialog>
 
-            {/* Convert to Task Confirmation Dialog */}
+            {/* Enhanced Convert to Task Dialog */}
             <Dialog open={showConvertModal} onOpenChange={setShowConvertModal}>
-                <DialogContent className="dialog-content">
+                <DialogContent className="dialog-content max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="text-card-foreground">Convert Order to Task?</DialogTitle>
+                        <DialogTitle className="text-card-foreground">Convert Order to Task</DialogTitle>
+                        <p className="text-sm text-muted-foreground">
+                            Select items to include in the task and configure task details
+                        </p>
                     </DialogHeader>
-                    <div className="space-y-4 text-card-foreground">
-                        <p className="text-sm text-muted-foreground">
-                            This will create a new task from order <strong>{convertingOrder?.order_number}</strong> for client <strong>{convertingOrder?.client_name}</strong>.
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                            The task will include all items from the order and will be set to "Pending Approval" status.
-                        </p>
-                    </div>
+                    {convertingOrder && (
+                        <div className="space-y-6 text-card-foreground">
+                            {/* Order Info */}
+                            <div className="p-4 bg-secondary/50 rounded-lg">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Order Number</Label>
+                                        <p className="font-semibold">{convertingOrder.order_number}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Client</Label>
+                                        <p className="font-semibold">{convertingOrder.client_name}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Item Selection */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label className="font-semibold">Select Items to Include</Label>
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={handleSelectAllItems}
+                                    >
+                                        {selectedItems.length === convertingOrder.items?.length ? 'Deselect All' : 'Select All'}
+                                    </Button>
+                                </div>
+                                <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-12"></TableHead>
+                                                <TableHead>Item</TableHead>
+                                                <TableHead className="text-center">Qty</TableHead>
+                                                <TableHead className="text-right">Price</TableHead>
+                                                <TableHead className="text-right">Total</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {convertingOrder.items?.map((item, idx) => (
+                                                <TableRow key={idx} className={selectedItems.includes(idx) ? 'bg-blue-50 dark:bg-blue-950/20' : ''}>
+                                                    <TableCell>
+                                                        <Checkbox
+                                                            checked={selectedItems.includes(idx)}
+                                                            onCheckedChange={() => handleItemToggle(idx)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className="font-medium">{item.item_name}</TableCell>
+                                                    <TableCell className="text-center">{item.quantity}</TableCell>
+                                                    <TableCell className="text-right">₱{item.price?.toFixed(2)}</TableCell>
+                                                    <TableCell className="text-right">₱{(item.quantity * item.price)?.toFixed(2)}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                                {selectedItems.length > 0 && (
+                                    <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                                        <span className="font-semibold">Selected Items Total:</span>
+                                        <span className="text-xl font-bold text-blue-600">₱{selectedItemsTotal.toFixed(2)}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Task Configuration */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Task Deadline *</Label>
+                                    <Input
+                                        type="date"
+                                        value={taskDeadline}
+                                        onChange={(e) => setTaskDeadline(e.target.value)}
+                                        min={format(new Date(), 'yyyy-MM-dd')}
+                                        required
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Default: 7 days from now
+                                    </p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Assign To (Optional)</Label>
+                                    <Select value={assignedTo} onValueChange={setAssignedTo}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Leave unassigned" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value={null}>Unassigned</SelectItem>
+                                            {teamMembers.map(member => (
+                                                <SelectItem key={member.id} value={member.email}>
+                                                    {member.nickname || member.full_name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-xs text-muted-foreground">
+                                        Task will appear in their queue
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Summary */}
+                            <div className="p-4 bg-secondary/50 rounded-lg border border-border">
+                                <h4 className="font-semibold mb-3">Task Summary</h4>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Items selected:</span>
+                                        <span className="font-medium">{selectedItems.length} of {convertingOrder.items?.length}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Total value:</span>
+                                        <span className="font-medium">₱{selectedItemsTotal.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Deadline:</span>
+                                        <span className="font-medium">{format(new Date(taskDeadline), 'MMM dd, yyyy')}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Assigned to:</span>
+                                        <span className="font-medium">
+                                            {assignedTo 
+                                                ? teamMembers.find(m => m.email === assignedTo)?.nickname || teamMembers.find(m => m.email === assignedTo)?.full_name || assignedTo
+                                                : 'Unassigned'
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowConvertModal(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={confirmConvertToTask}>
-                            Convert to Task
+                        <Button 
+                            onClick={confirmConvertToTask}
+                            disabled={selectedItems.length === 0}
+                        >
+                            Create Task
                         </Button>
                     </DialogFooter>
                 </DialogContent>
