@@ -111,14 +111,14 @@ export default function HomePage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-oswald text-white mb-6">
-              Bring Your Ideas to{' '}
-              <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                Life
-              </span>
+            <h2 className="text-white mb-6 text-4xl font-extrabold lowercase sm:text-5xl lg:text-6xl">Your Ideas to Impact
+
+
+
+
             </h2>
-            <p className="text-xl font-bai-jamjuree text-white/90 mb-8">
-              From creative design to printable outputs, kami ang bahala sa inyo!
+            <p className="text-white/90 mb-8 text-xl font-bai-jamjuree lowercase">From creative design to printable outputs, kami ang bahala sa inyo!
+
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -149,11 +149,11 @@ export default function HomePage() {
       <section id="services" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge className="mb-4 bg-indigo-100 text-indigo-700 border-indigo-200 font-bai-jamjuree font-semibold">
+            <Badge className="bg-slate-800 text-slate-100 mb-4 px-2.5 py-0.5 text-xs font-semibold rounded-md inline-flex items-center border transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shadow hover:bg-primary/80 border-indigo-200">
               Our Services
             </Badge>
-            <h3 className="text-3xl sm:text-4xl font-oswald text-gray-900 mb-4">
-              Designed to help you with your creative needs
+            <h3 className="text-gray-900 mb-4 text-3xl font-black lowercase sm:text-4xl">Designed to help you with your creative needs
+
             </h3>
             <p className="text-lg font-bai-jamjuree text-gray-600 max-w-2xl mx-auto">
               Comprehensive printing and design solutions tailored to your business needs
@@ -166,14 +166,14 @@ export default function HomePage() {
               key={index}
               className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group">
 
-                <CardContent className="p-6">
+                <CardContent className="bg-[#2755D9] p-6 rounded-lg">
                   <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                     <service.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h4 className="text-xl font-oswald text-gray-900 mb-3">
+                  <h4 className="text-slate-100 mb-3 text-xl font-extrabold lowercase">
                     {service.title}
                   </h4>
-                  <p className="font-bai-jamjuree text-gray-600 leading-relaxed">
+                  <p className="text-slate-50 font-bai-jamjuree leading-relaxed">
                     {service.description}
                   </p>
                 </CardContent>
