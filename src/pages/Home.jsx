@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -77,18 +76,18 @@ export default function HomePage() {
               <img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
                 alt="MCTS Logo"
-                className="h-14 w-auto" />
+                className="h-10 w-auto" />
 
               <div>
-                <h1 className="text-xl font-oswald text-white">MCTS</h1>
-                <p className="text-xs font-bai-jamjuree text-white/90">Marasigan Creative and Tech Solutions</p>
+                <h1 className="text-xl font-bold text-white">MCTS</h1>
+                <p className="text-xs text-white/90">Marasigan Creative and Tech Solutions</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <a href="#services" className="text-white/90 font-bai-jamjuree font-semibold hover:text-white transition-colors hidden md:block">Services</a>
-              <a href="#contact" className="text-white/90 font-bai-jamjuree font-semibold hover:text-white transition-colors hidden md:block">Contact</a>
+              <a href="#services" className="text-white/90 font-black lowercase hover:text-white transition-colors hidden md:block">Services</a>
+              <a href="#contact" className="text-white/90 font-black lowercase hover:text-white transition-colors hidden md:block">Contact</a>
               <a href={createPageUrl('ClientOrderForm')}>
-                <Button className="bg-white text-[#2053E6] hover:bg-gray-100 font-bai-jamjuree font-semibold">
+                <Button className="bg-white text-[#2053E6] hover:bg-gray-100">
                   Place Your Order
                 </Button>
               </a>
@@ -112,19 +111,19 @@ export default function HomePage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-white mb-6 text-4xl font-extrabold lowercase sm:text-5xl lg:text-6xl">Your Ideas to Impact
-
-
-
-
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+              Bring Your Ideas to{' '}
+              <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                Life
+              </span>
             </h2>
-            <p className="text-white/90 mb-8 text-xl font-bai-jamjuree lowercase">From creative design to printable outputs, kami ang bahala sa inyo!
+            <p className="text-white/90 mb-8 text-xl font-bold lowercase">from creative design to printable outputs, kami ang bahala sa inyo!
 
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href={createPageUrl('ClientOrderForm')}>
-                <Button size="lg" className="bg-white text-[#2053E6] hover:bg-gray-100 px-8 py-6 text-lg font-bai-jamjuree font-semibold shadow-xl">
+                <Button size="lg" className="bg-white text-[#2053E6] hover:bg-gray-100 px-8 py-6 text-lg shadow-xl">
                   Place Your Order <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </a>
@@ -138,7 +137,7 @@ export default function HomePage() {
 
 
                   <feature.icon className="w-4 h-4 text-white" />
-                  <span className="text-sm font-bai-jamjuree font-medium text-white">{feature.text}</span>
+                  <span className="text-sm font-medium text-white">{feature.text}</span>
                 </div>
               )}
             </div>
@@ -150,13 +149,13 @@ export default function HomePage() {
       <section id="services" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge className="bg-slate-800 text-slate-100 mb-4 px-2.5 py-0.5 text-xs font-semibold rounded-md inline-flex items-center border transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shadow hover:bg-primary/80 border-indigo-200">
+            <Badge className="mb-4 bg-indigo-100 text-indigo-700 border-indigo-200">
               Our Services
             </Badge>
-            <h3 className="text-gray-900 mb-4 text-3xl font-black lowercase sm:text-4xl">Designed to help you with your creative needs
-
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Designed to help you with your creative needs
             </h3>
-            <p className="text-lg font-bai-jamjuree text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Comprehensive printing and design solutions tailored to your business needs
             </p>
           </div>
@@ -167,14 +166,14 @@ export default function HomePage() {
               key={index}
               className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group">
 
-                <CardContent className="bg-[#2755D9] p-6 rounded-lg">
+                <CardContent className="p-6">
                   <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                     <service.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h4 className="text-slate-100 mb-3 text-xl font-extrabold lowercase">
+                  <h4 className="text-xl font-semibold text-gray-900 mb-3">
                     {service.title}
                   </h4>
-                  <p className="text-slate-50 font-bai-jamjuree leading-relaxed">
+                  <p className="text-gray-600 leading-relaxed">
                     {service.description}
                   </p>
                 </CardContent>
@@ -187,11 +186,14 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xl font-bai-jamjuree text-blue-100 mb-8 max-w-2xl mx-auto">
+          <h3 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+            Ready to Get Started?
+          </h3>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Place your order now and our team will contact you to finalize the details and bring your vision to life.
           </p>
           <a href={createPageUrl('ClientOrderForm')}>
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg font-bai-jamjuree font-semibold">
+            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg">
               Place Your Order
             </Button>
           </a>
@@ -202,13 +204,13 @@ export default function HomePage() {
       <section id="contact" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <Badge className="mb-4 bg-blue-100 text-blue-700 border-blue-200 font-bai-jamjuree font-semibold">
+            <Badge className="mb-4 bg-blue-100 text-blue-700 border-blue-200">
               Get in Touch
             </Badge>
-            <h3 className="text-3xl sm:text-4xl font-oswald text-gray-900 mb-4">
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Contact Us
             </h3>
-            <p className="text-lg font-bai-jamjuree text-gray-600">
+            <p className="text-lg text-gray-600">
               Have questions? We're here to help.
             </p>
           </div>
@@ -219,8 +221,8 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Phone className="w-6 h-6 text-white" />
                 </div>
-                <h4 className="font-oswald text-gray-900 mb-2">Phone</h4>
-                <a href="tel:09778270150" className="font-bai-jamjuree text-blue-600 hover:underline">
+                <h4 className="font-semibold text-gray-900 mb-2">Phone</h4>
+                <a href="tel:09778270150" className="text-blue-600 hover:underline">
                   0977 827 0150
                 </a>
               </CardContent>
@@ -231,8 +233,8 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="w-6 h-6 text-white" />
                 </div>
-                <h4 className="font-oswald text-gray-900 mb-2">Email</h4>
-                <a href="mailto:marasigancts@gmail.com" className="font-bai-jamjuree text-indigo-600 hover:underline">
+                <h4 className="font-semibold text-gray-900 mb-2">Email</h4>
+                <a href="mailto:marasigancts@gmail.com" className="text-indigo-600 hover:underline">
                   marasigancts@gmail.com
                 </a>
               </CardContent>
@@ -243,8 +245,8 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <MapPin className="w-6 h-6 text-white" />
                 </div>
-                <h4 className="font-oswald text-gray-900 mb-2">Visit Us</h4>
-                <p className="font-bai-jamjuree text-gray-600 text-sm">
+                <h4 className="font-semibold text-gray-900 mb-2">Visit Us</h4>
+                <p className="text-gray-600 text-sm">
                   Dasmarinas, Cavite
                 </p>
               </CardContent>
@@ -264,16 +266,16 @@ export default function HomePage() {
                   alt="MCTS Logo"
                   className="h-8 w-auto" />
 
-                <span className="text-white font-oswald text-lg">MCTS</span>
+                <span className="text-white font-bold text-lg">MCTS</span>
               </div>
-              <p className="text-gray-400 font-bai-jamjuree text-sm">
+              <p className="text-gray-400 text-sm">
                 Professional printing and design solutions for businesses of all sizes.
               </p>
             </div>
 
             <div>
-              <h4 className="text-white font-oswald mb-4">Quick Links</h4>
-              <ul className="space-y-2 font-bai-jamjuree">
+              <h4 className="text-white font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2">
                 <li>
                   <a href="#services" className="text-gray-400 hover:text-white transition-colors">
                     Services
@@ -293,19 +295,19 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h4 className="text-white font-oswald mb-4">For Team Members</h4>
-              <p className="text-gray-400 font-bai-jamjuree text-sm mb-4">
+              <h4 className="text-white font-semibold mb-4">For Team Members</h4>
+              <p className="text-gray-400 text-sm mb-4">
                 Access the internal management system.
               </p>
               <a href={createPageUrl('Dashboard')}>
-                <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white font-bai-jamjuree">
+                <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white">
                   Go to Dashboard
                 </Button>
               </a>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-400 font-bai-jamjuree text-sm">
+          <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
             <p>&copy; {new Date().getFullYear()} MCTS. All rights reserved.</p>
           </div>
         </div>
