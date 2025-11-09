@@ -150,7 +150,7 @@ export default function HomePage() {
       <section id="services" className="py-20 bg-white relative">
         {/* Background Pattern */}
         <div 
-          className="absolute inset-0 opacity-50"
+          className="absolute inset-0 opacity-10"
           style={{
             backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png)',
             backgroundRepeat: 'repeat',
