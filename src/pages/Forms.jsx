@@ -2006,6 +2006,8 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
     const { toast } = useToast();
     const [convertingOrder, setConvertingOrder] = useState(null);
     const [showConvertModal, setShowConvertModal] = useState(false);
+    const [viewingOrder, setViewingOrder] = useState(null);
+    const [showViewModal, setShowViewModal] = useState(false);
 
     const publicFormUrl = `${window.location.origin}${createPageUrl('ClientOrderForm')}`;
 
@@ -2014,7 +2016,7 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
             'new': { className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200", text: "New" },
             'reviewing': { className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200", text: "Reviewing" },
             'approved': { className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200", text: "Approved" },
-            'converted_to_job': { className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200", text: "Converted to Job" },
+            'converted_to_job': { className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200", text: "Converted to Task" },
             'rejected': { className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200", text: "Rejected" }
         };
         const config = statusConfig[status] || { className: "bg-gray-100 text-gray-800", text: status };
@@ -2048,12 +2050,17 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
         }
     };
 
-    const handleConvertToJob = (order) => {
+    const handleConvertToTask = (order) => {
         setConvertingOrder(order);
         setShowConvertModal(true);
     };
 
-    const confirmConvertToJob = async () => {
+    const handleViewOrder = (order) => {
+        setViewingOrder(order);
+        setShowViewModal(true);
+    };
+
+    const confirmConvertToTask = async () => {
         if (!convertingOrder) return;
 
         try {
@@ -2078,13 +2085,13 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
                 converted_job_id: newJob.id
             });
 
-            toast({ title: 'Success!', description: 'Order converted to job successfully.' });
+            toast({ title: 'Success!', description: 'Order converted to task successfully.' });
             setShowConvertModal(false);
             setConvertingOrder(null);
             onRefresh();
         } catch (error) {
-            console.error('Error converting order to job:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to convert order to job.' });
+            console.error('Error converting order to task:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to convert order to task.' });
         }
     };
 
@@ -2204,31 +2211,31 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onClick={() => {
-                                                            // Show order details in a dialog or expand row
-                                                            alert(`Order Details:\n\nItems:\n${order.items?.map(i => `- ${i.item_name} x${i.quantity} @ ₱${i.price}`).join('\n')}\n\nInstructions: ${order.special_instructions || 'None'}`);
-                                                        }}>
+                                                        <DropdownMenuItem onClick={() => handleViewOrder(order)}>
                                                             <Eye className="w-4 h-4 mr-2" />
                                                             View Details
                                                         </DropdownMenuItem>
-                                                        {order.status === 'new' && (
+                                                        {(order.status === 'new' || order.status === 'reviewing' || order.status === 'approved') && (
                                                             <>
-                                                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'reviewing')}>
-                                                                    <CheckCircle className="w-4 h-4 mr-2" />
-                                                                    Mark as Reviewing
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem onClick={() => handleConvertToJob(order)}>
+                                                                {order.status === 'new' && (
+                                                                    <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'reviewing')}>
+                                                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                                                        Mark as Reviewing
+                                                                    </DropdownMenuItem>
+                                                                )}
+                                                                {order.status === 'reviewing' && (
+                                                                    <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'approved')}>
+                                                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                                                        Approve Order
+                                                                    </DropdownMenuItem>
+                                                                )}
+                                                                <DropdownMenuItem onClick={() => handleConvertToTask(order)}>
                                                                     <FileText className="w-4 h-4 mr-2" />
-                                                                    Convert to Job
+                                                                    Convert to Task
                                                                 </DropdownMenuItem>
                                                             </>
                                                         )}
-                                                        {order.status === 'reviewing' && (
-                                                            <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'approved')}>
-                                                                <CheckCircle className="w-4 h-4 mr-2" />
-                                                                Approve Order
-                                                            </DropdownMenuItem>
-                                                        )}
+                                                        <DropdownMenuSeparator />
                                                         <DropdownMenuItem 
                                                             onClick={() => handleDelete(order.id)}
                                                             className="text-red-600 focus:text-red-700"
@@ -2248,26 +2255,114 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
                 </CardContent>
             </Card>
 
-            {/* Convert to Job Confirmation Dialog */}
-            <Dialog open={showConvertModal} onOpenChange={setShowConvertModal}>
-                <DialogContent>
+            {/* View Order Details Modal */}
+            <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+                <DialogContent className="dialog-content max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>Convert Order to Job?</DialogTitle>
+                        <DialogTitle className="text-card-foreground">Order Details</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4">
+                    {viewingOrder && (
+                        <div className="space-y-4 text-card-foreground">
+                            <div className="grid grid-cols-2 gap-4 p-4 bg-secondary/50 rounded-lg">
+                                <div>
+                                    <Label className="text-xs text-muted-foreground">Order Number</Label>
+                                    <p className="font-semibold">{viewingOrder.order_number}</p>
+                                </div>
+                                <div>
+                                    <Label className="text-xs text-muted-foreground">Date</Label>
+                                    <p className="font-semibold">{format(new Date(viewingOrder.created_date), 'MMM dd, yyyy')}</p>
+                                </div>
+                                <div>
+                                    <Label className="text-xs text-muted-foreground">Client</Label>
+                                    <p className="font-semibold">{viewingOrder.client_name}</p>
+                                    {viewingOrder.client_company && (
+                                        <p className="text-sm text-muted-foreground">{viewingOrder.client_company}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <Label className="text-xs text-muted-foreground">Contact</Label>
+                                    <p className="font-semibold">{viewingOrder.client_phone}</p>
+                                    {viewingOrder.client_email && (
+                                        <p className="text-sm text-muted-foreground">{viewingOrder.client_email}</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label className="font-semibold mb-2 block">Order Items</Label>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Item</TableHead>
+                                            <TableHead className="text-center">Qty</TableHead>
+                                            <TableHead className="text-right">Price</TableHead>
+                                            <TableHead className="text-right">Total</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {viewingOrder.items?.map((item, idx) => (
+                                            <TableRow key={idx}>
+                                                <TableCell className="font-medium">{item.item_name}</TableCell>
+                                                <TableCell className="text-center">{item.quantity}</TableCell>
+                                                <TableCell className="text-right">₱{item.price?.toFixed(2)}</TableCell>
+                                                <TableCell className="text-right">₱{(item.quantity * item.price)?.toFixed(2)}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            {viewingOrder.promo_code && (
+                                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                    <Label className="text-xs text-green-700">Promo Code Applied</Label>
+                                    <p className="font-semibold text-green-800">{viewingOrder.promo_code}</p>
+                                </div>
+                            )}
+
+                            <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <span className="font-bold text-lg">Total Amount:</span>
+                                <span className="text-2xl font-bold text-blue-600">₱{viewingOrder.total_amount?.toFixed(2)}</span>
+                            </div>
+
+                            {viewingOrder.special_instructions && (
+                                <div>
+                                    <Label className="font-semibold mb-2 block">Special Instructions</Label>
+                                    <p className="text-sm text-muted-foreground p-3 bg-secondary/50 rounded-lg">
+                                        {viewingOrder.special_instructions}
+                                    </p>
+                                </div>
+                            )}
+
+                            <div className="flex justify-end gap-2">
+                                <Button variant="outline" onClick={() => setShowViewModal(false)}>
+                                    Close
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Convert to Task Confirmation Dialog */}
+            <Dialog open={showConvertModal} onOpenChange={setShowConvertModal}>
+                <DialogContent className="dialog-content">
+                    <DialogHeader>
+                        <DialogTitle className="text-card-foreground">Convert Order to Task?</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 text-card-foreground">
                         <p className="text-sm text-muted-foreground">
-                            This will create a new job from order <strong>{convertingOrder?.order_number}</strong> for client <strong>{convertingOrder?.client_name}</strong>.
+                            This will create a new task from order <strong>{convertingOrder?.order_number}</strong> for client <strong>{convertingOrder?.client_name}</strong>.
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            The job will include all items from the order and will be set to "Pending Approval" status.
+                            The task will include all items from the order and will be set to "Pending Approval" status.
                         </p>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShowConvertModal(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={confirmConvertToJob}>
-                            Convert to Job
+                        <Button onClick={confirmConvertToTask}>
+                            Convert to Task
                         </Button>
                     </DialogFooter>
                 </DialogContent>
