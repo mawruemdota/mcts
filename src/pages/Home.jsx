@@ -17,54 +17,54 @@ import {
   ArrowRight,
   Sparkles,
   FileText,
-  Image as ImageIcon } from
-'lucide-react';
+  Image as ImageIcon
+} from 'lucide-react';
 
 export default function HomePage() {
   const services = [
-  {
-    icon: Printer,
-    title: 'Digital Printing',
-    description: 'High-quality tarpaulins, stickers, banners, and large format printing for all your business needs.',
-    color: 'bg-blue-500'
-  },
-  {
-    icon: FileText,
-    title: 'Business Cards & IDs',
-    description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
-    color: 'bg-green-500'
-  },
-  {
-    icon: ImageIcon,
-    title: 'Promotional Materials',
-    description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
-    color: 'bg-purple-500'
-  },
-  {
-    icon: Palette,
-    title: 'Creative Design',
-    description: 'Expert graphic design services, social media content creation, and brand identity development.',
-    color: 'bg-pink-500'
-  },
-  {
-    icon: Sparkles,
-    title: 'Creative Tech Solutions',
-    description: 'Cutting-edge augmented reality solutions to make your marketing campaigns truly interactive.',
-    color: 'bg-orange-500'
-  },
-  {
-    icon: Package,
-    title: 'Rush Orders',
-    description: 'Need it fast? We offer rush services to meet your urgent deadlines without compromising quality.',
-    color: 'bg-red-500'
-  }];
+    {
+      icon: Printer,
+      title: 'Digital Printing',
+      description: 'High-quality tarpaulins, stickers, banners, and large format printing for all your business needs.',
+      color: 'bg-blue-500'
+    },
+    {
+      icon: FileText,
+      title: 'Business Cards & IDs',
+      description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
+      color: 'bg-green-500'
+    },
+    {
+      icon: ImageIcon,
+      title: 'Promotional Materials',
+      description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
+      color: 'bg-purple-500'
+    },
+    {
+      icon: Palette,
+      title: 'Creative Design',
+      description: 'Expert graphic design services, social media content creation, and brand identity development.',
+      color: 'bg-pink-500'
+    },
+    {
+      icon: Sparkles,
+      title: 'Creative Tech Solutions',
+      description: 'Cutting-edge augmented reality solutions to make your marketing campaigns truly interactive.',
+      color: 'bg-orange-500'
+    },
+    {
+      icon: Package,
+      title: 'Rush Orders',
+      description: 'Need it fast? We offer rush services to meet your urgent deadlines without compromising quality.',
+      color: 'bg-red-500'
+    }];
 
 
   const features = [
-  { icon: Zap, text: 'Fast Turnaround' },
-  { icon: CheckCircle, text: 'Quality Guaranteed' },
-  { icon: Users, text: 'Expert Team' },
-  { icon: Package, text: 'Competitive Pricing' }];
+    { icon: Zap, text: 'Fast Turnaround' },
+    { icon: CheckCircle, text: 'Quality Guaranteed' },
+    { icon: Users, text: 'Expert Team' },
+    { icon: Package, text: 'Competitive Pricing' }];
 
 
   return (
@@ -109,7 +109,7 @@ export default function HomePage() {
           {/* Overlay for opacity control */}
           <div className="absolute inset-0 bg-[#2053E6] opacity-30"></div>
         </div>
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
             <h2 className="text-white mb-6 text-4xl font-black lowercase sm:text-5xl lg:text-6xl">Bring Your Ideas to Impact
@@ -133,8 +133,8 @@ export default function HomePage() {
             {/* Feature Pills */}
             <div className="flex flex-wrap gap-4 justify-center mt-12">
               {features.map((feature, index) =>
-              <div
-                key={index} className="bg-slate-800 px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-sm shadow-sm border border-white/30">
+                <div
+                  key={index} className="bg-slate-800 px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-sm shadow-sm border border-white/30">
 
 
                   <feature.icon className="w-4 h-4 text-white" />
@@ -149,15 +149,16 @@ export default function HomePage() {
       {/* Services Section */}
       <section id="services" className="py-20 bg-white relative">
         {/* Background Pattern */}
-        <div 
-          className="absolute inset-0 opacity-10"
+        <div
+          className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png)',
             backgroundRepeat: 'repeat',
             backgroundSize: 'auto'
           }}
         />
-        
+
+        {/* ... keep existing code (services content) */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-indigo-100 text-indigo-700 border-indigo-200">
@@ -173,9 +174,9 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) =>
-            <Card
-              key={index}
-              className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group">
+              <Card
+                key={index}
+                className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group">
 
                 <CardContent className="bg-[#2053E6] p-6">
                   <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
@@ -212,8 +213,19 @@ export default function HomePage() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="contact" className="py-20 bg-white relative">
+        {/* Background Pattern */}
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png)',
+            backgroundRepeat: 'repeat',
+            backgroundSize: 'auto'
+          }}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* ... keep existing code (contact content) */}
           <div className="text-center mb-12">
             <Badge className="mb-4 bg-blue-100 text-blue-700 border-blue-200">
               Get in Touch
