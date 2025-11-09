@@ -17,7 +17,9 @@ import {
   ArrowRight,
   Sparkles,
   FileText,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Facebook,
+  Instagram
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -240,7 +242,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
             <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-100">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -274,6 +276,30 @@ export default function HomePage() {
                 <p className="text-gray-600 text-sm">
                   Dasmarinas, Cavite
                 </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-blue-50 to-white border-blue-100">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Facebook className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="text-gray-900 mb-2 font-black lowercase">Facebook</h4>
+                <a href="https://facebook.com/marasigancts" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  marasigancts
+                </a>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-pink-50 to-white border-pink-100">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Instagram className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="text-gray-900 mb-2 font-black lowercase">Instagram</h4>
+                <a href="https://www.instagram.com/marasigancts" target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:underline">
+                  marasigancts
+                </a>
               </CardContent>
             </Card>
           </div>
