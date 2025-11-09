@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -156,10 +157,20 @@ export default function ClientOrderFormPage() {
 
   const calculateDiscount = () => {
     if (!appliedCode) return 0;
-    if (appliedCode.type === 'percentage_off') {
-      return calculateSubtotal() * (appliedCode.value / 100);
+    
+    const subtotal = calculateSubtotal();
+    
+    switch(appliedCode.type) {
+      case 'percentage_off':
+        return subtotal * (appliedCode.value / 100);
+      case 'fixed_amount':
+        return Math.min(appliedCode.value, subtotal); // Can't discount more than subtotal
+      case 'aggressive_pricing':
+        // Aggressive pricing is already applied to item prices, so no additional discount
+        return 0;
+      default:
+        return 0;
     }
-    return 0;
   };
 
   const calculateTotal = () => {
@@ -212,6 +223,9 @@ export default function ClientOrderFormPage() {
   };
 
   if (submitted) {
+    const subtotal = calculateSubtotal();
+    const discount = calculateDiscount();
+    const total = calculateTotal();
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center shadow-lg bg-white">
@@ -221,25 +235,32 @@ export default function ClientOrderFormPage() {
             </div>
             <CardTitle className="text-2xl text-gray-900">Order Submitted!</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-gray-600">
-              Thank you for your order! We have received your request and will contact you shortly to confirm the details and finalize your order.
+          <CardContent>
+            <p className="text-gray-600 mb-6">
+              Thank you! We have received your order request and will contact you shortly to finalize the details.
             </p>
             <div className="space-y-2 text-sm text-gray-500 bg-gray-50 p-4 rounded-lg">
               <p><strong>Order Number:</strong> {orderNumber}</p>
-              <p><strong>Total:</strong> ₱{calculateTotal().toFixed(2)}</p>
+              <p><strong>Total:</strong> ₱{total.toFixed(2)}</p>
               <p><strong>Items:</strong> {formData.items.length}</p>
-              {appliedCode &&
-              <p><strong>Promo Code Applied:</strong> {appliedCode.code}</p>
-              }
+              {appliedCode && (
+                <div className="pt-2 border-t border-gray-200">
+                  <p className="text-green-600 font-medium">
+                    <strong>Promo Applied:</strong> {appliedCode.code}
+                  </p>
+                  {discount > 0 && (
+                    <p className="text-green-600">You saved ₱{discount.toFixed(2)}!</p>
+                  )}
+                </div>
+              )}
             </div>
             <p className="text-xs text-gray-500 mt-4">
               Please keep your order number for reference. We'll reach out to you at {formData.client_phone} soon.
             </p>
           </CardContent>
         </Card>
-      </div>);
-
+      </div>
+    );
   }
 
   const subtotal = calculateSubtotal();
@@ -427,57 +448,79 @@ export default function ClientOrderFormPage() {
 
                   {/* Promo Code Section */}
                   <div className="pt-2 border-t space-y-2">
-                    <Label className="text-sm font-medium flex items-center gap-2">
-                      <Tag className="w-4 h-4" />
-                      Promo Code
-                    </Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <Tag className="w-4 h-4" />
+                        Promo Code
+                      </Label>
+                      <span className="text-xs text-gray-500">(One code per order)</span>
+                    </div>
                     {!appliedCode ?
-                    <div className="flex gap-2">
-                        <Input
-                        placeholder="Enter code"
-                        value={promoCodeInput}
-                        onChange={(e) => setPromoCodeInput(e.target.value)}
-                        className="flex-1" />
-
-                        <Button type="button" size="sm" onClick={applyPromoCode}>
-                          Apply
-                        </Button>
-                      </div> :
-
-                    <div className="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded">
-                        <div>
-                          <p className="text-sm font-medium text-green-800">{appliedCode.code}</p>
-                          <p className="text-xs text-green-600">
-                            {appliedCode.type === 'aggressive_pricing' ?
-                          'Special pricing applied' :
-                          `${appliedCode.value}% off`}
-                          </p>
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Enter code"
+                            value={promoCodeInput}
+                            onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                            className="flex-1 uppercase"
+                          />
+                          <Button type="button" size="sm" onClick={applyPromoCode} className="bg-blue-600 hover:bg-blue-700">
+                            Apply
+                          </Button>
                         </div>
-                        <Button type="button" variant="ghost" size="icon" onClick={removePromoCode}>
-                          <X className="w-4 h-4" />
+                        {promoCodeError &&
+                          <p className="text-xs text-red-500 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            {promoCodeError}
+                          </p>
+                        }
+                      </div> :
+                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-green-800">{appliedCode.code}</p>
+                            <p className="text-xs text-green-700">
+                              {appliedCode.type === 'aggressive_pricing' 
+                                ? 'Special pricing applied' 
+                                : appliedCode.type === 'percentage_off'
+                                ? `${appliedCode.value}% off`
+                                : `₱${appliedCode.value} off`}
+                            </p>
+                          </div>
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" onClick={removePromoCode} className="hover:bg-red-100">
+                          <X className="w-4 h-4 text-red-600" />
                         </Button>
                       </div>
-                    }
-                    {promoCodeError &&
-                    <p className="text-xs text-red-500">{promoCodeError}</p>
                     }
                   </div>
 
-                  {/* Total */}
-                  <div className="pt-2 border-t space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Subtotal:</span>
+                  {/* Total - Enhanced Display */}
+                  <div className="pt-3 border-t-2 border-gray-200 space-y-2">
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Subtotal:</span>
                       <span className="font-medium">₱{subtotal.toFixed(2)}</span>
                     </div>
                     {discount > 0 &&
-                    <div className="flex justify-between text-sm text-green-600">
-                        <span>Discount:</span>
-                        <span>-₱{discount.toFixed(2)}</span>
+                      <div className="flex justify-between text-sm bg-green-50 px-2 py-1 rounded">
+                        <span className="text-green-700 font-medium">Discount ({appliedCode?.code}):</span>
+                        <span className="text-green-700 font-bold">-₱{discount.toFixed(2)}</span>
                       </div>
                     }
-                    <div className="flex justify-between items-center pt-2 border-t">
-                      <span className="font-semibold text-gray-900">Total Amount:</span>
-                      <span className="text-2xl font-bold text-blue-600">₱{total.toFixed(2)}</span>
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                      <span className="font-bold text-gray-900 text-lg">Total Amount:</span>
+                      <div className="text-right">
+                        {discount > 0 && (
+                          <p className="text-xs text-gray-500 line-through">₱{subtotal.toFixed(2)}</p>
+                        )}
+                        <p className="text-2xl font-bold text-blue-600">₱{total.toFixed(2)}</p>
+                        {discount > 0 && (
+                          <p className="text-xs text-green-600 font-medium">You save ₱{discount.toFixed(2)}!</p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -492,8 +535,8 @@ export default function ClientOrderFormPage() {
                         value={formData.client_name}
                         onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                         required
-                        className="text-gray-900 bg-gray-50" />
-
+                        className="text-gray-900 bg-gray-50"
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -503,8 +546,8 @@ export default function ClientOrderFormPage() {
                         value={formData.client_phone}
                         onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
                         required
-                        className="text-gray-900 bg-gray-50" />
-
+                        className="text-gray-900 bg-gray-50"
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -514,8 +557,8 @@ export default function ClientOrderFormPage() {
                         type="email"
                         value={formData.client_email}
                         onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
-                        className="text-gray-900 bg-gray-50" />
-
+                        className="text-gray-900 bg-gray-50"
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -524,8 +567,8 @@ export default function ClientOrderFormPage() {
                         id="client_company"
                         value={formData.client_company}
                         onChange={(e) => setFormData({ ...formData, client_company: e.target.value })}
-                        className="text-gray-900 bg-gray-50" />
-
+                        className="text-gray-900 bg-gray-50"
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -536,8 +579,8 @@ export default function ClientOrderFormPage() {
                         onChange={(e) => setFormData({ ...formData, special_instructions: e.target.value })}
                         className="text-gray-900 bg-gray-50"
                         rows={3}
-                        placeholder="Any special requests or details..." />
-
+                        placeholder="Any special requests or details..."
+                      />
                     </div>
                   </div>
 
@@ -554,6 +597,6 @@ export default function ClientOrderFormPage() {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
