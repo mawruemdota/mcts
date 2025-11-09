@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -76,7 +77,7 @@ export default function HomePage() {
               <img
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
                 alt="MCTS Logo"
-                className="h-10 w-auto" />
+                className="h-14 w-auto" />
 
               <div>
                 <h1 className="text-xl font-oswald text-white">MCTS</h1>
@@ -186,9 +187,6 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-3xl sm:text-4xl font-oswald text-white mb-6">
-            Ready to Get Started?
-          </h3>
           <p className="text-xl font-bai-jamjuree text-blue-100 mb-8 max-w-2xl mx-auto">
             Place your order now and our team will contact you to finalize the details and bring your vision to life.
           </p>
