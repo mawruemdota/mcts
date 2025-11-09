@@ -26,19 +26,22 @@ export default function HomePage() {
       icon: Printer,
       title: 'Digital Printing',
       description: 'High-quality tarpaulins, stickers, banners, and large format printing for all your business needs.',
-      color: 'bg-blue-500'
+      color: 'bg-blue-500',
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/4421b8bd3_ElyuInasal.jpg'
     },
     {
       icon: FileText,
       title: 'Business Cards & IDs',
       description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
-      color: 'bg-green-500'
+      color: 'bg-green-500',
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/9c22c69df_1.png'
     },
     {
       icon: ImageIcon,
       title: 'Promotional Materials',
       description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
-      color: 'bg-purple-500'
+      color: 'bg-purple-500',
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/2216363cc_IMG_9573.jpg'
     },
     {
       icon: Palette,
@@ -89,7 +92,7 @@ export default function HomePage() {
               <a href="#contact" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Contact</a>
               <a href={createPageUrl('ClientOrderForm')}>
                 <Button className="bg-white text-[#2053E6] hover:bg-gray-100">
-                  Place Your Order
+                  Order
                 </Button>
               </a>
             </div>
@@ -112,12 +115,7 @@ export default function HomePage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-white mb-6 text-4xl font-black lowercase sm:text-5xl lg:text-6xl">Bring Your Ideas to Impact
-
-
-
-
-            </h2>
+            <h2 className="text-white mb-6 text-4xl font-black lowercase sm:text-5xl lg:text-6xl">Bring Your Ideas to Impact</h2>
             <p className="text-xl text-white/90 mb-8">
               From creative design to printable outputs, kami ang bahala sa inyo!
             </p>
@@ -125,7 +123,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href={createPageUrl('ClientOrderForm')}>
                 <Button size="lg" className="bg-white text-[#2053E6] hover:bg-gray-100 px-8 py-6 text-lg shadow-xl">
-                  Place Your Order <ArrowRight className="ml-2 w-5 h-5" />
+                  Order <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </a>
             </div>
@@ -158,7 +156,6 @@ export default function HomePage() {
           }}
         />
 
-        {/* ... keep existing code (services content) */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-indigo-100 text-indigo-700 border-indigo-200">
@@ -167,27 +164,40 @@ export default function HomePage() {
             <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Designed to help you with your creative needs
             </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">basta creative execution, pagusapan natin
-
-            </p>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">basta creative execution, pagusapan natin</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) =>
               <Card
                 key={index}
-                className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group">
+                className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group overflow-hidden">
 
-                <CardContent className="bg-[#2053E6] p-6">
-                  <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    <service.icon className="w-6 h-6 text-white" />
+                <CardContent className="bg-[#2053E6] p-6 relative">
+                  {/* Background Image with Opacity */}
+                  {service.backgroundImage && (
+                    <div
+                      className="absolute inset-0 bg-cover bg-center opacity-30"
+                      style={{
+                        backgroundImage: `url(${service.backgroundImage})`
+                      }}
+                    />
+                  )}
+
+                  {/* Content */}
+                  <div className="relative z-10">
+                    {!service.backgroundImage && (
+                      <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                        <service.icon className="w-6 h-6 text-white" />
+                      </div>
+                    )}
+                    <h4 className="text-slate-100 mb-3 text-xl font-black text-left lowercase mt-4">
+                      {service.title}
+                    </h4>
+                    <p className="text-slate-50 leading-relaxed">
+                      {service.description}
+                    </p>
                   </div>
-                  <h4 className="text-slate-100 mb-3 text-xl font-black text-left lowercase">
-                    {service.title}
-                  </h4>
-                  <p className="text-slate-50 leading-relaxed">
-                    {service.description}
-                  </p>
                 </CardContent>
               </Card>
             )}
@@ -198,15 +208,13 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-white mb-6 text-3xl font-black sm:text-4xl">let's make an impact!
-
-          </h3>
+          <h3 className="text-white mb-6 text-3xl font-black sm:text-4xl">let's make an impact!</h3>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Place your order now and our team will contact you to finalize the details and bring your vision to life.
           </p>
           <a href={createPageUrl('ClientOrderForm')}>
             <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg">
-              Place Your Order
+              Order
             </Button>
           </a>
         </div>
@@ -225,14 +233,11 @@ export default function HomePage() {
         />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* ... keep existing code (contact content) */}
           <div className="text-center mb-12">
             <Badge className="mb-4 bg-blue-100 text-blue-700 border-blue-200">
               Get in Touch
             </Badge>
-            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">we got you!
-
-            </h3>
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">we got you!</h3>
             <p className="text-lg text-gray-600">
               Have questions? We're here to help.
             </p>
@@ -288,7 +293,6 @@ export default function HomePage() {
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
                   alt="MCTS Logo"
                   className="h-8 w-auto" />
-
                 <span className="text-white font-bold text-lg">MCTS</span>
               </div>
               <p className="text-gray-400 text-sm">
