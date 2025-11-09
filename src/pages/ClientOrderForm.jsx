@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
+import {
   ClipboardList,
   CheckCircle,
   AlertTriangle,
@@ -17,8 +17,8 @@ import {
   Minus,
   ShoppingCart,
   Search,
-  Tag
-} from "lucide-react";
+  Tag } from
+"lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ClientOrderFormPage() {
@@ -45,9 +45,9 @@ export default function ClientOrderFormPage() {
     const loadData = async () => {
       try {
         const [items, codes] = await Promise.all([
-          base44.entities.PriceListItem.list(),
-          base44.entities.DiscountCode.filter({ is_active: true })
-        ]);
+        base44.entities.PriceListItem.list(),
+        base44.entities.DiscountCode.filter({ is_active: true })]
+        );
         const sortedItems = items.sort((a, b) => a.item_name.localeCompare(b.item_name));
         setPricelist(sortedItems);
         setDiscountCodes(codes);
@@ -61,31 +61,31 @@ export default function ClientOrderFormPage() {
 
   const applyPromoCode = () => {
     setPromoCodeError('');
-    const code = discountCodes.find(c => c.code.toUpperCase() === promoCodeInput.toUpperCase());
-    
+    const code = discountCodes.find((c) => c.code.toUpperCase() === promoCodeInput.toUpperCase());
+
     if (!code) {
       setPromoCodeError('Invalid promo code');
       return;
     }
-    
+
     setAppliedCode(code);
     setPromoCodeError('');
-    
+
     // Update all items in cart with new pricing
-    const updatedItems = formData.items.map(item => {
-      const pricelistItem = pricelist.find(p => p.id === item.item_id);
+    const updatedItems = formData.items.map((item) => {
+      const pricelistItem = pricelist.find((p) => p.id === item.item_id);
       if (!pricelistItem) return item;
-      
+
       let newPrice;
       if (code.type === 'aggressive_pricing') {
         newPrice = pricelistItem.price_aggressive || pricelistItem.price_conservative;
       } else {
         newPrice = pricelistItem.price_conservative;
       }
-      
+
       return { ...item, price: newPrice };
     });
-    
+
     setFormData({ ...formData, items: updatedItems });
   };
 
@@ -93,27 +93,27 @@ export default function ClientOrderFormPage() {
     setAppliedCode(null);
     setPromoCodeInput('');
     setPromoCodeError('');
-    
+
     // Reset all items to conservative pricing
-    const updatedItems = formData.items.map(item => {
-      const pricelistItem = pricelist.find(p => p.id === item.item_id);
+    const updatedItems = formData.items.map((item) => {
+      const pricelistItem = pricelist.find((p) => p.id === item.item_id);
       if (!pricelistItem) return item;
       return { ...item, price: pricelistItem.price_conservative };
     });
-    
+
     setFormData({ ...formData, items: updatedItems });
   };
 
   const addItemToOrder = (pricelistItem) => {
-    const existingItemIndex = formData.items.findIndex(i => i.item_id === pricelistItem.id);
-    
+    const existingItemIndex = formData.items.findIndex((i) => i.item_id === pricelistItem.id);
+
     let itemPrice;
     if (appliedCode && appliedCode.type === 'aggressive_pricing') {
       itemPrice = pricelistItem.price_aggressive || pricelistItem.price_conservative;
     } else {
       itemPrice = pricelistItem.price_conservative;
     }
-    
+
     if (existingItemIndex !== -1) {
       const newItems = [...formData.items];
       newItems[existingItemIndex].quantity += 1;
@@ -133,13 +133,13 @@ export default function ClientOrderFormPage() {
   const updateItemQuantity = (index, delta) => {
     const newItems = [...formData.items];
     const newQuantity = newItems[index].quantity + delta;
-    
+
     if (newQuantity <= 0) {
       newItems.splice(index, 1);
     } else {
       newItems[index].quantity = newQuantity;
     }
-    
+
     setFormData({ ...formData, items: newItems });
   };
 
@@ -150,7 +150,7 @@ export default function ClientOrderFormPage() {
 
   const calculateSubtotal = () => {
     return formData.items.reduce((total, item) => {
-      return total + (item.price * item.quantity);
+      return total + item.price * item.quantity;
     }, 0);
   };
 
@@ -168,20 +168,20 @@ export default function ClientOrderFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.client_name || !formData.client_phone) {
       setError("Please provide your name and contact number.");
       return;
     }
-    
+
     if (formData.items.length === 0) {
       setError("Please add at least one item to your order.");
       return;
     }
-    
+
     setIsSubmitting(true);
     setError('');
-    
+
     try {
       const year = new Date().getFullYear();
       const timestamp = Date.now();
@@ -207,7 +207,7 @@ export default function ClientOrderFormPage() {
       setError("Failed to submit order. Please try again or contact us directly.");
       console.error('Order submission error:', err);
     }
-    
+
     setIsSubmitting(false);
   };
 
@@ -229,30 +229,30 @@ export default function ClientOrderFormPage() {
               <p><strong>Order Number:</strong> {orderNumber}</p>
               <p><strong>Total:</strong> ₱{calculateTotal().toFixed(2)}</p>
               <p><strong>Items:</strong> {formData.items.length}</p>
-              {appliedCode && (
-                <p><strong>Promo Code Applied:</strong> {appliedCode.code}</p>
-              )}
+              {appliedCode &&
+              <p><strong>Promo Code Applied:</strong> {appliedCode.code}</p>
+              }
             </div>
             <p className="text-xs text-gray-500 mt-4">
               Please keep your order number for reference. We'll reach out to you at {formData.client_phone} soon.
             </p>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>);
+
   }
 
   const subtotal = calculateSubtotal();
   const discount = calculateDiscount();
   const total = calculateTotal();
 
-  const filteredItems = pricelist.filter(item =>
-    item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = pricelist.filter((item) =>
+  item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const itemProducts = filteredItems.filter(item => item.category === 'item');
-  const itemServices = filteredItems.filter(item => item.category === 'service');
+  const itemProducts = filteredItems.filter((item) => item.category === 'item');
+  const itemServices = filteredItems.filter((item) => item.category === 'service');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -265,12 +265,12 @@ export default function ClientOrderFormPage() {
           <p className="text-gray-600">Place Your Order</p>
         </div>
         
-        {error && (
-          <Alert variant="destructive" className="mb-6 max-w-3xl mx-auto">
+        {error &&
+        <Alert variant="destructive" className="mb-6 max-w-3xl mx-auto">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
-        )}
+        }
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left side - Product/Service List */}
@@ -284,8 +284,8 @@ export default function ClientOrderFormPage() {
                     placeholder="Search items..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+                    className="pl-10" />
+
                 </div>
               </CardHeader>
               <CardContent>
@@ -307,8 +307,8 @@ export default function ClientOrderFormPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {itemProducts.map(item => (
-                            <TableRow key={item.id} className="cursor-pointer hover:bg-blue-50" onClick={() => addItemToOrder(item)}>
+                          {itemProducts.map((item) =>
+                          <TableRow key={item.id} className="cursor-pointer hover:bg-blue-50" onClick={() => addItemToOrder(item)}>
                               <TableCell className="font-medium">{item.item_name}</TableCell>
                               <TableCell className="text-sm text-gray-600">{item.description || 'No description'}</TableCell>
                               <TableCell className="text-right">
@@ -316,17 +316,17 @@ export default function ClientOrderFormPage() {
                                 <div className="text-xs text-gray-500">per {item.unit}</div>
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); addItemToOrder(item); }}>
+                                <Button size="sm" variant="outline" onClick={(e) => {e.stopPropagation();addItemToOrder(item);}} className="bg-[#2053E6] text-slate-50 px-3 text-xs font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input shadow-sm hover:bg-accent hover:text-accent-foreground h-8">
                                   <Plus className="w-4 h-4" />
                                 </Button>
                               </TableCell>
                             </TableRow>
-                          ))}
+                          )}
                         </TableBody>
                       </Table>
-                      {itemProducts.length === 0 && (
-                        <p className="text-center text-gray-500 py-8">No products found</p>
-                      )}
+                      {itemProducts.length === 0 &&
+                      <p className="text-center text-gray-500 py-8">No products found</p>
+                      }
                     </div>
                   </TabsContent>
                   
@@ -342,8 +342,8 @@ export default function ClientOrderFormPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {itemServices.map(item => (
-                            <TableRow key={item.id} className="cursor-pointer hover:bg-blue-50" onClick={() => addItemToOrder(item)}>
+                          {itemServices.map((item) =>
+                          <TableRow key={item.id} className="cursor-pointer hover:bg-blue-50" onClick={() => addItemToOrder(item)}>
                               <TableCell className="font-medium">{item.item_name}</TableCell>
                               <TableCell className="text-sm text-gray-600">{item.description || 'No description'}</TableCell>
                               <TableCell className="text-right">
@@ -351,17 +351,17 @@ export default function ClientOrderFormPage() {
                                 <div className="text-xs text-gray-500">per {item.unit}</div>
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); addItemToOrder(item); }}>
+                                <Button size="sm" variant="outline" onClick={(e) => {e.stopPropagation();addItemToOrder(item);}}>
                                   <Plus className="w-4 h-4" />
                                 </Button>
                               </TableCell>
                             </TableRow>
-                          ))}
+                          )}
                         </TableBody>
                       </Table>
-                      {itemServices.length === 0 && (
-                        <p className="text-center text-gray-500 py-8">No services found</p>
-                      )}
+                      {itemServices.length === 0 &&
+                      <p className="text-center text-gray-500 py-8">No services found</p>
+                      }
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -379,50 +379,50 @@ export default function ClientOrderFormPage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Order Items */}
                   <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                    {formData.items.length === 0 ? (
-                      <p className="text-sm text-gray-500 text-center py-4">
+                    {formData.items.length === 0 ?
+                    <p className="text-sm text-gray-500 text-center py-4">
                         No items added yet. Click on items to add them to your order.
-                      </p>
-                    ) : (
-                      formData.items.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      </p> :
+
+                    formData.items.map((item, index) =>
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900 truncate">{item.item_name}</p>
                             <p className="text-xs text-gray-500">₱{item.price.toFixed(2)} / {item.unit}</p>
                           </div>
                           <div className="flex items-center gap-2 ml-2">
                             <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => updateItemQuantity(index, -1)}
-                            >
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => updateItemQuantity(index, -1)}>
+
                               <Minus className="w-3 h-3" />
                             </Button>
                             <span className="text-sm font-semibold w-8 text-center">{item.quantity}</span>
                             <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => updateItemQuantity(index, 1)}
-                            >
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => updateItemQuantity(index, 1)}>
+
                               <Plus className="w-3 h-3" />
                             </Button>
                             <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => removeItem(index)}
-                            >
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => removeItem(index)}>
+
                               <X className="w-3 h-3 text-red-500" />
                             </Button>
                           </div>
                         </div>
-                      ))
-                    )}
+                    )
+                    }
                   </div>
 
                   {/* Promo Code Section */}
@@ -431,36 +431,36 @@ export default function ClientOrderFormPage() {
                       <Tag className="w-4 h-4" />
                       Promo Code
                     </Label>
-                    {!appliedCode ? (
-                      <div className="flex gap-2">
+                    {!appliedCode ?
+                    <div className="flex gap-2">
                         <Input
-                          placeholder="Enter code"
-                          value={promoCodeInput}
-                          onChange={(e) => setPromoCodeInput(e.target.value)}
-                          className="flex-1"
-                        />
+                        placeholder="Enter code"
+                        value={promoCodeInput}
+                        onChange={(e) => setPromoCodeInput(e.target.value)}
+                        className="flex-1" />
+
                         <Button type="button" size="sm" onClick={applyPromoCode}>
                           Apply
                         </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded">
+                      </div> :
+
+                    <div className="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded">
                         <div>
                           <p className="text-sm font-medium text-green-800">{appliedCode.code}</p>
                           <p className="text-xs text-green-600">
-                            {appliedCode.type === 'aggressive_pricing' 
-                              ? 'Special pricing applied' 
-                              : `${appliedCode.value}% off`}
+                            {appliedCode.type === 'aggressive_pricing' ?
+                          'Special pricing applied' :
+                          `${appliedCode.value}% off`}
                           </p>
                         </div>
                         <Button type="button" variant="ghost" size="icon" onClick={removePromoCode}>
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
-                    )}
-                    {promoCodeError && (
-                      <p className="text-xs text-red-500">{promoCodeError}</p>
-                    )}
+                    }
+                    {promoCodeError &&
+                    <p className="text-xs text-red-500">{promoCodeError}</p>
+                    }
                   </div>
 
                   {/* Total */}
@@ -469,12 +469,12 @@ export default function ClientOrderFormPage() {
                       <span className="text-gray-600">Subtotal:</span>
                       <span className="font-medium">₱{subtotal.toFixed(2)}</span>
                     </div>
-                    {discount > 0 && (
-                      <div className="flex justify-between text-sm text-green-600">
+                    {discount > 0 &&
+                    <div className="flex justify-between text-sm text-green-600">
                         <span>Discount:</span>
                         <span>-₱{discount.toFixed(2)}</span>
                       </div>
-                    )}
+                    }
                     <div className="flex justify-between items-center pt-2 border-t">
                       <span className="font-semibold text-gray-900">Total Amount:</span>
                       <span className="text-2xl font-bold text-blue-600">₱{total.toFixed(2)}</span>
@@ -492,8 +492,8 @@ export default function ClientOrderFormPage() {
                         value={formData.client_name}
                         onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                         required
-                        className="text-gray-900 bg-gray-50"
-                      />
+                        className="text-gray-900 bg-gray-50" />
+
                     </div>
 
                     <div className="space-y-2">
@@ -503,8 +503,8 @@ export default function ClientOrderFormPage() {
                         value={formData.client_phone}
                         onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
                         required
-                        className="text-gray-900 bg-gray-50"
-                      />
+                        className="text-gray-900 bg-gray-50" />
+
                     </div>
 
                     <div className="space-y-2">
@@ -514,8 +514,8 @@ export default function ClientOrderFormPage() {
                         type="email"
                         value={formData.client_email}
                         onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
-                        className="text-gray-900 bg-gray-50"
-                      />
+                        className="text-gray-900 bg-gray-50" />
+
                     </div>
 
                     <div className="space-y-2">
@@ -524,8 +524,8 @@ export default function ClientOrderFormPage() {
                         id="client_company"
                         value={formData.client_company}
                         onChange={(e) => setFormData({ ...formData, client_company: e.target.value })}
-                        className="text-gray-900 bg-gray-50"
-                      />
+                        className="text-gray-900 bg-gray-50" />
+
                     </div>
 
                     <div className="space-y-2">
@@ -536,16 +536,16 @@ export default function ClientOrderFormPage() {
                         onChange={(e) => setFormData({ ...formData, special_instructions: e.target.value })}
                         className="text-gray-900 bg-gray-50"
                         rows={3}
-                        placeholder="Any special requests or details..."
-                      />
+                        placeholder="Any special requests or details..." />
+
                     </div>
                   </div>
 
                   <Button
                     type="submit"
                     disabled={isSubmitting || formData.items.length === 0}
-                    className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700"
-                  >
+                    className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700">
+
                     {isSubmitting ? "Submitting Order..." : "Submit Order"}
                   </Button>
                 </form>
@@ -554,6 +554,6 @@ export default function ClientOrderFormPage() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
