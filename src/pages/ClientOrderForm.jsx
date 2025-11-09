@@ -316,7 +316,7 @@ export default function ClientOrderFormPage() {
                                 <div className="text-xs text-gray-500">per {item.unit}</div>
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button size="sm" variant="outline" onClick={(e) => {e.stopPropagation();addItemToOrder(item);}} className="bg-[#2053E6] text-slate-50 px-3 text-xs font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input shadow-sm hover:bg-accent hover:text-accent-foreground h-8">
+                                <Button size="sm" variant="outline" onClick={(e) => {e.stopPropagation();addItemToOrder(item);}}>
                                   <Plus className="w-4 h-4" />
                                 </Button>
                               </TableCell>
@@ -351,7 +351,7 @@ export default function ClientOrderFormPage() {
                                 <div className="text-xs text-gray-500">per {item.unit}</div>
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button size="sm" variant="outline" onClick={(e) => {e.stopPropagation();addItemToOrder(item);}}>
+                                <Button size="sm" variant="outline" onClick={(e) => {e.stopPropagation();addItemToOrder(item);}} className="bg-[#2053E6] text-slate-50 px-3 text-xs font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input shadow-sm hover:bg-accent hover:text-accent-foreground h-8">
                                   <Plus className="w-4 h-4" />
                                 </Button>
                               </TableCell>
