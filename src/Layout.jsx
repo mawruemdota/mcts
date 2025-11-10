@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { User } from "@/entities/User";
 import { base44 } from "@/api/base44Client";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -92,7 +93,7 @@ export default function Layout({ children, currentPageName }) {
       if (currentUser.is_active === false) {
         setIsInactiveUser(true);
         setUser(null);
-      } else if (currentUser.is_authorized_access === false) { // Reuse this state for unauthorized users
+      } else if (currentUser.is_authorized_access === false) {
         setIsInactiveUser(true);
         setUser(null);
       } else {
@@ -224,12 +225,13 @@ export default function Layout({ children, currentPageName }) {
   if (!user) {
     if (isInactiveUser) {
       return (
-        <div 
-          className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
-          style={{
-            backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png)'
-          }}
-        >
+        <div className="min-h-screen flex items-center justify-center relative">
+          <OptimizedImage
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png"
+            alt="Background"
+            className="absolute inset-0 w-full h-full"
+            objectFit="cover"
+          />
           <div className="absolute inset-0 bg-red-900/40 backdrop-blur-sm"></div>
           <div className="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 relative z-10">
             <div className="text-center mb-8">
@@ -251,12 +253,13 @@ export default function Layout({ children, currentPageName }) {
     }
 
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
-        style={{
-          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png)'
-        }}
-      >
+      <div className="min-h-screen flex items-center justify-center relative">
+        <OptimizedImage
+          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png"
+          alt="Background"
+          className="absolute inset-0 w-full h-full"
+          objectFit="cover"
+        />
         <div className="absolute inset-0 bg-blue-900/40 backdrop-blur-sm"></div>
         <div className="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 relative z-10">
           <div className="text-center mb-8">
@@ -422,10 +425,12 @@ export default function Layout({ children, currentPageName }) {
           <div className="p-6">
             {/* Logo */}
             <div className="flex items-center gap-3 mb-8">
-              <img 
+              <OptimizedImage
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
                 alt="MCTS Logo"
-                className="w-10 h-10 object-contain flex-shrink-0"
+                className="w-10 h-10 flex-shrink-0"
+                objectFit="contain"
+                priority={true}
               />
               <div>
                 <h2 className="font-bold text-foreground text-lg">MCTS</h2>
@@ -501,7 +506,12 @@ export default function Layout({ children, currentPageName }) {
                   <div className="flex items-center gap-3 cursor-pointer hover:bg-secondary p-2 rounded-lg transition-colors">
                     <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                       {user?.profile_picture_url ? (
-                        <img src={user.profile_picture_url} alt={user.full_name} className="w-full h-full object-cover" />
+                        <OptimizedImage
+                          src={user.profile_picture_url}
+                          alt={user.full_name}
+                          className="w-full h-full"
+                          objectFit="cover"
+                        />
                       ) : (
                         <UserIcon className="w-5 h-5 text-muted-foreground" />
                       )}
