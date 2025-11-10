@@ -60,7 +60,7 @@ export default function HomePage() {
       title: 'Business Cards & IDs',
       description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
       color: 'bg-green-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/9c22c69df_1.png',
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/68b7bc911_1.png',
       details: {
         fullDescription: 'Make a lasting first impression with premium business cards and professional employee IDs. Our high-quality printing ensures your brand looks its best in every interaction.',
         features: [
@@ -87,7 +87,7 @@ export default function HomePage() {
       title: 'Promotional Materials',
       description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
       color: 'bg-purple-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/2216363cc_IMG_9573.jpg',
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/9943ed4a2_IMG_9573.jpg',
       details: {
         fullDescription: 'Elevate your marketing campaigns with professionally designed and printed promotional materials that capture attention and drive engagement.',
         features: [
@@ -204,7 +204,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <OptimizedImage
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png"
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/463e3516f_logo3.png"
                 alt="MCTS Logo"
                 className="h-14 w-auto"
                 priority={true}
@@ -228,7 +228,7 @@ export default function HomePage() {
       <section className="relative overflow-hidden py-20 lg:py-32">
         <div className="absolute inset-0">
           <OptimizedImage
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/b878ac35a_bg.png"
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/9225d35e6_bg.png"
             alt="Background"
             className="w-full h-full"
             objectFit="cover"
@@ -518,7 +518,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <OptimizedImage
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png"
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/463e3516f_logo3.png"
                   alt="MCTS Logo"
                   className="h-8 w-auto"
                 />

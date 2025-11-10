@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -227,7 +226,7 @@ export default function Layout({ children, currentPageName }) {
       return (
         <div className="min-h-screen flex items-center justify-center relative">
           <OptimizedImage
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png"
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/9225d35e6_bg.png"
             alt="Background"
             className="absolute inset-0 w-full h-full"
             objectFit="cover"
@@ -255,7 +254,7 @@ export default function Layout({ children, currentPageName }) {
     return (
       <div className="min-h-screen flex items-center justify-center relative">
         <OptimizedImage
-          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png"
+          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/9225d35e6_bg.png"
           alt="Background"
           className="absolute inset-0 w-full h-full"
           objectFit="cover"
@@ -426,7 +425,7 @@ export default function Layout({ children, currentPageName }) {
             {/* Logo */}
             <div className="flex items-center gap-3 mb-8">
               <OptimizedImage
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/463e3516f_logo3.png"
                 alt="MCTS Logo"
                 className="w-10 h-10 flex-shrink-0"
                 objectFit="contain"
