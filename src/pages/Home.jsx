@@ -291,11 +291,11 @@ export default function HomePage() {
             {services.map((service, index) =>
               <Card
                 key={index}
-                className="bg-white border-gray-200 hover:shadow-xl transition-all duration-300 group overflow-hidden">
+                className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group overflow-hidden">
 
-                <CardContent className="bg-white p-6 relative min-h-[280px] flex flex-col border border-gray-100">
+                <CardContent className="bg-[#2053E6] p-6 relative min-h-[280px] flex flex-col">
                   {service.backgroundImage && (
-                    <div className="absolute inset-0 opacity-20">
+                    <div className="absolute inset-0 opacity-30">
                       <OptimizedImage
                         src={service.backgroundImage}
                         alt={service.title}
@@ -306,20 +306,22 @@ export default function HomePage() {
                   )}
 
                   <div className="relative z-10 flex-1 flex flex-col">
-                    <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                      <service.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <h4 className="text-gray-900 mb-3 text-xl font-black text-left lowercase">
+                    {!service.backgroundImage && (
+                      <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                        <service.icon className="w-6 h-6 text-white" />
+                      </div>
+                    )}
+                    <h4 className="text-slate-100 mb-3 text-xl font-black text-left lowercase mt-4">
                       {service.title}
                     </h4>
-                    <p className="text-gray-700 leading-relaxed mb-4 flex-1">
+                    <p className="text-slate-50 leading-relaxed mb-4 flex-1">
                       {service.description}
                     </p>
                     <Button 
                       variant="secondary" 
                       size="sm"
                       onClick={() => setSelectedService(service)}
-                      className="w-full mt-auto bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold"
+                      className="w-full mt-auto bg-white/90 hover:bg-white text-[#2053E6] font-semibold"
                     >
                       <Info className="w-4 h-4 mr-2" />
                       Learn More
@@ -389,7 +391,7 @@ export default function HomePage() {
 
               <div className="flex gap-3 pt-4">
                 <a href={createPageUrl('ClientOrderForm')} className="flex-1">
-                  <Button className="w-full bg-[#2053E6] hover:bg-[#1a45c4] text-white">
+                  <Button className="w-full bg-[#2053E6] hover:bg-[#1a45c4]">
                     Order Now
                   </Button>
                 </a>
