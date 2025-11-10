@@ -1,8 +1,8 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { createPageUrl } from '@/utils';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import {
@@ -20,58 +20,181 @@ import {
   FileText,
   Image as ImageIcon,
   Facebook,
-  Instagram
+  Instagram,
+  Info
 } from 'lucide-react';
 
 export default function HomePage() {
+  const [selectedService, setSelectedService] = useState(null);
+
   const services = [
     {
       icon: Printer,
       title: 'Digital Printing',
       description: 'High-quality tarpaulins, stickers, banners, and large format printing for all your business needs.',
       color: 'bg-blue-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/4421b8bd3_ElyuInasal.jpg'
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/4421b8bd3_ElyuInasal.jpg',
+      details: {
+        fullDescription: 'Transform your vision into vibrant reality with our state-of-the-art digital printing services. We specialize in producing stunning, high-resolution prints for both indoor and outdoor applications.',
+        features: [
+          'Large format printing up to 10ft wide',
+          'Weather-resistant outdoor materials',
+          'High-resolution up to 1440 DPI',
+          'Same-day rush printing available',
+          'UV-resistant inks for long-lasting colors',
+          'Custom sizes and finishes'
+        ],
+        applications: [
+          'Tarpaulins & Banners',
+          'Vehicle Wraps',
+          'Wall Graphics',
+          'Window Decals',
+          'Floor Graphics',
+          'Exhibition Displays'
+        ],
+        turnaround: '1-3 business days (rush options available)'
+      }
     },
     {
       icon: FileText,
       title: 'Business Cards & IDs',
       description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
       color: 'bg-green-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/9c22c69df_1.png'
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/9c22c69df_1.png',
+      details: {
+        fullDescription: 'Make a lasting first impression with premium business cards and professional employee IDs. Our high-quality printing ensures your brand looks its best in every interaction.',
+        features: [
+          'Premium card stock options',
+          'Matte, glossy, or spot UV finishes',
+          'PVC ID cards with photo printing',
+          'Lamination for durability',
+          'Custom designs available',
+          'Bulk discounts for large orders'
+        ],
+        applications: [
+          'Business Cards',
+          'Calling Cards',
+          'Employee ID Cards',
+          'Membership Cards',
+          'Gift Cards',
+          'Loyalty Cards'
+        ],
+        turnaround: '2-4 business days'
+      }
     },
     {
       icon: ImageIcon,
       title: 'Promotional Materials',
       description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
       color: 'bg-purple-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/2216363cc_IMG_9573.jpg'
+      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/2216363cc_IMG_9573.jpg',
+      details: {
+        fullDescription: 'Elevate your marketing campaigns with professionally designed and printed promotional materials that capture attention and drive engagement.',
+        features: [
+          'Full-color printing',
+          'Multiple paper weights and finishes',
+          'Custom folding options',
+          'Die-cutting available',
+          'Eco-friendly paper options',
+          'Design assistance included'
+        ],
+        applications: [
+          'Flyers & Leaflets',
+          'Brochures & Catalogs',
+          'Posters',
+          'Invitations',
+          'Postcards',
+          'Menu Cards'
+        ],
+        turnaround: '2-5 business days'
+      }
     },
     {
       icon: Palette,
       title: 'Creative Design',
       description: 'Expert graphic design services, social media content creation, and brand identity development.',
-      color: 'bg-pink-500'
+      color: 'bg-pink-500',
+      details: {
+        fullDescription: 'Our creative team brings your ideas to life with stunning designs that resonate with your target audience and strengthen your brand identity.',
+        features: [
+          'Brand identity design',
+          'Logo creation and refinement',
+          'Social media graphics',
+          'Marketing collateral design',
+          'Packaging design',
+          'Unlimited revisions until perfect'
+        ],
+        applications: [
+          'Logo Design',
+          'Brand Guidelines',
+          'Social Media Content',
+          'Marketing Materials',
+          'Packaging Design',
+          'Infographics'
+        ],
+        turnaround: '3-7 business days'
+      }
     },
     {
       icon: Sparkles,
       title: 'Creative Tech Solutions',
       description: 'Cutting-edge augmented reality solutions to make your marketing campaigns truly interactive.',
-      color: 'bg-orange-500'
+      color: 'bg-orange-500',
+      details: {
+        fullDescription: 'Step into the future of marketing with our innovative AR solutions. We create immersive experiences that engage customers in ways traditional media cannot.',
+        features: [
+          'Custom AR marker creation',
+          '3D model development',
+          'Interactive product showcases',
+          'Virtual try-on experiences',
+          'Gamified marketing campaigns',
+          'Analytics and tracking'
+        ],
+        applications: [
+          'Product Visualization',
+          'Interactive Packaging',
+          'Virtual Showrooms',
+          'Educational Experiences',
+          'Event Activations',
+          'Brand Storytelling'
+        ],
+        turnaround: '1-2 weeks'
+      }
     },
     {
       icon: Package,
       title: 'Rush Orders',
       description: 'Need it fast? We offer rush services to meet your urgent deadlines without compromising quality.',
-      color: 'bg-red-500'
-    }];
-
+      color: 'bg-red-500',
+      details: {
+        fullDescription: 'When time is of the essence, our rush service delivers exceptional results on an accelerated timeline. We prioritize your urgent projects without sacrificing quality.',
+        features: [
+          'Same-day printing available',
+          'Priority queue processing',
+          'Dedicated project manager',
+          '24/7 customer support',
+          'Express delivery options',
+          'Quality guarantee'
+        ],
+        applications: [
+          'Event Materials',
+          'Last-Minute Campaigns',
+          'Emergency Replacements',
+          'Time-Sensitive Projects',
+          'Corporate Events',
+          'Product Launches'
+        ],
+        turnaround: 'Same day to 24 hours'
+      }
+    }
+  ];
 
   const features = [
     { icon: Zap, text: 'Fast Turnaround' },
     { icon: CheckCircle, text: 'Quality Guaranteed' },
     { icon: Users, text: 'Expert Team' },
-    { icon: Package, text: 'Competitive Pricing' }];
-
+    { icon: Package, text: 'Competitive Pricing' }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -103,7 +226,6 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
-        {/* Background Image with Overlay */}
         <div className="absolute inset-0">
           <OptimizedImage
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/b878ac35a_bg.png"
@@ -112,7 +234,6 @@ export default function HomePage() {
             objectFit="cover"
             priority={true}
           />
-          {/* Overlay for opacity control */}
           <div className="absolute inset-0 bg-[#2053E6] opacity-30"></div>
         </div>
 
@@ -131,13 +252,10 @@ export default function HomePage() {
               </a>
             </div>
 
-            {/* Feature Pills */}
             <div className="flex flex-wrap gap-4 justify-center mt-12">
               {features.map((feature, index) =>
                 <div
                   key={index} className="bg-slate-800 px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-sm shadow-sm border border-white/30">
-
-
                   <feature.icon className="w-4 h-4 text-white" />
                   <span className="text-sm font-medium text-white">{feature.text}</span>
                 </div>
@@ -149,10 +267,9 @@ export default function HomePage() {
 
       {/* Services Section */}
       <section id="services" className="py-20 bg-white relative">
-        {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <OptimizedImage
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/ad1abef0a_pattern2.png"
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png"
             alt="Pattern"
             className="w-full h-full"
             objectFit="repeat"
@@ -176,8 +293,7 @@ export default function HomePage() {
                 key={index}
                 className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group overflow-hidden">
 
-                <CardContent className="bg-[#2053E6] p-6 relative min-h-[200px]">
-                  {/* Background Image with Opacity */}
+                <CardContent className="bg-[#2053E6] p-6 relative min-h-[280px] flex flex-col">
                   {service.backgroundImage && (
                     <div className="absolute inset-0 opacity-30">
                       <OptimizedImage
@@ -189,8 +305,7 @@ export default function HomePage() {
                     </div>
                   )}
 
-                  {/* Content */}
-                  <div className="relative z-10">
+                  <div className="relative z-10 flex-1 flex flex-col">
                     {!service.backgroundImage && (
                       <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                         <service.icon className="w-6 h-6 text-white" />
@@ -199,9 +314,18 @@ export default function HomePage() {
                     <h4 className="text-slate-100 mb-3 text-xl font-black text-left lowercase mt-4">
                       {service.title}
                     </h4>
-                    <p className="text-slate-50 leading-relaxed">
+                    <p className="text-slate-50 leading-relaxed mb-4 flex-1">
                       {service.description}
                     </p>
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={() => setSelectedService(service)}
+                      className="w-full mt-auto bg-white/90 hover:bg-white text-[#2053E6] font-semibold"
+                    >
+                      <Info className="w-4 h-4 mr-2" />
+                      Learn More
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -209,6 +333,76 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Service Details Modal */}
+      <Dialog open={!!selectedService} onOpenChange={() => setSelectedService(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-2xl">
+              {selectedService && (
+                <>
+                  <div className={`${selectedService.color} w-12 h-12 rounded-lg flex items-center justify-center`}>
+                    <selectedService.icon className="w-6 h-6 text-white" />
+                  </div>
+                  {selectedService.title}
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedService && selectedService.details && (
+            <div className="space-y-6 pt-4">
+              <div>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedService.details.fullDescription}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-lg mb-3 text-gray-900">Key Features</h4>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {selectedService.details.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-lg mb-3 text-gray-900">Applications</h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedService.details.applications.map((app, idx) => (
+                    <Badge key={idx} variant="secondary" className="text-sm">
+                      {app}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-5 h-5 text-blue-600" />
+                  <h4 className="font-bold text-gray-900">Turnaround Time</h4>
+                </div>
+                <p className="text-gray-700">{selectedService.details.turnaround}</p>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <a href={createPageUrl('ClientOrderForm')} className="flex-1">
+                  <Button className="w-full bg-[#2053E6] hover:bg-[#1a45c4]">
+                    Order Now
+                  </Button>
+                </a>
+                <Button variant="outline" onClick={() => setSelectedService(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
@@ -227,13 +421,10 @@ export default function HomePage() {
 
       {/* Contact Section */}
       <section id="contact" className="py-20 bg-white relative">
-        {/* Background Pattern */}
-        <div
-          className="absolute inset-0 opacity-5"
-        >
+        <div className="absolute inset-0 opacity-5">
           <OptimizedImage
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/ad1abef0a_pattern2.png"
-            alt="Contact Pattern"
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png"
+            alt="Pattern"
             className="w-full h-full"
             objectFit="repeat"
           />
@@ -254,7 +445,6 @@ export default function HomePage() {
             <Card className="bg-white border-gray-200 shadow-lg">
               <CardContent className="p-8">
                 <div className="space-y-6">
-                  {/* Phone */}
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Phone className="w-5 h-5 text-blue-600" />
@@ -267,7 +457,6 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Email */}
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Mail className="w-5 h-5 text-indigo-600" />
@@ -280,7 +469,6 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Location */}
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
                       <MapPin className="w-5 h-5 text-purple-600" />
@@ -291,25 +479,23 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Divider */}
                   <div className="border-t border-gray-200 my-6"></div>
 
-                  {/* Social Media */}
                   <div>
                     <p className="text-sm text-gray-500 mb-3">Follow Us</p>
                     <div className="flex items-center gap-3">
-                      <a
-                        href="https://facebook.com/marasigancts"
-                        target="_blank"
+                      <a 
+                        href="https://facebook.com/marasigancts" 
+                        target="_blank" 
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                       >
                         <Facebook className="w-5 h-5 text-blue-600" />
                         <span className="text-sm font-medium text-gray-900">Facebook</span>
                       </a>
-                      <a
-                        href="https://www.instagram.com/marasigancts"
-                        target="_blank"
+                      <a 
+                        href="https://www.instagram.com/marasigancts" 
+                        target="_blank" 
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 px-4 py-2 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors"
                       >
@@ -382,6 +568,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-    </div>);
-
+    </div>
+  );
 }
