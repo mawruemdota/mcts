@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,30 +11,101 @@ import { Upload, Loader2, Trash2, Plus, Image as ImageIcon, ArrowUp, ArrowDown, 
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function HomepageSettings() {
   const [homepageContent, setHomepageContent] = useState(null);
   const [originalHomepageContent, setOriginalHomepageContent] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingField, setUploadingField] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
 
+  const defaultServices = [
+    {
+      title: 'digital printing',
+      description: 'High-quality tarpaulins, stickers, banners, and large format printing for all your business needs.',
+      image_url: '',
+      icon_name: 'Printer',
+      icon_color: 'bg-blue-500',
+      order: 0
+    },
+    {
+      title: 'business cards & ids',
+      description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
+      image_url: '',
+      icon_name: 'CreditCard',
+      icon_color: 'bg-blue-500',
+      order: 1
+    },
+    {
+      title: 'promotional materials',
+      description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
+      image_url: '',
+      icon_name: 'FileText',
+      icon_color: 'bg-blue-500',
+      order: 2
+    },
+    {
+      title: 'creative design',
+      description: 'Expert graphic design services, social media content creation, and brand identity development.',
+      image_url: '',
+      icon_name: 'Palette',
+      icon_color: 'bg-pink-500',
+      order: 3
+    },
+    {
+      title: 'creative tech solutions',
+      description: 'Cutting-edge augmented reality solutions to make your marketing campaigns truly interactive.',
+      image_url: '',
+      icon_name: 'Sparkles',
+      icon_color: 'bg-orange-500',
+      order: 4
+    },
+    {
+      title: 'rush orders',
+      description: 'Need it fast? We offer rush services to meet your urgent deadlines without compromising quality.',
+      image_url: '',
+      icon_name: 'Zap',
+      icon_color: 'bg-red-500',
+      order: 5
+    }
+  ];
+
+  const iconOptions = [
+    'Printer', 'CreditCard', 'FileText', 'Palette', 'Sparkles', 'Zap', 
+    'Package', 'Image', 'Mail', 'Phone', 'Camera', 'Video', 'Music'
+  ];
+
+  const colorOptions = [
+    { value: 'bg-blue-500', label: 'Blue' },
+    { value: 'bg-pink-500', label: 'Pink' },
+    { value: 'bg-orange-500', label: 'Orange' },
+    { value: 'bg-red-500', label: 'Red' },
+    { value: 'bg-green-500', label: 'Green' },
+    { value: 'bg-purple-500', label: 'Purple' },
+    { value: 'bg-yellow-500', label: 'Yellow' },
+    { value: 'bg-indigo-500', label: 'Indigo' }
+  ];
+
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [contentData, galleryData, pricelistData] = await Promise.all([
+      const [contentData, galleryData] = await Promise.all([
         base44.entities.HomePageContent.list(),
-        base44.entities.GalleryImage.list(),
-        base44.entities.PriceListItem.filter({ category: 'service' })
+        base44.entities.GalleryImage.list()
       ]);
       
       if (contentData.length > 0) {
-        setHomepageContent(contentData[0]);
-        setOriginalHomepageContent(contentData[0]);
+        const content = contentData[0];
+        // Ensure homepage_services exists and has 6 items
+        if (!content.homepage_services || content.homepage_services.length === 0) {
+          content.homepage_services = defaultServices;
+        }
+        setHomepageContent(content);
+        setOriginalHomepageContent(content);
       } else {
         // Create default entry
         const defaultContent = await base44.entities.HomePageContent.create({
@@ -46,6 +116,7 @@ export default function HomepageSettings() {
           main_logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png',
           services_section_title: 'Designed to help you with your creative needs',
           services_section_subtitle: 'basta creative execution, pagusapan natin',
+          homepage_services: defaultServices,
           contact_phone: '0977 827 0150',
           contact_email: 'marasigancts@gmail.com',
           contact_location: 'Dasmarinas, Cavite',
@@ -58,7 +129,6 @@ export default function HomepageSettings() {
       }
       
       setGalleryImages(galleryData.sort((a, b) => a.order - b.order));
-      setServices(pricelistData);
     } catch (error) {
       console.error('Error loading data:', error);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to load homepage settings.' });
@@ -71,7 +141,6 @@ export default function HomepageSettings() {
   }, []);
 
   useEffect(() => {
-    // Check for unsaved changes
     if (homepageContent && originalHomepageContent) {
       const hasChanges = JSON.stringify(homepageContent) !== JSON.stringify(originalHomepageContent);
       setHasUnsavedChanges(hasChanges);
@@ -92,6 +161,30 @@ export default function HomepageSettings() {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to upload image.' });
     }
     setUploadingField(null);
+  };
+
+  const uploadServiceImage = async (e, index) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingField(`service-${index}`);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const newServices = [...homepageContent.homepage_services];
+      newServices[index].image_url = file_url;
+      setHomepageContent(prev => ({ ...prev, homepage_services: newServices }));
+      toast({ title: 'Success', description: 'Service image uploaded! Click "Save Changes" to apply.' });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to upload image.' });
+    }
+    setUploadingField(null);
+  };
+
+  const updateServiceField = (index, field, value) => {
+    const newServices = [...homepageContent.homepage_services];
+    newServices[index][field] = value;
+    setHomepageContent(prev => ({ ...prev, homepage_services: newServices }));
   };
 
   const handleSaveChanges = async () => {
@@ -184,26 +277,6 @@ export default function HomepageSettings() {
     }
   };
 
-  const uploadServiceImage = async (serviceId, file) => {
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.PriceListItem.update(serviceId, { service_image_url: file_url });
-      setServices(prev => prev.map(svc => svc.id === serviceId ? { ...svc, service_image_url: file_url } : svc));
-      toast({ title: 'Success', description: 'Service image uploaded!' });
-    } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to upload image.' });
-    }
-  };
-
-  const updateServiceField = async (serviceId, field, value) => {
-    try {
-      await base44.entities.PriceListItem.update(serviceId, { [field]: value });
-      setServices(prev => prev.map(svc => svc.id === serviceId ? { ...svc, [field]: value } : svc));
-    } catch (error) {
-      console.error('Update error:', error);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -255,7 +328,7 @@ export default function HomepageSettings() {
         <Tabs defaultValue="general" className="w-full">
           <TabsList>
             <TabsTrigger value="general">General Settings</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
+            <TabsTrigger value="services">Services (6 Cards)</TabsTrigger>
             <TabsTrigger value="gallery">Gallery Carousel</TabsTrigger>
             <TabsTrigger value="contact">Contact Information</TabsTrigger>
           </TabsList>
@@ -422,99 +495,127 @@ export default function HomepageSettings() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Individual Services</CardTitle>
+                <CardTitle>Homepage Service Cards</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Manage titles, descriptions, and images for each service card shown on the homepage.
+                  Configure the 6 service cards displayed on your homepage. Each card can have a background image or use an icon with a colored background.
                 </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {services.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <ImageIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>No services found. Add services in the Products page first.</p>
-                    </div>
-                  ) : (
-                    services.map((service) => (
-                      <Card key={service.id} className="bg-secondary/30">
-                        <CardContent className="p-6">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-3">
-                              <Label className="text-xs text-muted-foreground">Service Image</Label>
-                              {service.service_image_url ? (
-                                <OptimizedImage
-                                  src={service.service_image_url}
-                                  alt={service.item_name}
-                                  className="w-full h-48 rounded-lg"
-                                  objectFit="cover"
-                                />
-                              ) : (
-                                <div className="w-full h-48 bg-secondary rounded-lg flex items-center justify-center">
-                                  <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                                </div>
-                              )}
-                              <Input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files[0];
-                                  if (file) uploadServiceImage(service.id, file);
-                                }}
+                  {homepageContent?.homepage_services?.map((service, index) => (
+                    <Card key={index} className="bg-secondary/30">
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-2 mb-4">
+                          <Badge variant="outline" className="text-lg">Card {index + 1}</Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="space-y-3">
+                            <Label className="text-xs text-muted-foreground">Card Preview</Label>
+                            {service.image_url ? (
+                              <OptimizedImage
+                                src={service.image_url}
+                                alt={service.title}
+                                className="w-full h-48 rounded-lg"
+                                objectFit="cover"
                               />
-                            </div>
-                            <div className="md:col-span-2 space-y-4">
-                              <div>
-                                <Label>Service Title (Card Heading)</Label>
-                                <Input
-                                  value={service.item_name || ''}
-                                  onChange={(e) => {
-                                    setServices(prev => prev.map(svc => 
-                                      svc.id === service.id ? { ...svc, item_name: e.target.value } : svc
-                                    ));
-                                  }}
-                                  onBlur={(e) => updateServiceField(service.id, 'item_name', e.target.value)}
-                                  placeholder="e.g., digital printing"
-                                />
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  This is the main heading shown on the service card (lowercase recommended).
-                                </p>
-                              </div>
-                              <div>
-                                <Label>Service Description</Label>
-                                <Textarea
-                                  value={service.description || ''}
-                                  onChange={(e) => {
-                                    setServices(prev => prev.map(svc => 
-                                      svc.id === service.id ? { ...svc, description: e.target.value } : svc
-                                    ));
-                                  }}
-                                  onBlur={(e) => updateServiceField(service.id, 'description', e.target.value)}
-                                  rows={3}
-                                  placeholder="Brief description for the service card..."
-                                />
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  This description appears on the card below the title.
-                                </p>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-                                <div>
-                                  <Label className="text-xs text-muted-foreground">Unit</Label>
-                                  <p className="font-medium text-sm">{service.unit}</p>
-                                </div>
-                                <div>
-                                  <Label className="text-xs text-muted-foreground">Base Price</Label>
-                                  <p className="font-medium text-sm">₱{service.price_conservative}</p>
+                            ) : (
+                              <div className={`w-full h-48 ${service.icon_color} rounded-lg flex items-center justify-center`}>
+                                <div className="text-white text-6xl">
+                                  {service.icon_name}
                                 </div>
                               </div>
-                              <p className="text-xs text-muted-foreground italic">
-                                Note: To edit pricing or add new services, go to the Products page.
+                            )}
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => uploadServiceImage(e, index)}
+                              disabled={uploadingField === `service-${index}`}
+                            />
+                            {uploadingField === `service-${index}` && (
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span className="text-xs">Uploading...</span>
+                              </div>
+                            )}
+                            {service.image_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full"
+                                onClick={() => updateServiceField(index, 'image_url', '')}
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Remove Image
+                              </Button>
+                            )}
+                          </div>
+                          <div className="md:col-span-2 space-y-4">
+                            <div>
+                              <Label>Card Title</Label>
+                              <Input
+                                value={service.title || ''}
+                                onChange={(e) => updateServiceField(index, 'title', e.target.value)}
+                                placeholder="e.g., digital printing"
+                              />
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Lowercase recommended for consistency
                               </p>
                             </div>
+                            <div>
+                              <Label>Card Description</Label>
+                              <Textarea
+                                value={service.description || ''}
+                                onChange={(e) => updateServiceField(index, 'description', e.target.value)}
+                                rows={3}
+                                placeholder="Brief description for the card..."
+                              />
+                            </div>
+                            {!service.image_url && (
+                              <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                                <div>
+                                  <Label>Icon</Label>
+                                  <Select 
+                                    value={service.icon_name} 
+                                    onValueChange={(value) => updateServiceField(index, 'icon_name', value)}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select icon" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {iconOptions.map(icon => (
+                                        <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label>Icon Background Color</Label>
+                                  <Select 
+                                    value={service.icon_color} 
+                                    onValueChange={(value) => updateServiceField(index, 'icon_color', value)}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select color" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {colorOptions.map(color => (
+                                        <SelectItem key={color.value} value={color.value}>
+                                          <div className="flex items-center gap-2">
+                                            <div className={`w-4 h-4 rounded ${color.value}`}></div>
+                                            {color.label}
+                                          </div>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -714,7 +815,6 @@ export default function HomepageSettings() {
           </TabsContent>
         </Tabs>
 
-        {/* Floating Save Button */}
         {hasUnsavedChanges && (
           <div className="fixed bottom-8 right-8 z-50">
             <Button 

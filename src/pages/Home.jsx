@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -8,43 +7,40 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { createPageUrl } from '@/utils';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import {
-  Printer,
-  Palette,
-  Package,
   Zap,
+  CheckCircle2,
   Users,
-  CheckCircle,
+  Package,
   Mail,
   Phone,
   MapPin,
   ArrowRight,
-  Sparkles,
-  FileText,
-  Image as ImageIcon,
   Facebook,
   Instagram,
   Info,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Printer,
+  CreditCard,
+  FileText,
+  Palette,
+  Sparkles
 } from 'lucide-react';
+import { format } from 'date-fns';
 
 export default function HomePage() {
   const [selectedService, setSelectedService] = useState(null);
   const [homepageContent, setHomepageContent] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [services, setServices] = useState([]); // State for fetched services
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const [contentData, galleryData, serviceData] = await Promise.all([
+        const [contentData, galleryData] = await Promise.all([
           base44.entities.HomePageContent.list(),
-          base44.entities.GalleryImage.filter({ is_active: true }),
-          base44.entities.PriceListItem.filter({ category: 'service', is_active: true }).then(items => 
-            items.sort((a, b) => a.order_number - b.order_number) // Sort services by order_number
-          )
+          base44.entities.GalleryImage.filter({ is_active: true })
         ]);
         
         if (contentData.length > 0) {
@@ -53,7 +49,6 @@ export default function HomePage() {
         
         const sortedGallery = galleryData.sort((a, b) => a.order - b.order);
         setGalleryImages(sortedGallery);
-        setServices(serviceData); // Set fetched services
       } catch (error) {
         console.error('Error loading content:', error);
       }
@@ -63,7 +58,6 @@ export default function HomePage() {
     loadContent();
   }, []);
 
-  // Auto-advance carousel
   useEffect(() => {
     if (galleryImages.length > 1) {
       const timer = setInterval(() => {
@@ -81,18 +75,15 @@ export default function HomePage() {
     setCurrentImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
   };
 
-  // Default values
   const heroTitle = homepageContent?.hero_title || 'your ideas to impact';
   const heroSubtitle = homepageContent?.hero_subtitle || 'From creative design to printable outputs, kami ang bahala sa inyo!';
   const heroBackground = homepageContent?.hero_background_url || 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/6e687ce1e_bg.png';
   const patternBackground = homepageContent?.pattern_background_url || 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png';
   const mainLogo = homepageContent?.main_logo_url || 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png';
   
-  // Services section titles
   const servicesSectionTitle = homepageContent?.services_section_title || 'Designed to help you with your creative needs';
   const servicesSectionSubtitle = homepageContent?.services_section_subtitle || 'basta creative execution, pagusapan natin';
-
-  // Contact info with defaults
+  
   const contactPhone = homepageContent?.contact_phone || '0977 827 0150';
   const contactEmail = homepageContent?.contact_email || 'marasigancts@gmail.com';
   const contactLocation = homepageContent?.contact_location || 'Dasmarinas, Cavite';
@@ -100,10 +91,10 @@ export default function HomePage() {
   const instagramUrl = homepageContent?.instagram_url || 'https://www.instagram.com/marasigancts';
   const companyDescription = homepageContent?.company_description || 'Professional printing and design solutions for businesses of all sizes.';
 
-  // Default service details for modal (keep the detailed info)
-  // This object maps service names to their extensive details for the modal
+  const homepageServices = homepageContent?.homepage_services || [];
+
   const serviceDetails = {
-    'Digital Printing': {
+    'digital printing': {
       fullDescription: 'Transform your vision into vibrant reality with our state-of-the-art digital printing services. We specialize in producing stunning, high-resolution prints for both indoor and outdoor applications.',
       features: [
         'Large format printing up to 10ft wide',
@@ -123,7 +114,7 @@ export default function HomePage() {
       ],
       turnaround: '1-3 business days (rush options available)'
     },
-    'Business Cards & IDs': {
+    'business cards & ids': {
       fullDescription: 'Make a lasting first impression with premium business cards and professional employee IDs. Our high-quality printing ensures your brand looks its best in every interaction.',
       features: [
         'Premium card stock options',
@@ -143,7 +134,7 @@ export default function HomePage() {
       ],
       turnaround: '2-4 business days'
     },
-    'Promotional Materials': {
+    'promotional materials': {
       fullDescription: 'Elevate your marketing campaigns with professionally designed and printed promotional materials that capture attention and drive engagement.',
       features: [
         'Full-color printing',
@@ -163,7 +154,7 @@ export default function HomePage() {
       ],
       turnaround: '2-5 business days'
     },
-    'Creative Design': {
+    'creative design': {
       fullDescription: 'Our creative team brings your ideas to life with stunning designs that resonate with your target audience and strengthen your brand identity.',
       features: [
         'Brand identity design',
@@ -183,7 +174,7 @@ export default function HomePage() {
       ],
       turnaround: '3-7 business days'
     },
-    'Creative Tech Solutions': {
+    'creative tech solutions': {
       fullDescription: 'Step into the future of marketing with our innovative AR solutions. We create immersive experiences that engage customers in ways traditional media cannot.',
       features: [
         'Custom AR marker creation',
@@ -203,7 +194,7 @@ export default function HomePage() {
       ],
       turnaround: '1-2 weeks'
     },
-    'Rush Orders': {
+    'rush orders': {
       fullDescription: 'When time is of the essence, our rush service delivers exceptional results on an accelerated timeline. We prioritize your urgent projects without sacrificing quality.',
       features: [
         'Same-day printing available',
@@ -227,21 +218,19 @@ export default function HomePage() {
 
   const features = [
     { icon: Zap, text: 'Fast Turnaround' },
-    { icon: CheckCircle, text: 'Quality Guaranteed' },
+    { icon: CheckCircle2, text: 'Quality Guaranteed' },
     { icon: Users, text: 'Expert Team' },
     { icon: Package, text: 'Competitive Pricing' }
   ];
 
-  // Get icon for service based on name
-  const getServiceIcon = (serviceName) => {
-    const name = serviceName.toLowerCase();
-    if (name.includes('print')) return Printer;
-    if (name.includes('card') || name.includes('id')) return FileText;
-    if (name.includes('promotional') || name.includes('material')) return ImageIcon;
-    if (name.includes('design')) return Palette;
-    if (name.includes('tech') || name.includes('ar')) return Sparkles;
-    if (name.includes('rush')) return Package;
-    return FileText; // Default icon
+  const iconMap = {
+    'Printer': Printer,
+    'CreditCard': CreditCard,
+    'FileText': FileText,
+    'Palette': Palette,
+    'Sparkles': Sparkles,
+    'Zap': Zap,
+    'Package': Package
   };
 
   return (
@@ -399,40 +388,39 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service) => {
-              const ServiceIcon = getServiceIcon(service.item_name);
-              const details = serviceDetails[service.item_name] || null; // Lookup details from local object
+            {homepageServices.map((service, index) => {
+              const IconComponent = iconMap[service.icon_name] || FileText;
+              const details = serviceDetails[service.title.toLowerCase()];
               
               return (
                 <Card
-                  key={service.id}
+                  key={index}
                   className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group overflow-hidden"
                 >
                   <CardContent className="bg-[#2053E6] p-6 relative min-h-[280px] flex flex-col">
-                    {service.service_image_url && (
+                    {service.image_url ? (
                       <div className="absolute inset-0 opacity-30">
                         <OptimizedImage
-                          src={service.service_image_url}
-                          alt={service.item_name}
+                          src={service.image_url}
+                          alt={service.title}
                           className="w-full h-full"
                           objectFit="cover"
                         />
                       </div>
+                    ) : (
+                      <div className={`absolute top-6 left-6 ${service.icon_color} w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <IconComponent className="w-6 h-6 text-white" />
+                      </div>
                     )}
 
                     <div className="relative z-10 flex-1 flex flex-col">
-                      {!service.service_image_url && (
-                        <div className="bg-blue-500 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                          <ServiceIcon className="w-6 h-6 text-white" />
-                        </div>
-                      )}
                       <h4 className="text-slate-100 mb-3 text-xl font-black text-left lowercase mt-4">
-                        {service.item_name}
+                        {service.title}
                       </h4>
                       <p className="text-slate-50 leading-relaxed mb-4 flex-1">
                         {service.description}
                       </p>
-                      {details && ( // Only show "Learn More" if detailed info exists
+                      {details && (
                         <Button
                           variant="secondary"
                           size="sm"
@@ -459,16 +447,16 @@ export default function HomePage() {
             <DialogTitle className="flex items-center gap-3 text-2xl">
               {selectedService && (
                 <>
-                  <div className="bg-blue-500 w-12 h-12 rounded-lg flex items-center justify-center">
-                    {React.createElement(getServiceIcon(selectedService.item_name), { className: "w-6 h-6 text-white" })}
+                  <div className={`${selectedService.icon_color || 'bg-blue-500'} w-12 h-12 rounded-lg flex items-center justify-center`}>
+                    {React.createElement(iconMap[selectedService.icon_name] || FileText, { className: "w-6 h-6 text-white" })}
                   </div>
-                  {selectedService.item_name}
+                  {selectedService.title}
                 </>
               )}
             </DialogTitle>
           </DialogHeader>
           
-          {selectedService?.details && ( // Conditionally render details if they exist
+          {selectedService?.details && (
             <div className="space-y-6 pt-4">
               <div>
                 <p className="text-gray-700 leading-relaxed">
@@ -481,7 +469,7 @@ export default function HomePage() {
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {selectedService.details.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                       <span className="text-gray-700">{feature}</span>
                     </li>
                   ))}
