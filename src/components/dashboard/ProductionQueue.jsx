@@ -165,6 +165,22 @@ export default function ProductionQueue({ user, initialFilter }) {
     }
   }, [fetchJobsAndUsers]);
 
+  // Fix: Close and reopen modal when selecting a different job
+  const handleJobSelect = useCallback((job) => {
+    if (selectedJob?.id === job.id) {
+      // Same job clicked, just ignore or toggle
+      return;
+    }
+    
+    // Close current modal first
+    setSelectedJob(null);
+    
+    // Wait a brief moment, then open the new one
+    setTimeout(() => {
+      setSelectedJob(job);
+    }, 100);
+  }, [selectedJob]);
+
   const filteredJobs = useMemo(() => {
     return jobs
       .filter((job) => {
@@ -340,7 +356,7 @@ export default function ProductionQueue({ user, initialFilter }) {
                                   >
                                     <JobCard
                                       job={job}
-                                      onSelect={setSelectedJob}
+                                      onSelect={handleJobSelect} // Changed from setSelectedJob to handleJobSelect
                                       onArchive={handleArchiveJob}
                                       userMap={usersMap}
                                     />
@@ -363,6 +379,7 @@ export default function ProductionQueue({ user, initialFilter }) {
 
       {selectedJob &&
         <JobDetails
+          key={selectedJob.id} {/* Added key prop */}
           job={selectedJob}
           onClose={() => setSelectedJob(null)}
           onUpdate={handleUpdate}
