@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -28,6 +27,7 @@ import {
   Plus,
   Palette,
   UserX,
+  Home,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -201,13 +201,19 @@ export default function Layout({ children, currentPageName }) {
             url: createPageUrl("Team"),
             icon: Users,
             roles: ["admin"]
+          },
+          {
+            title: "Homepage",
+            url: createPageUrl("HomepageSettings"),
+            icon: Home,
+            roles: ["admin"]
           }
         );
       }
     }
 
     if (user?.role !== 'admin') {
-      const adminOnlyPages = ["Shop Cash", "Team", "Archive"];
+      const adminOnlyPages = ["Shop Cash", "Team", "Archive", "Homepage"];
       return baseItems.filter(item => !adminOnlyPages.includes(item.title));
     }
 
