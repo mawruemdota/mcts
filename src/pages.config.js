@@ -30,6 +30,7 @@ import ClientOrderForm from './pages/ClientOrderForm';
 import PurchaseOrderPrintView from './pages/PurchaseOrderPrintView';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
+import HomepageSettings from './pages/HomepageSettings';
 import Layout from './Layout.jsx';
 
 
@@ -66,6 +67,7 @@ export const PAGES = {
     "PurchaseOrderPrintView": PurchaseOrderPrintView,
     "Home": Home,
     "NotFound": NotFound,
+    "HomepageSettings": HomepageSettings,
 }
 
 export const pagesConfig = {
