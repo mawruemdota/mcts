@@ -42,11 +42,11 @@ export default function HomePage() {
           base44.entities.HomePageContent.list(),
           base44.entities.GalleryImage.filter({ is_active: true })
         ]);
-
+        
         if (contentData.length > 0) {
           setHomepageContent(contentData[0]);
         }
-
+        
         const sortedGallery = galleryData.sort((a, b) => a.order - b.order);
         setGalleryImages(sortedGallery);
       } catch (error) {
@@ -54,7 +54,7 @@ export default function HomePage() {
       }
       setIsLoading(false);
     };
-
+    
     loadContent();
   }, []);
 
@@ -82,6 +82,14 @@ export default function HomePage() {
   const heroBackground = homepageContent?.hero_background_url || 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/6e687ce1e_bg.png';
   const patternBackground = homepageContent?.pattern_background_url || 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png';
   const mainLogo = homepageContent?.main_logo_url || 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png';
+  
+  // Contact info with defaults
+  const contactPhone = homepageContent?.contact_phone || '0977 827 0150';
+  const contactEmail = homepageContent?.contact_email || 'marasigancts@gmail.com';
+  const contactLocation = homepageContent?.contact_location || 'Dasmarinas, Cavite';
+  const facebookUrl = homepageContent?.facebook_url || 'https://facebook.com/marasigancts';
+  const instagramUrl = homepageContent?.instagram_url || 'https://www.instagram.com/marasigancts';
+  const companyDescription = homepageContent?.company_description || 'Professional printing and design solutions for businesses of all sizes.';
 
   const services = [
     {
@@ -570,8 +578,8 @@ export default function HomePage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Phone</p>
-                      <a href="tel:09778270150" className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
-                        0977 827 0150
+                      <a href={`tel:${contactPhone.replace(/\s/g, '')}`} className="text-gray-900 font-medium hover:text-blue-600 transition-colors">
+                        {contactPhone}
                       </a>
                     </div>
                   </div>
@@ -582,8 +590,8 @@ export default function HomePage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Email</p>
-                      <a href="mailto:marasigancts@gmail.com" className="text-gray-900 font-medium hover:text-indigo-600 transition-colors">
-                        marasigancts@gmail.com
+                      <a href={`mailto:${contactEmail}`} className="text-gray-900 font-medium hover:text-indigo-600 transition-colors">
+                        {contactEmail}
                       </a>
                     </div>
                   </div>
@@ -594,7 +602,7 @@ export default function HomePage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Location</p>
-                      <p className="text-gray-900 font-medium">Dasmarinas, Cavite</p>
+                      <p className="text-gray-900 font-medium">{contactLocation}</p>
                     </div>
                   </div>
 
@@ -604,7 +612,7 @@ export default function HomePage() {
                     <p className="text-sm text-gray-500 mb-3">Follow Us</p>
                     <div className="flex items-center gap-3">
                       <a
-                        href="https://facebook.com/marasigancts"
+                        href={facebookUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
@@ -613,7 +621,7 @@ export default function HomePage() {
                         <span className="text-sm font-medium text-gray-900">Facebook</span>
                       </a>
                       <a
-                        href="https://www.instagram.com/marasigancts"
+                        href={instagramUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 px-4 py-2 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors"
@@ -644,7 +652,7 @@ export default function HomePage() {
                 <span className="text-white font-bold text-lg">MCTS</span>
               </div>
               <p className="text-gray-400 text-sm">
-                Professional printing and design solutions for businesses of all sizes.
+                {companyDescription}
               </p>
             </div>
 

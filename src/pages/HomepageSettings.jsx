@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Loader2, Trash2, Plus, Image as ImageIcon, ArrowUp, ArrowDown } from 'lucide-react';
+import { Upload, Loader2, Trash2, Plus, Image as ImageIcon, ArrowUp, ArrowDown, Phone, Mail, MapPin, Facebook, Instagram } from 'lucide-react';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -35,7 +35,13 @@ export default function HomepageSettings() {
           hero_subtitle: 'From creative design to printable outputs, kami ang bahala sa inyo!',
           hero_background_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/6e687ce1e_bg.png',
           pattern_background_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png',
-          main_logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png'
+          main_logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png',
+          contact_phone: '0977 827 0150',
+          contact_email: 'marasigancts@gmail.com',
+          contact_location: 'Dasmarinas, Cavite',
+          facebook_url: 'https://facebook.com/marasigancts',
+          instagram_url: 'https://www.instagram.com/marasigancts',
+          company_description: 'Professional printing and design solutions for businesses of all sizes.'
         });
         setHomepageContent(defaultContent);
       }
@@ -166,13 +172,14 @@ export default function HomepageSettings() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Homepage Settings</h1>
-          <p className="text-muted-foreground mt-1">Manage images and content for the public homepage</p>
+          <p className="text-muted-foreground mt-1">Manage images, content, and contact information for the public homepage</p>
         </div>
 
         <Tabs defaultValue="general" className="w-full">
           <TabsList>
             <TabsTrigger value="general">General Settings</TabsTrigger>
             <TabsTrigger value="gallery">Gallery Carousel</TabsTrigger>
+            <TabsTrigger value="contact">Contact Information</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-6">
@@ -404,6 +411,106 @@ export default function HomepageSettings() {
                       </Card>
                     ))
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="contact" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Contact Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="contact_phone" className="flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      Phone Number
+                    </Label>
+                    <Input
+                      id="contact_phone"
+                      value={homepageContent?.contact_phone || ''}
+                      onChange={(e) => setHomepageContent(prev => ({ ...prev, contact_phone: e.target.value }))}
+                      onBlur={(e) => handleTextUpdate('contact_phone', e.target.value)}
+                      placeholder="e.g., 0977 827 0150"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="contact_email" className="flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      Email Address
+                    </Label>
+                    <Input
+                      id="contact_email"
+                      type="email"
+                      value={homepageContent?.contact_email || ''}
+                      onChange={(e) => setHomepageContent(prev => ({ ...prev, contact_email: e.target.value }))}
+                      onBlur={(e) => handleTextUpdate('contact_email', e.target.value)}
+                      placeholder="e.g., marasigancts@gmail.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="contact_location" className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Location/Address
+                  </Label>
+                  <Input
+                    id="contact_location"
+                    value={homepageContent?.contact_location || ''}
+                    onChange={(e) => setHomepageContent(prev => ({ ...prev, contact_location: e.target.value }))}
+                    onBlur={(e) => handleTextUpdate('contact_location', e.target.value)}
+                    placeholder="e.g., Dasmarinas, Cavite"
+                  />
+                </div>
+
+                <div className="border-t pt-6 space-y-4">
+                  <h3 className="font-semibold text-lg">Social Media Links</h3>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="facebook_url" className="flex items-center gap-2">
+                      <Facebook className="w-4 h-4" />
+                      Facebook Page URL
+                    </Label>
+                    <Input
+                      id="facebook_url"
+                      type="url"
+                      value={homepageContent?.facebook_url || ''}
+                      onChange={(e) => setHomepageContent(prev => ({ ...prev, facebook_url: e.target.value }))}
+                      onBlur={(e) => handleTextUpdate('facebook_url', e.target.value)}
+                      placeholder="https://facebook.com/yourpage"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="instagram_url" className="flex items-center gap-2">
+                      <Instagram className="w-4 h-4" />
+                      Instagram Profile URL
+                    </Label>
+                    <Input
+                      id="instagram_url"
+                      type="url"
+                      value={homepageContent?.instagram_url || ''}
+                      onChange={(e) => setHomepageContent(prev => ({ ...prev, instagram_url: e.target.value }))}
+                      onBlur={(e) => handleTextUpdate('instagram_url', e.target.value)}
+                      placeholder="https://instagram.com/yourprofile"
+                    />
+                  </div>
+                </div>
+
+                <div className="border-t pt-6 space-y-2">
+                  <Label htmlFor="company_description">Company Description (Footer)</Label>
+                  <Textarea
+                    id="company_description"
+                    value={homepageContent?.company_description || ''}
+                    onChange={(e) => setHomepageContent(prev => ({ ...prev, company_description: e.target.value }))}
+                    onBlur={(e) => handleTextUpdate('company_description', e.target.value)}
+                    rows={3}
+                    placeholder="Brief description for the footer section..."
+                  />
                 </div>
               </CardContent>
             </Card>
