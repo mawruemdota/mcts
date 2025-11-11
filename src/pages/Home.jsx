@@ -32,15 +32,19 @@ export default function HomePage() {
   const [selectedService, setSelectedService] = useState(null);
   const [homepageContent, setHomepageContent] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [services, setServices] = useState([]); // State for fetched services
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const [contentData, galleryData] = await Promise.all([
+        const [contentData, galleryData, serviceData] = await Promise.all([
           base44.entities.HomePageContent.list(),
-          base44.entities.GalleryImage.filter({ is_active: true })
+          base44.entities.GalleryImage.filter({ is_active: true }),
+          base44.entities.PriceListItem.filter({ category: 'service', is_active: true }).then(items => 
+            items.sort((a, b) => a.order_number - b.order_number) // Sort services by order_number
+          )
         ]);
         
         if (contentData.length > 0) {
@@ -49,6 +53,7 @@ export default function HomePage() {
         
         const sortedGallery = galleryData.sort((a, b) => a.order - b.order);
         setGalleryImages(sortedGallery);
+        setServices(serviceData); // Set fetched services
       } catch (error) {
         console.error('Error loading content:', error);
       }
@@ -83,6 +88,10 @@ export default function HomePage() {
   const patternBackground = homepageContent?.pattern_background_url || 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png';
   const mainLogo = homepageContent?.main_logo_url || 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png';
   
+  // Services section titles
+  const servicesSectionTitle = homepageContent?.services_section_title || 'Designed to help you with your creative needs';
+  const servicesSectionSubtitle = homepageContent?.services_section_subtitle || 'basta creative execution, pagusapan natin';
+
   // Contact info with defaults
   const contactPhone = homepageContent?.contact_phone || '0977 827 0150';
   const contactEmail = homepageContent?.contact_email || 'marasigancts@gmail.com';
@@ -91,167 +100,130 @@ export default function HomePage() {
   const instagramUrl = homepageContent?.instagram_url || 'https://www.instagram.com/marasigancts';
   const companyDescription = homepageContent?.company_description || 'Professional printing and design solutions for businesses of all sizes.';
 
-  const services = [
-    {
-      icon: Printer,
-      title: 'Digital Printing',
-      description: 'High-quality tarpaulins, stickers, banners, and large format printing for all your business needs.',
-      color: 'bg-blue-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/4421b8bd3_ElyuInasal.jpg',
-      details: {
-        fullDescription: 'Transform your vision into vibrant reality with our state-of-the-art digital printing services. We specialize in producing stunning, high-resolution prints for both indoor and outdoor applications.',
-        features: [
-          'Large format printing up to 10ft wide',
-          'Weather-resistant outdoor materials',
-          'High-resolution up to 1440 DPI',
-          'Same-day rush printing available',
-          'UV-resistant inks for long-lasting colors',
-          'Custom sizes and finishes'
-        ],
-        applications: [
-          'Tarpaulins & Banners',
-          'Vehicle Wraps',
-          'Wall Graphics',
-          'Window Decals',
-          'Floor Graphics',
-          'Exhibition Displays'
-        ],
-        turnaround: '1-3 business days (rush options available)'
-      }
+  // Default service details for modal (keep the detailed info)
+  // This object maps service names to their extensive details for the modal
+  const serviceDetails = {
+    'Digital Printing': {
+      fullDescription: 'Transform your vision into vibrant reality with our state-of-the-art digital printing services. We specialize in producing stunning, high-resolution prints for both indoor and outdoor applications.',
+      features: [
+        'Large format printing up to 10ft wide',
+        'Weather-resistant outdoor materials',
+        'High-resolution up to 1440 DPI',
+        'Same-day rush printing available',
+        'UV-resistant inks for long-lasting colors',
+        'Custom sizes and finishes'
+      ],
+      applications: [
+        'Tarpaulins & Banners',
+        'Vehicle Wraps',
+        'Wall Graphics',
+        'Window Decals',
+        'Floor Graphics',
+        'Exhibition Displays'
+      ],
+      turnaround: '1-3 business days (rush options available)'
     },
-    {
-      icon: FileText,
-      title: 'Business Cards & IDs',
-      description: 'Professional business cards, calling cards, and employee ID printing with quick turnaround.',
-      color: 'bg-green-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/9c22c69df_1.png',
-      details: {
-        fullDescription: 'Make a lasting first impression with premium business cards and professional employee IDs. Our high-quality printing ensures your brand looks its best in every interaction.',
-        features: [
-          'Premium card stock options',
-          'Matte, glossy, or spot UV finishes',
-          'PVC ID cards with photo printing',
-          'Lamination for durability',
-          'Custom designs available',
-          'Bulk discounts for large orders'
-        ],
-        applications: [
-          'Business Cards',
-          'Calling Cards',
-          'Employee ID Cards',
-          'Membership Cards',
-          'Gift Cards',
-          'Loyalty Cards'
-        ],
-        turnaround: '2-4 business days'
-      }
+    'Business Cards & IDs': {
+      fullDescription: 'Make a lasting first impression with premium business cards and professional employee IDs. Our high-quality printing ensures your brand looks its best in every interaction.',
+      features: [
+        'Premium card stock options',
+        'Matte, glossy, or spot UV finishes',
+        'PVC ID cards with photo printing',
+        'Lamination for durability',
+        'Custom designs available',
+        'Bulk discounts for large orders'
+      ],
+      applications: [
+        'Business Cards',
+        'Calling Cards',
+        'Employee ID Cards',
+        'Membership Cards',
+        'Gift Cards',
+        'Loyalty Cards'
+      ],
+      turnaround: '2-4 business days'
     },
-    {
-      icon: ImageIcon,
-      title: 'Promotional Materials',
-      description: 'Eye-catching flyers, brochures, invitations, and marketing materials to boost your brand.',
-      color: 'bg-purple-500',
-      backgroundImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/2216363cc_IMG_9573.jpg',
-      details: {
-        fullDescription: 'Elevate your marketing campaigns with professionally designed and printed promotional materials that capture attention and drive engagement.',
-        features: [
-          'Full-color printing',
-          'Multiple paper weights and finishes',
-          'Custom folding options',
-          'Die-cutting available',
-          'Eco-friendly paper options',
-          'Design assistance included'
-        ],
-        applications: [
-          'Flyers & Leaflets',
-          'Brochures & Catalogs',
-          'Posters',
-          'Invitations',
-          'Postcards',
-          'Menu Cards'
-        ],
-        turnaround: '2-5 business days'
-      }
+    'Promotional Materials': {
+      fullDescription: 'Elevate your marketing campaigns with professionally designed and printed promotional materials that capture attention and drive engagement.',
+      features: [
+        'Full-color printing',
+        'Multiple paper weights and finishes',
+        'Custom folding options',
+        'Die-cutting available',
+        'Eco-friendly paper options',
+        'Design assistance included'
+      ],
+      applications: [
+        'Flyers & Leaflets',
+        'Brochures & Catalogs',
+        'Posters',
+        'Invitations',
+        'Postcards',
+        'Menu Cards'
+      ],
+      turnaround: '2-5 business days'
     },
-    {
-      icon: Palette,
-      title: 'Creative Design',
-      description: 'Expert graphic design services, social media content creation, and brand identity development.',
-      color: 'bg-pink-500',
-      details: {
-        fullDescription: 'Our creative team brings your ideas to life with stunning designs that resonate with your target audience and strengthen your brand identity.',
-        features: [
-          'Brand identity design',
-          'Logo creation and refinement',
-          'Social media graphics',
-          'Marketing collateral design',
-          'Packaging design',
-          'Unlimited revisions until perfect'
-        ],
-        applications: [
-          'Logo Design',
-          'Brand Guidelines',
-          'Social Media Content',
-          'Marketing Materials',
-          'Packaging Design',
-          'Infographics'
-        ],
-        turnaround: '3-7 business days'
-      }
+    'Creative Design': {
+      fullDescription: 'Our creative team brings your ideas to life with stunning designs that resonate with your target audience and strengthen your brand identity.',
+      features: [
+        'Brand identity design',
+        'Logo creation and refinement',
+        'Social media graphics',
+        'Marketing collateral design',
+        'Packaging design',
+        'Unlimited revisions until perfect'
+      ],
+      applications: [
+        'Logo Design',
+        'Brand Guidelines',
+        'Social Media Content',
+        'Marketing Materials',
+        'Packaging Design',
+        'Infographics'
+      ],
+      turnaround: '3-7 business days'
     },
-    {
-      icon: Sparkles,
-      title: 'Creative Tech Solutions',
-      description: 'Cutting-edge augmented reality solutions to make your marketing campaigns truly interactive.',
-      color: 'bg-orange-500',
-      details: {
-        fullDescription: 'Step into the future of marketing with our innovative AR solutions. We create immersive experiences that engage customers in ways traditional media cannot.',
-        features: [
-          'Custom AR marker creation',
-          '3D model development',
-          'Interactive product showcases',
-          'Virtual try-on experiences',
-          'Gamified marketing campaigns',
-          'Analytics and tracking'
-        ],
-        applications: [
-          'Product Visualization',
-          'Interactive Packaging',
-          'Virtual Showrooms',
-          'Educational Experiences',
-          'Event Activations',
-          'Brand Storytelling'
-        ],
-        turnaround: '1-2 weeks'
-      }
+    'Creative Tech Solutions': {
+      fullDescription: 'Step into the future of marketing with our innovative AR solutions. We create immersive experiences that engage customers in ways traditional media cannot.',
+      features: [
+        'Custom AR marker creation',
+        '3D model development',
+        'Interactive product showcases',
+        'Virtual try-on experiences',
+        'Gamified marketing campaigns',
+        'Analytics and tracking'
+      ],
+      applications: [
+        'Product Visualization',
+        'Interactive Packaging',
+        'Virtual Showrooms',
+        'Educational Experiences',
+        'Event Activations',
+        'Brand Storytelling'
+      ],
+      turnaround: '1-2 weeks'
     },
-    {
-      icon: Package,
-      title: 'Rush Orders',
-      description: 'Need it fast? We offer rush services to meet your urgent deadlines without compromising quality.',
-      color: 'bg-red-500',
-      details: {
-        fullDescription: 'When time is of the essence, our rush service delivers exceptional results on an accelerated timeline. We prioritize your urgent projects without sacrificing quality.',
-        features: [
-          'Same-day printing available',
-          'Priority queue processing',
-          'Dedicated project manager',
-          '24/7 customer support',
-          'Express delivery options',
-          'Quality guarantee'
-        ],
-        applications: [
-          'Event Materials',
-          'Last-Minute Campaigns',
-          'Emergency Replacements',
-          'Time-Sensitive Projects',
-          'Corporate Events',
-          'Product Launches'
-        ],
-        turnaround: 'Same day to 24 hours'
-      }
+    'Rush Orders': {
+      fullDescription: 'When time is of the essence, our rush service delivers exceptional results on an accelerated timeline. We prioritize your urgent projects without sacrificing quality.',
+      features: [
+        'Same-day printing available',
+        'Priority queue processing',
+        'Dedicated project manager',
+        '24/7 customer support',
+        'Express delivery options',
+        'Quality guarantee'
+      ],
+      applications: [
+        'Event Materials',
+        'Last-Minute Campaigns',
+        'Emergency Replacements',
+        'Time-Sensitive Projects',
+        'Corporate Events',
+        'Product Launches'
+      ],
+      turnaround: 'Same day to 24 hours'
     }
-  ];
+  };
 
   const features = [
     { icon: Zap, text: 'Fast Turnaround' },
@@ -259,6 +231,18 @@ export default function HomePage() {
     { icon: Users, text: 'Expert Team' },
     { icon: Package, text: 'Competitive Pricing' }
   ];
+
+  // Get icon for service based on name
+  const getServiceIcon = (serviceName) => {
+    const name = serviceName.toLowerCase();
+    if (name.includes('print')) return Printer;
+    if (name.includes('card') || name.includes('id')) return FileText;
+    if (name.includes('promotional') || name.includes('material')) return ImageIcon;
+    if (name.includes('design')) return Palette;
+    if (name.includes('tech') || name.includes('ar')) return Sparkles;
+    if (name.includes('rush')) return Package;
+    return FileText; // Default icon
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -409,54 +393,61 @@ export default function HomePage() {
               Our Services
             </Badge>
             <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Designed to help you with your creative needs
+              {servicesSectionTitle}
             </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">basta creative execution, pagusapan natin</p>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{servicesSectionSubtitle}</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <Card
-                key={index}
-                className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group overflow-hidden"
-              >
-                <CardContent className="bg-[#2053E6] p-6 relative min-h-[280px] flex flex-col">
-                  {service.backgroundImage && (
-                    <div className="absolute inset-0 opacity-30">
-                      <OptimizedImage
-                        src={service.backgroundImage}
-                        alt={service.title}
-                        className="w-full h-full"
-                        objectFit="cover"
-                      />
-                    </div>
-                  )}
-
-                  <div className="relative z-10 flex-1 flex flex-col">
-                    {!service.backgroundImage && (
-                      <div className={`${service.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                        <service.icon className="w-6 h-6 text-white" />
+            {services.map((service) => {
+              const ServiceIcon = getServiceIcon(service.item_name);
+              const details = serviceDetails[service.item_name] || null; // Lookup details from local object
+              
+              return (
+                <Card
+                  key={service.id}
+                  className="bg-gradient-to-br from-white to-gray-50 border-gray-200 hover:shadow-xl transition-all duration-300 group overflow-hidden"
+                >
+                  <CardContent className="bg-[#2053E6] p-6 relative min-h-[280px] flex flex-col">
+                    {service.service_image_url && (
+                      <div className="absolute inset-0 opacity-30">
+                        <OptimizedImage
+                          src={service.service_image_url}
+                          alt={service.item_name}
+                          className="w-full h-full"
+                          objectFit="cover"
+                        />
                       </div>
                     )}
-                    <h4 className="text-slate-100 mb-3 text-xl font-black text-left lowercase mt-4">
-                      {service.title}
-                    </h4>
-                    <p className="text-slate-50 leading-relaxed mb-4 flex-1">
-                      {service.description}
-                    </p>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setSelectedService(service)}
-                      className="w-full mt-auto bg-white/90 hover:bg-white text-[#2053E6] font-semibold"
-                    >
-                      <Info className="w-4 h-4 mr-2" />
-                      Learn More
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                    <div className="relative z-10 flex-1 flex flex-col">
+                      {!service.service_image_url && (
+                        <div className="bg-blue-500 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <ServiceIcon className="w-6 h-6 text-white" />
+                        </div>
+                      )}
+                      <h4 className="text-slate-100 mb-3 text-xl font-black text-left lowercase mt-4">
+                        {service.item_name}
+                      </h4>
+                      <p className="text-slate-50 leading-relaxed mb-4 flex-1">
+                        {service.description}
+                      </p>
+                      {details && ( // Only show "Learn More" if detailed info exists
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setSelectedService({ ...service, details })}
+                          className="w-full mt-auto bg-white/90 hover:bg-white text-[#2053E6] font-semibold"
+                        >
+                          <Info className="w-4 h-4 mr-2" />
+                          Learn More
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -468,16 +459,16 @@ export default function HomePage() {
             <DialogTitle className="flex items-center gap-3 text-2xl">
               {selectedService && (
                 <>
-                  <div className={`${selectedService.color} w-12 h-12 rounded-lg flex items-center justify-center`}>
-                    <selectedService.icon className="w-6 h-6 text-white" />
+                  <div className="bg-blue-500 w-12 h-12 rounded-lg flex items-center justify-center">
+                    {React.createElement(getServiceIcon(selectedService.item_name), { className: "w-6 h-6 text-white" })}
                   </div>
-                  {selectedService.title}
+                  {selectedService.item_name}
                 </>
               )}
             </DialogTitle>
           </DialogHeader>
-
-          {selectedService && selectedService.details && (
+          
+          {selectedService?.details && ( // Conditionally render details if they exist
             <div className="space-y-6 pt-4">
               <div>
                 <p className="text-gray-700 leading-relaxed">

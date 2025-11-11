@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +44,8 @@ export default function HomepageSettings() {
           hero_background_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/6e687ce1e_bg.png',
           pattern_background_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/ad1abef0a_pattern2.png',
           main_logo_url: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a7205f4bc/7aad79b47_logo3.png',
+          services_section_title: 'Designed to help you with your creative needs',
+          services_section_subtitle: 'basta creative execution, pagusapan natin',
           contact_phone: '0977 827 0150',
           contact_email: 'marasigancts@gmail.com',
           contact_location: 'Dasmarinas, Cavite',
@@ -192,13 +195,12 @@ export default function HomepageSettings() {
     }
   };
 
-  const updateServiceDescription = async (serviceId, description) => {
+  const updateServiceField = async (serviceId, field, value) => {
     try {
-      await base44.entities.PriceListItem.update(serviceId, { description });
-      setServices(prev => prev.map(svc => svc.id === serviceId ? { ...svc, description } : svc));
-      toast({ title: 'Success', description: 'Service description updated!' });
+      await base44.entities.PriceListItem.update(serviceId, { [field]: value });
+      setServices(prev => prev.map(svc => svc.id === serviceId ? { ...svc, [field]: value } : svc));
     } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to update description.' });
+      console.error('Update error:', error);
     }
   };
 
@@ -394,10 +396,35 @@ export default function HomepageSettings() {
           <TabsContent value="services" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Services Display</CardTitle>
+                <CardTitle>Services Section Heading</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="services_section_title">Section Title</Label>
+                  <Input
+                    id="services_section_title"
+                    value={homepageContent?.services_section_title || ''}
+                    onChange={(e) => setHomepageContent(prev => ({ ...prev, services_section_title: e.target.value }))}
+                    placeholder="e.g., Designed to help you with your creative needs"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="services_section_subtitle">Section Subtitle</Label>
+                  <Input
+                    id="services_section_subtitle"
+                    value={homepageContent?.services_section_subtitle || ''}
+                    onChange={(e) => setHomepageContent(prev => ({ ...prev, services_section_subtitle: e.target.value }))}
+                    placeholder="e.g., basta creative execution, pagusapan natin"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Individual Services</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Manage images and descriptions for services shown on the homepage. 
-                  To add new services or edit pricing, go to the Products page.
+                  Manage titles, descriptions, and images for each service card shown on the homepage.
                 </p>
               </CardHeader>
               <CardContent>
@@ -413,16 +440,16 @@ export default function HomepageSettings() {
                         <CardContent className="p-6">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-3">
-                              <Label className="text-base font-semibold">{service.item_name}</Label>
+                              <Label className="text-xs text-muted-foreground">Service Image</Label>
                               {service.service_image_url ? (
                                 <OptimizedImage
                                   src={service.service_image_url}
                                   alt={service.item_name}
-                                  className="w-full h-40 rounded-lg"
+                                  className="w-full h-48 rounded-lg"
                                   objectFit="cover"
                                 />
                               ) : (
-                                <div className="w-full h-40 bg-secondary rounded-lg flex items-center justify-center">
+                                <div className="w-full h-48 bg-secondary rounded-lg flex items-center justify-center">
                                   <ImageIcon className="w-12 h-12 text-muted-foreground" />
                                 </div>
                               )}
@@ -435,9 +462,25 @@ export default function HomepageSettings() {
                                 }}
                               />
                             </div>
-                            <div className="md:col-span-2 space-y-3">
+                            <div className="md:col-span-2 space-y-4">
                               <div>
-                                <Label>Homepage Description</Label>
+                                <Label>Service Title (Card Heading)</Label>
+                                <Input
+                                  value={service.item_name || ''}
+                                  onChange={(e) => {
+                                    setServices(prev => prev.map(svc => 
+                                      svc.id === service.id ? { ...svc, item_name: e.target.value } : svc
+                                    ));
+                                  }}
+                                  onBlur={(e) => updateServiceField(service.id, 'item_name', e.target.value)}
+                                  placeholder="e.g., digital printing"
+                                />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  This is the main heading shown on the service card (lowercase recommended).
+                                </p>
+                              </div>
+                              <div>
+                                <Label>Service Description</Label>
                                 <Textarea
                                   value={service.description || ''}
                                   onChange={(e) => {
@@ -445,24 +488,27 @@ export default function HomepageSettings() {
                                       svc.id === service.id ? { ...svc, description: e.target.value } : svc
                                     ));
                                   }}
-                                  onBlur={(e) => updateServiceDescription(service.id, e.target.value)}
-                                  rows={4}
-                                  placeholder="Brief description for the homepage..."
+                                  onBlur={(e) => updateServiceField(service.id, 'description', e.target.value)}
+                                  rows={3}
+                                  placeholder="Brief description for the service card..."
                                 />
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  This description will be shown on the service card on the homepage.
+                                  This description appears on the card below the title.
                                 </p>
                               </div>
-                              <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div className="grid grid-cols-2 gap-4 pt-2 border-t">
                                 <div>
                                   <Label className="text-xs text-muted-foreground">Unit</Label>
-                                  <p className="font-medium">{service.unit}</p>
+                                  <p className="font-medium text-sm">{service.unit}</p>
                                 </div>
                                 <div>
-                                  <Label className="text-xs text-muted-foreground">Price</Label>
-                                  <p className="font-medium">₱{service.price_conservative}</p>
+                                  <Label className="text-xs text-muted-foreground">Base Price</Label>
+                                  <p className="font-medium text-sm">₱{service.price_conservative}</p>
                                 </div>
                               </div>
+                              <p className="text-xs text-muted-foreground italic">
+                                Note: To edit pricing or add new services, go to the Products page.
+                              </p>
                             </div>
                           </div>
                         </CardContent>
