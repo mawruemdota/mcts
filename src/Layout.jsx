@@ -69,7 +69,8 @@ export default function Layout({ children, currentPageName }) {
                        location.pathname.startsWith(createPageUrl("PublicContentView")) ||
                        location.pathname.startsWith(createPageUrl("ARView")) ||
                        location.pathname.startsWith(createPageUrl("ReimbursementPrintView")) ||
-                       location.pathname.startsWith(createPageUrl("ClientOrderForm"));
+                       location.pathname.startsWith(createPageUrl("ClientOrderForm")) ||
+                       location.pathname.startsWith(createPageUrl("OrderTracking"));
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'dark';
