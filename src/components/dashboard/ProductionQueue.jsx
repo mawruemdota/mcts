@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Job, User } from '@/entities/all';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -162,20 +161,21 @@ export default function ProductionQueue({ user, initialFilter }) {
       await Job.delete(jobId);
       setSelectedJob(null);
       fetchJobsAndUsers();
+      toast({
+        title: "Success",
+        description: "Order deleted.",
+        duration: 3000
+      });
     }
-  }, [fetchJobsAndUsers]);
+  }, [fetchJobsAndUsers, toast]);
 
-  // Fix: Close and reopen modal when selecting a different job
   const handleJobSelect = useCallback((job) => {
     if (selectedJob?.id === job.id) {
-      // Same job clicked, just ignore or toggle
       return;
     }
     
-    // Close current modal first
     setSelectedJob(null);
     
-    // Wait a brief moment, then open the new one
     setTimeout(() => {
       setSelectedJob(job);
     }, 100);
@@ -239,7 +239,8 @@ export default function ProductionQueue({ user, initialFilter }) {
         .then(() => {
             toast({
                 title: "Task Updated",
-                description: `Moved to "${statusConfig[newStatus]?.label}".`
+                description: `Moved to "${statusConfig[newStatus]?.label}".`,
+                duration: 3000
             });
         })
         .catch((error) => {
@@ -249,6 +250,7 @@ export default function ProductionQueue({ user, initialFilter }) {
                 variant: "destructive",
                 title: "Update Failed",
                 description: "Could not move the task. Please try again.",
+                duration: 3000
             });
         });
   };
@@ -356,7 +358,7 @@ export default function ProductionQueue({ user, initialFilter }) {
                                   >
                                     <JobCard
                                       job={job}
-                                      onSelect={handleJobSelect} // Changed from setSelectedJob to handleJobSelect
+                                      onSelect={handleJobSelect}
                                       onArchive={handleArchiveJob}
                                       userMap={usersMap}
                                     />
@@ -377,18 +379,18 @@ export default function ProductionQueue({ user, initialFilter }) {
         </CardContent>
       </Card>
 
-      {selectedJob &&
+      {selectedJob && (
         <JobDetails
-          key={selectedJob.id} {/* Added key prop */}
+          key={selectedJob.id}
           job={selectedJob}
           onClose={() => setSelectedJob(null)}
           onUpdate={handleUpdate}
           onDelete={handleDelete}
           user={user}
         />
-      }
+      )}
 
-      {isNewTaskModalOpen &&
+      {isNewTaskModalOpen && (
         <NewTaskModal
           isOpen={isNewTaskModalOpen}
           onClose={() => setNewTaskModalOpen(false)}
@@ -398,7 +400,7 @@ export default function ProductionQueue({ user, initialFilter }) {
           }}
           user={user}
         />
-      }
+      )}
     </>
   );
 }
