@@ -7,27 +7,34 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Loader2, Trash2, Plus, Image as ImageIcon, ArrowUp, ArrowDown, Phone, Mail, MapPin, Facebook, Instagram } from 'lucide-react';
+import { Upload, Loader2, Trash2, Plus, Image as ImageIcon, ArrowUp, ArrowDown, Phone, Mail, MapPin, Facebook, Instagram, Save, RefreshCw } from 'lucide-react';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function HomepageSettings() {
   const [homepageContent, setHomepageContent] = useState(null);
+  const [originalHomepageContent, setOriginalHomepageContent] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingField, setUploadingField] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
 
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [contentData, galleryData] = await Promise.all([
+      const [contentData, galleryData, pricelistData] = await Promise.all([
         base44.entities.HomePageContent.list(),
-        base44.entities.GalleryImage.list()
+        base44.entities.GalleryImage.list(),
+        base44.entities.PriceListItem.filter({ category: 'service' })
       ]);
       
       if (contentData.length > 0) {
         setHomepageContent(contentData[0]);
+        setOriginalHomepageContent(contentData[0]);
       } else {
         // Create default entry
         const defaultContent = await base44.entities.HomePageContent.create({
@@ -44,9 +51,11 @@ export default function HomepageSettings() {
           company_description: 'Professional printing and design solutions for businesses of all sizes.'
         });
         setHomepageContent(defaultContent);
+        setOriginalHomepageContent(defaultContent);
       }
       
       setGalleryImages(galleryData.sort((a, b) => a.order - b.order));
+      setServices(pricelistData);
     } catch (error) {
       console.error('Error loading data:', error);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to load homepage settings.' });
@@ -58,6 +67,14 @@ export default function HomepageSettings() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    // Check for unsaved changes
+    if (homepageContent && originalHomepageContent) {
+      const hasChanges = JSON.stringify(homepageContent) !== JSON.stringify(originalHomepageContent);
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [homepageContent, originalHomepageContent]);
+
   const handleFileUpload = async (e, field) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -65,13 +82,8 @@ export default function HomepageSettings() {
     setUploadingField(field);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      
-      await base44.entities.HomePageContent.update(homepageContent.id, {
-        [field]: file_url
-      });
-      
       setHomepageContent(prev => ({ ...prev, [field]: file_url }));
-      toast({ title: 'Success', description: 'Image uploaded successfully!' });
+      toast({ title: 'Success', description: 'Image uploaded! Click "Save Changes" to apply.' });
     } catch (error) {
       console.error('Upload error:', error);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to upload image.' });
@@ -79,14 +91,24 @@ export default function HomepageSettings() {
     setUploadingField(null);
   };
 
-  const handleTextUpdate = async (field, value) => {
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
     try {
-      await base44.entities.HomePageContent.update(homepageContent.id, {
-        [field]: value
-      });
-      setHomepageContent(prev => ({ ...prev, [field]: value }));
+      await base44.entities.HomePageContent.update(homepageContent.id, homepageContent);
+      setOriginalHomepageContent(homepageContent);
+      setHasUnsavedChanges(false);
+      toast({ title: 'Success', description: 'All changes saved successfully!' });
     } catch (error) {
-      console.error('Update error:', error);
+      console.error('Save error:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to save changes.' });
+    }
+    setIsSaving(false);
+  };
+
+  const handleDiscardChanges = () => {
+    if (window.confirm('Are you sure you want to discard all unsaved changes?')) {
+      setHomepageContent({ ...originalHomepageContent });
+      toast({ title: 'Changes Discarded', description: 'All unsaved changes have been reverted.' });
     }
   };
 
@@ -159,6 +181,27 @@ export default function HomepageSettings() {
     }
   };
 
+  const uploadServiceImage = async (serviceId, file) => {
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.PriceListItem.update(serviceId, { service_image_url: file_url });
+      setServices(prev => prev.map(svc => svc.id === serviceId ? { ...svc, service_image_url: file_url } : svc));
+      toast({ title: 'Success', description: 'Service image uploaded!' });
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to upload image.' });
+    }
+  };
+
+  const updateServiceDescription = async (serviceId, description) => {
+    try {
+      await base44.entities.PriceListItem.update(serviceId, { description });
+      setServices(prev => prev.map(svc => svc.id === serviceId ? { ...svc, description } : svc));
+      toast({ title: 'Success', description: 'Service description updated!' });
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to update description.' });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -170,14 +213,47 @@ export default function HomepageSettings() {
   return (
     <div className="p-6 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Homepage Settings</h1>
-          <p className="text-muted-foreground mt-1">Manage images, content, and contact information for the public homepage</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Homepage Settings</h1>
+            <p className="text-muted-foreground mt-1">Manage images, content, and contact information for the public homepage</p>
+          </div>
+          
+          {hasUnsavedChanges && (
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={handleDiscardChanges}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Discard
+              </Button>
+              <Button onClick={handleSaveChanges} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
+
+        {hasUnsavedChanges && (
+          <Alert className="bg-yellow-50 border-yellow-200">
+            <AlertDescription className="text-yellow-800">
+              You have unsaved changes. Click "Save Changes" to apply them to the homepage.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Tabs defaultValue="general" className="w-full">
           <TabsList>
             <TabsTrigger value="general">General Settings</TabsTrigger>
+            <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="gallery">Gallery Carousel</TabsTrigger>
             <TabsTrigger value="contact">Contact Information</TabsTrigger>
           </TabsList>
@@ -233,7 +309,6 @@ export default function HomepageSettings() {
                     id="hero_title"
                     value={homepageContent?.hero_title || ''}
                     onChange={(e) => setHomepageContent(prev => ({ ...prev, hero_title: e.target.value }))}
-                    onBlur={(e) => handleTextUpdate('hero_title', e.target.value)}
                   />
                 </div>
                 <div>
@@ -242,7 +317,6 @@ export default function HomepageSettings() {
                     id="hero_subtitle"
                     value={homepageContent?.hero_subtitle || ''}
                     onChange={(e) => setHomepageContent(prev => ({ ...prev, hero_subtitle: e.target.value }))}
-                    onBlur={(e) => handleTextUpdate('hero_subtitle', e.target.value)}
                     rows={3}
                   />
                 </div>
@@ -311,6 +385,89 @@ export default function HomepageSettings() {
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span className="text-sm">Uploading...</span>
                     </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="services" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Services Display</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Manage images and descriptions for services shown on the homepage. 
+                  To add new services or edit pricing, go to the Products page.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {services.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <ImageIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No services found. Add services in the Products page first.</p>
+                    </div>
+                  ) : (
+                    services.map((service) => (
+                      <Card key={service.id} className="bg-secondary/30">
+                        <CardContent className="p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="space-y-3">
+                              <Label className="text-base font-semibold">{service.item_name}</Label>
+                              {service.service_image_url ? (
+                                <OptimizedImage
+                                  src={service.service_image_url}
+                                  alt={service.item_name}
+                                  className="w-full h-40 rounded-lg"
+                                  objectFit="cover"
+                                />
+                              ) : (
+                                <div className="w-full h-40 bg-secondary rounded-lg flex items-center justify-center">
+                                  <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                                </div>
+                              )}
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) uploadServiceImage(service.id, file);
+                                }}
+                              />
+                            </div>
+                            <div className="md:col-span-2 space-y-3">
+                              <div>
+                                <Label>Homepage Description</Label>
+                                <Textarea
+                                  value={service.description || ''}
+                                  onChange={(e) => {
+                                    setServices(prev => prev.map(svc => 
+                                      svc.id === service.id ? { ...svc, description: e.target.value } : svc
+                                    ));
+                                  }}
+                                  onBlur={(e) => updateServiceDescription(service.id, e.target.value)}
+                                  rows={4}
+                                  placeholder="Brief description for the homepage..."
+                                />
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  This description will be shown on the service card on the homepage.
+                                </p>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Unit</Label>
+                                  <p className="font-medium">{service.unit}</p>
+                                </div>
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Price</Label>
+                                  <p className="font-medium">₱{service.price_conservative}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
                   )}
                 </div>
               </CardContent>
@@ -432,7 +589,6 @@ export default function HomepageSettings() {
                       id="contact_phone"
                       value={homepageContent?.contact_phone || ''}
                       onChange={(e) => setHomepageContent(prev => ({ ...prev, contact_phone: e.target.value }))}
-                      onBlur={(e) => handleTextUpdate('contact_phone', e.target.value)}
                       placeholder="e.g., 0977 827 0150"
                     />
                   </div>
@@ -447,7 +603,6 @@ export default function HomepageSettings() {
                       type="email"
                       value={homepageContent?.contact_email || ''}
                       onChange={(e) => setHomepageContent(prev => ({ ...prev, contact_email: e.target.value }))}
-                      onBlur={(e) => handleTextUpdate('contact_email', e.target.value)}
                       placeholder="e.g., marasigancts@gmail.com"
                     />
                   </div>
@@ -462,7 +617,6 @@ export default function HomepageSettings() {
                     id="contact_location"
                     value={homepageContent?.contact_location || ''}
                     onChange={(e) => setHomepageContent(prev => ({ ...prev, contact_location: e.target.value }))}
-                    onBlur={(e) => handleTextUpdate('contact_location', e.target.value)}
                     placeholder="e.g., Dasmarinas, Cavite"
                   />
                 </div>
@@ -480,7 +634,6 @@ export default function HomepageSettings() {
                       type="url"
                       value={homepageContent?.facebook_url || ''}
                       onChange={(e) => setHomepageContent(prev => ({ ...prev, facebook_url: e.target.value }))}
-                      onBlur={(e) => handleTextUpdate('facebook_url', e.target.value)}
                       placeholder="https://facebook.com/yourpage"
                     />
                   </div>
@@ -495,7 +648,6 @@ export default function HomepageSettings() {
                       type="url"
                       value={homepageContent?.instagram_url || ''}
                       onChange={(e) => setHomepageContent(prev => ({ ...prev, instagram_url: e.target.value }))}
-                      onBlur={(e) => handleTextUpdate('instagram_url', e.target.value)}
                       placeholder="https://instagram.com/yourprofile"
                     />
                   </div>
@@ -507,7 +659,6 @@ export default function HomepageSettings() {
                     id="company_description"
                     value={homepageContent?.company_description || ''}
                     onChange={(e) => setHomepageContent(prev => ({ ...prev, company_description: e.target.value }))}
-                    onBlur={(e) => handleTextUpdate('company_description', e.target.value)}
                     rows={3}
                     placeholder="Brief description for the footer section..."
                   />
@@ -516,6 +667,30 @@ export default function HomepageSettings() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Floating Save Button */}
+        {hasUnsavedChanges && (
+          <div className="fixed bottom-8 right-8 z-50">
+            <Button 
+              onClick={handleSaveChanges} 
+              disabled={isSaving}
+              size="lg"
+              className="shadow-2xl"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5 mr-2" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
