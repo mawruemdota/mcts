@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -251,6 +252,11 @@ export default function HomePage() {
             <div className="flex items-center gap-4">
               <a href="#services" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Services</a>
               <a href="#contact" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Contact</a>
+              <a href={createPageUrl('OrderTracking')}>
+                <Button variant="ghost" className="text-white hover:bg-white/10 hidden md:inline-flex">
+                  Track Order
+                </Button>
+              </a>
               <a href={createPageUrl('ClientOrderForm')}>
                 <Button className="bg-white text-[#2053E6] hover:bg-gray-100">
                   Order
@@ -646,6 +652,11 @@ export default function HomePage() {
                 <li>
                   <a href={createPageUrl('ClientOrderForm')} className="text-gray-400 hover:text-white transition-colors">
                     Place Your Order
+                  </a>
+                </li>
+                <li>
+                  <a href={createPageUrl('OrderTracking')} className="text-gray-400 hover:text-white transition-colors">
+                    Track Your Order
                   </a>
                 </li>
                 <li>
