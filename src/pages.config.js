@@ -31,6 +31,7 @@ import PurchaseOrderPrintView from './pages/PurchaseOrderPrintView';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import HomepageSettings from './pages/HomepageSettings';
+import OrderTracking from './pages/OrderTracking';
 import Layout from './Layout.jsx';
 
 
@@ -68,6 +69,7 @@ export const PAGES = {
     "Home": Home,
     "NotFound": NotFound,
     "HomepageSettings": HomepageSettings,
+    "OrderTracking": OrderTracking,
 }
 
 export const pagesConfig = {

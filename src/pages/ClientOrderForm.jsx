@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,17 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  ClipboardList,
   CheckCircle,
   AlertTriangle,
   X,
   Plus,
   Minus,
-  ShoppingCart,
   Search,
-  Tag } from
-"lucide-react";
+  Tag } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import OptimizedImage from "@/components/ui/OptimizedImage";
+import { createPageUrl } from "@/utils";
 
 export default function ClientOrderFormPage() {
   const [formData, setFormData] = useState({
@@ -41,17 +39,22 @@ export default function ClientOrderFormPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
+  const [homepageContent, setHomepageContent] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [items, codes] = await Promise.all([
-        base44.entities.PriceListItem.list(),
-        base44.entities.DiscountCode.filter({ is_active: true })]
-        );
+        const [items, codes, contentData] = await Promise.all([
+          base44.entities.PriceListItem.list(),
+          base44.entities.DiscountCode.filter({ is_active: true }),
+          base44.entities.HomePageContent.list()
+        ]);
         const sortedItems = items.sort((a, b) => a.item_name.localeCompare(b.item_name));
         setPricelist(sortedItems);
         setDiscountCodes(codes);
+        if (contentData.length > 0) {
+          setHomepageContent(contentData[0]);
+        }
       } catch (error) {
         console.error('Error loading data:', error);
         setError('Failed to load items. Please refresh the page.');
@@ -59,6 +62,8 @@ export default function ClientOrderFormPage() {
     };
     loadData();
   }, []);
+
+  const heroBackground = homepageContent?.hero_background_url || 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/6e687ce1e_bg.png';
 
   const applyPromoCode = () => {
     setPromoCodeError('');
@@ -72,7 +77,6 @@ export default function ClientOrderFormPage() {
     setAppliedCode(code);
     setPromoCodeError('');
 
-    // Update all items in cart with new pricing
     const updatedItems = formData.items.map((item) => {
       const pricelistItem = pricelist.find((p) => p.id === item.item_id);
       if (!pricelistItem) return item;
@@ -95,7 +99,6 @@ export default function ClientOrderFormPage() {
     setPromoCodeInput('');
     setPromoCodeError('');
 
-    // Reset all items to conservative pricing
     const updatedItems = formData.items.map((item) => {
       const pricelistItem = pricelist.find((p) => p.id === item.item_id);
       if (!pricelistItem) return item;
@@ -164,9 +167,8 @@ export default function ClientOrderFormPage() {
       case 'percentage_off':
         return subtotal * (appliedCode.value / 100);
       case 'fixed_amount':
-        return Math.min(appliedCode.value, subtotal); // Can't discount more than subtotal
+        return Math.min(appliedCode.value, subtotal);
       case 'aggressive_pricing':
-        // Aggressive pricing is already applied to item prices, so no additional discount
         return 0;
       default:
         return 0;
@@ -227,8 +229,16 @@ export default function ClientOrderFormPage() {
     const discount = calculateDiscount();
     const total = calculateTotal();
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full text-center shadow-lg bg-white">
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+        <OptimizedImage
+          src={heroBackground}
+          alt="Background"
+          className="absolute inset-0 w-full h-full"
+          objectFit="cover"
+        />
+        <div className="absolute inset-0 bg-[#2053E6] opacity-30"></div>
+        
+        <Card className="max-w-md w-full text-center shadow-2xl bg-white relative z-10">
           <CardHeader>
             <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-white" />
@@ -257,6 +267,18 @@ export default function ClientOrderFormPage() {
             <p className="text-xs text-gray-500 mt-4">
               Please keep your order number for reference. We'll reach out to you at {formData.client_phone} soon.
             </p>
+            <div className="mt-6 space-y-2">
+              <a href={createPageUrl('OrderTracking')} className="block">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  Track Your Order
+                </Button>
+              </a>
+              <a href={createPageUrl('Home')} className="block">
+                <Button variant="outline" className="w-full">
+                  Back to Homepage
+                </Button>
+              </a>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -276,16 +298,16 @@ export default function ClientOrderFormPage() {
   const itemServices = filteredItems.filter((item) => item.category === 'service');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShoppingCart className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">MCTS</h1>
-          <p className="text-gray-600">Place Your Order</p>
-        </div>
-        
+    <div className="min-h-screen relative overflow-hidden p-4">
+      <OptimizedImage
+        src={heroBackground}
+        alt="Background"
+        className="absolute inset-0 w-full h-full"
+        objectFit="cover"
+      />
+      <div className="absolute inset-0 bg-[#2053E6] opacity-30"></div>
+      
+      <div className="max-w-6xl mx-auto relative z-10">
         {error &&
         <Alert variant="destructive" className="mb-6 max-w-3xl mx-auto">
             <AlertTriangle className="h-4 w-4" />
@@ -498,7 +520,7 @@ export default function ClientOrderFormPage() {
                     }
                   </div>
 
-                  {/* Total - Enhanced Display */}
+                  {/* Total */}
                   <div className="pt-3 border-t-2 border-gray-200 space-y-2">
                     <div className="flex justify-between text-sm text-gray-600">
                       <span>Subtotal:</span>
