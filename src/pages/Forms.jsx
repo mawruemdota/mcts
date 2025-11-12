@@ -562,19 +562,17 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
         issue_date: newIssueDate,
         due_date: newDueDate,
         job_ids: editingInvoice?.job_ids || [],
-        manual_items: editingInvoice ? (editingInvoice.items?.filter(item => !item.job_id && item.description !== 'ID Cards')?.map(item => ({ 
+        manual_items: editingInvoice ? (editingInvoice.items?.filter(item => !item.job_id)?.map(item => ({ 
             description: item.description,
             quantity: item.quantity,
             price: item.price
         })) || []) : [],
-        selected_id_records: editingInvoice ? (editingInvoice.items?.some(item => item.description === 'ID Cards') ? [] : []) : [], // Reset if editing, or empty if new. Will be populated by existing ID records in useEffect.
         discount: editingInvoice?.discount || 0,
         notes: editingInvoice?.notes || ''
     });
     const [clients, setClients] = useState([]);
     const [pricelist, setPricelist] = useState([]);
     const [availableJobs, setAvailableJobs] = useState([]);
-    const [availableIdRecords, setAvailableIdRecords] = useState([]);
     const [selectedClient, setSelectedClient] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
@@ -599,7 +597,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
     const fetchClientSpecificItems = useCallback(async (clientId, currentInvoiceId = null) => {
         if (!clientId) {
             setAvailableJobs([]);
-            setAvailableIdRecords([]);
             return;
         }
         setIsLoading(true);
@@ -614,14 +611,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                 )
             );
             setAvailableJobs(unbilledJobs);
-
-            const clientPrintedIdRecords = await IDPrintRecord.filter({ client_id: clientId });
-            // Filter to include 'printed' records not yet invoiced, or records already linked to *this* invoice (for editing)
-            const billableIdRecords = clientPrintedIdRecords.filter(record =>
-                (record.status === 'printed' && !record.invoice_id) ||
-                (currentInvoiceId && record.invoice_id === currentInvoiceId)
-            );
-            setAvailableIdRecords(billableIdRecords);
 
         } catch (error) {
             console.error("Error fetching client data:", error);
@@ -641,12 +630,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
             if (editingInvoice) {
                 const client = clientData.find(c => c.id === editingInvoice.client_id);
                 setSelectedClient(client);
-
-                // Populate selected_id_records from editingInvoice if it had an ID Cards item
-                if (editingInvoice.items?.some(item => item.description === 'ID Cards')) {
-                    const linkedIdRecords = await IDPrintRecord.filter({ invoice_id: editingInvoice.id });
-                    setFormData(prev => ({ ...prev, selected_id_records: linkedIdRecords.map(rec => rec.id) }));
-                }
             } else {
                 const newInvoiceNumber = await getNextInvoiceNumberForReset();
                 setFormData(prev => ({
@@ -663,7 +646,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
             fetchClientSpecificItems(selectedClient.id, editingInvoice?.id);
         } else {
             setAvailableJobs([]);
-            setAvailableIdRecords([]);
         }
     }, [selectedClient, fetchClientSpecificItems, editingInvoice]);
 
@@ -676,8 +658,7 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
             client_name: client?.client_name || '',
             client_email: client?.email || '',
             job_ids: [],
-            manual_items: editingInvoice ? prev.manual_items : [],
-            selected_id_records: []
+            manual_items: editingInvoice ? prev.manual_items : []
         }));
     };
 
@@ -686,14 +667,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
             setFormData(prev => ({ ...prev, job_ids: [...prev.job_ids, jobId] }));
         } else {
             setFormData(prev => ({ ...prev, job_ids: prev.job_ids.filter(id => id !== jobId) }));
-        }
-    };
-
-    const handleIdRecordSelection = (recordId, checked) => {
-        if (checked) {
-            setFormData(prev => ({ ...prev, selected_id_records: [...prev.selected_id_records, recordId] }));
-        } else {
-            setFormData(prev => ({ ...prev, selected_id_records: prev.selected_id_records.filter(id => id !== recordId) }));
         }
     };
 
@@ -738,12 +711,7 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
             return sum + (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 0);
         }, 0);
 
-        const selectedIdRecords = availableIdRecords.filter(record => 
-            formData.selected_id_records.includes(record.id)
-        );
-        const idTotal = selectedIdRecords.reduce((sum, record) => sum + (record.unit_price || 0), 0);
-
-        const subtotal = jobsTotal + manualTotal + idTotal;
+        const subtotal = jobsTotal + manualTotal;
         const discount = parseFloat(formData.discount) || 0;
         return Math.max(0, subtotal - discount);
     };
@@ -757,7 +725,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
         }
 
         const selectedJobsInCurrentSubmission = availableJobs.filter(job => formData.job_ids.includes(job.id));
-        const selectedIdRecordsInCurrentSubmission = availableIdRecords.filter(record => formData.selected_id_records.includes(record.id));
 
         const items = [];
 
@@ -776,18 +743,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
             });
         });
 
-        // Add selected ID records with correct quantity
-        if (selectedIdRecordsInCurrentSubmission.length > 0) {
-            const totalIdPrice = selectedIdRecordsInCurrentSubmission.reduce((sum, record) => sum + (parseFloat(record.unit_price) || 0), 0);
-            const totalIdQuantity = selectedIdRecordsInCurrentSubmission.length;
-            
-            items.push({
-                description: 'ID Cards',
-                quantity: totalIdQuantity,
-                price: totalIdQuantity > 0 ? totalIdPrice / totalIdQuantity : 0
-            });
-        }
-
         // Add manual items
         formData.manual_items.forEach(item => {
             if (item.description.trim()) {
@@ -801,7 +756,7 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
 
         // Check if there are any items at all
         if (items.length === 0) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Please add at least one item, task, or ID record.' });
+            toast({ variant: 'destructive', title: 'Error', description: 'Please add at least one item or task.' });
             return;
         }
 
@@ -838,30 +793,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                 await Invoice.update(editingInvoice.id, invoiceData);
                 savedInvoice = { ...editingInvoice, ...invoiceData };
                 toast({ title: 'Success', description: 'Invoice updated successfully.' });
-
-                // IDPrintRecord management during edit
-                const previouslyInvoicedIds = availableIdRecords
-                    .filter(rec => rec.invoice_id === editingInvoice.id)
-                    .map(rec => rec.id);
-
-                // Revert status for IDs that were linked but are no longer selected
-                const idsToDeInvoice = previouslyInvoicedIds.filter(id => !formData.selected_id_records.includes(id));
-                for (const id of idsToDeInvoice) {
-                    await IDPrintRecord.update(id, { status: 'printed', invoice_id: null });
-                }
-
-                // Update newly selected IDs (or those whose status was 'printed' and now linked)
-                const idsToInvoice = formData.selected_id_records.filter(id => !previouslyInvoicedIds.includes(id));
-                for (const id of idsToInvoice) {
-                     const currentRecord = await IDPrintRecord.get(id); // Re-fetch to be safe
-                     if (currentRecord && currentRecord.status === 'printed') { // Only if they are printed and not already invoiced to this invoice
-                         await IDPrintRecord.update(id, { status: 'invoiced', invoice_id: savedInvoice.id });
-                     }
-                }
-                // For jobs, we don't automatically revert status on unselection during edit.
-                // The previous code didn't either and it implies job completion for billing.
-                // If a job is unselected from an invoice, its status remains 'completed'.
-
             } else { // Creating a new invoice
                 savedInvoice = await Invoice.create(invoiceData);
                 toast({ title: 'Success', description: 'Invoice created successfully.' });
@@ -872,17 +803,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                         status: 'completed',
                         completion_date: new Date().toISOString(),
                     });
-                }
-
-                // Update ID records to 'invoiced' status (only for newly created invoices)
-                for (const record of selectedIdRecordsInCurrentSubmission) {
-                    const currentRecord = await IDPrintRecord.get(record.id);
-                    if (currentRecord && currentRecord.status === 'printed' && !currentRecord.invoice_id) { // Only if they are printed and not already linked
-                        await IDPrintRecord.update(record.id, {
-                            status: 'invoiced',
-                            invoice_id: savedInvoice.id,
-                        });
-                    }
                 }
                 
                 // Open invoice in new tab only for new invoices
@@ -902,7 +822,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                     due_date: newDueDate,
                     job_ids: [],
                     manual_items: [],
-                    selected_id_records: [],
                     discount: 0,
                     notes: ''
                 });
@@ -963,7 +882,7 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
             {selectedClient && (
                 <>
                     {isLoading ? (
-                        <p className="text-muted-foreground">Loading tasks and ID records...</p>
+                        <p className="text-muted-foreground">Loading tasks...</p>
                     ) : (
                         <>
                             {availableJobs.length > 0 && (
@@ -1002,44 +921,6 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                                                             (Completed: {format(new Date(job.completion_date), 'MMM d')})
                                                         </span>
                                                     )}
-                                                </Label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {availableIdRecords.length > 0 && (
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <Label>ID Cards Ready for Billing</Label>
-                                        {availableIdRecords.length > 1 && (
-                                            <div className="flex items-center space-x-2 text-sm">
-                                                <Checkbox
-                                                    id="select-all-ids"
-                                                    checked={formData.selected_id_records.length === availableIdRecords.length}
-                                                    onCheckedChange={(checked) => {
-                                                        if (checked) {
-                                                            setFormData(prev => ({ ...prev, selected_id_records: availableIdRecords.map(r => r.id) }));
-                                                        } else {
-                                                            setFormData(prev => ({ ...prev, selected_id_records: [] }));
-                                                        }
-                                                    }}
-                                                />
-                                                <Label htmlFor={`select-all-ids`} className="cursor-pointer">Select All</Label>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="border border-border rounded-md p-4 space-y-2 max-h-32 overflow-y-auto">
-                                        {availableIdRecords.map(record => (
-                                            <div key={record.id} className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id={`id-record-${record.id}`}
-                                                    checked={formData.selected_id_records.includes(record.id)}
-                                                    onCheckedChange={(checked) => handleIdRecordSelection(record.id, checked)}
-                                                />
-                                                <Label htmlFor={`id-record-${record.id}`} className="flex-1 cursor-pointer text-foreground">
-                                                    {record.employee_name} ({record.position}) - ₱{(record.unit_price || 0).toFixed(2)}
                                                 </Label>
                                             </div>
                                         ))}
@@ -3018,7 +2899,14 @@ export default function FormsPage() {
     const [showEditInvoiceModal, setShowEditInvoiceModal] = useState(false); 
 
     const [invoiceFilter, setInvoiceFilter] = useState(['unpaid', 'billed']); 
-    const [idFilters, setIdFilters] = useState({ searchTerm: '', client: 'all', status: 'all', invoice: 'all' });
+    const [idFilters, setIdFilters] = useState({ 
+        searchTerm: '', 
+        client: 'all', 
+        status: 'all', 
+        invoice: 'all',
+        dateFrom: '',
+        dateTo: ''
+    });
     const { toast } = useToast();
     const [invoicesForFilter, setInvoicesForFilter] = useState([]);
 
@@ -3179,7 +3067,21 @@ export default function FormsPage() {
         const searchMatch = record.employee_name.toLowerCase().includes(idFilters.searchTerm.toLowerCase()) ||
                             (record.id_number || '').toLowerCase().includes(idFilters.searchTerm.toLowerCase()) ||
                             record.client_name.toLowerCase().includes(idFilters.searchTerm.toLowerCase());
-        return clientMatch && statusMatch && searchMatch && invoiceMatch;
+        
+        // Date filtering
+        let dateMatch = true;
+        if (idFilters.dateFrom) {
+            const fromDate = new Date(idFilters.dateFrom);
+            fromDate.setHours(0, 0, 0, 0);
+            dateMatch = dateMatch && new Date(record.print_date) >= fromDate;
+        }
+        if (idFilters.dateTo) {
+            const toDate = new Date(idFilters.dateTo);
+            toDate.setHours(23, 59, 59, 999);
+            dateMatch = dateMatch && new Date(record.print_date) <= toDate;
+        }
+        
+        return clientMatch && statusMatch && searchMatch && invoiceMatch && dateMatch;
     });
 
     const getIdStatusBadge = (record) => {
@@ -3551,7 +3453,7 @@ export default function FormsPage() {
                                         </Button>
                                     </div>
                                 </div>
-                                <div className="grid sm:grid-cols-2 lg:grid-cols-4 items-center gap-2 pt-4">
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-6 items-center gap-2 pt-4">
                                     <div className="relative flex-1 sm:col-span-2 lg:col-span-1">
                                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -3597,6 +3499,24 @@ export default function FormsPage() {
                                             <SelectItem value="paid">Paid</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    <div className="space-y-2">
+                                        <Input
+                                            type="date"
+                                            placeholder="From Date"
+                                            value={idFilters.dateFrom}
+                                            onChange={(e) => setIdFilters(prev => ({...prev, dateFrom: e.target.value}))}
+                                            className="text-foreground"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Input
+                                            type="date"
+                                            placeholder="To Date"
+                                            value={idFilters.dateTo}
+                                            onChange={(e) => setIdFilters(prev => ({...prev, dateTo: e.target.value}))}
+                                            className="text-foreground"
+                                        />
+                                    </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
