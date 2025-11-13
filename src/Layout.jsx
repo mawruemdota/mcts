@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -40,6 +39,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Toaster } from "@/components/ui/toaster";
 import NotificationsPanel from "@/components/dashboard/NotificationsPanel";
 import ProfileSettingsModal from "@/components/auth/ProfileSettingsModal";
 import FloatingCalculator from "@/components/ui/FloatingCalculator";
@@ -133,7 +133,12 @@ export default function Layout({ children, currentPageName }) {
   };
 
   if (isPublicPage) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        <Toaster />
+      </>
+    );
   }
 
   const getNavigationItems = () => {
@@ -566,6 +571,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </div>
 
+      <Toaster />
       {showProfileSettings && <ProfileSettingsModal user={user} onClose={() => { setShowProfileSettings(false); loadUser(); }} />}
       {showCalculator && <FloatingCalculator onClose={() => setShowCalculator(false)} />}
       {showQuickReminder && <QuickReminderModal isOpen={showQuickReminder} onClose={() => setShowQuickReminder(false)} user={user} />}
