@@ -25,7 +25,9 @@ import {
   CreditCard,
   FileText,
   Palette,
-  Sparkles
+  Sparkles,
+  Video,
+  ExternalLink
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -95,6 +97,8 @@ export default function HomePage() {
   const contactLocation = homepageContent?.contact_location || 'Dasmarinas, Cavite';
   const facebookUrl = homepageContent?.facebook_url || 'https://facebook.com/marasigancts';
   const instagramUrl = homepageContent?.instagram_url || 'https://www.instagram.com/marasigancts';
+  const tiktokUrl = homepageContent?.tiktok_url || '';
+  const customSocialLinks = homepageContent?.custom_social_links || [];
   const companyDescription = homepageContent?.company_description || 'Professional printing and design solutions for businesses of all sizes.';
 
   const homepageServices = homepageContent?.homepage_services || [];
@@ -669,25 +673,54 @@ export default function HomePage() {
 
                   <div>
                     <p className="text-sm text-gray-500 mb-3">Follow Us</p>
-                    <div className="flex items-center gap-3">
-                      <a
-                        href={facebookUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                      >
-                        <Facebook className="w-5 h-5 text-blue-600" />
-                        <span className="text-sm font-medium text-gray-900">Facebook</span>
-                      </a>
-                      <a
-                        href={instagramUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors"
-                      >
-                        <Instagram className="w-5 h-5 text-pink-600" />
-                        <span className="text-sm font-medium text-gray-900">Instagram</span>
-                      </a>
+                    <div className="flex flex-wrap items-center gap-3">
+                      {facebookUrl && (
+                        <a
+                          href={facebookUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                        >
+                          <Facebook className="w-5 h-5 text-blue-600" />
+                          <span className="text-sm font-medium text-gray-900">Facebook</span>
+                        </a>
+                      )}
+                      {instagramUrl && (
+                        <a
+                          href={instagramUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors"
+                        >
+                          <Instagram className="w-5 h-5 text-pink-600" />
+                          <span className="text-sm font-medium text-gray-900">Instagram</span>
+                        </a>
+                      )}
+                      {tiktokUrl && (
+                        <a
+                          href={tiktokUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors"
+                        >
+                          <Video className="w-5 h-5 text-white" />
+                          <span className="text-sm font-medium text-white">TikTok</span>
+                        </a>
+                      )}
+                      {customSocialLinks.map((link, idx) => (
+                        link.name && link.url && (
+                          <a
+                            key={idx}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                          >
+                            <ExternalLink className="w-5 h-5 text-gray-600" />
+                            <span className="text-sm font-medium text-gray-900">{link.name}</span>
+                          </a>
+                        )
+                      ))}
                     </div>
                   </div>
                 </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Loader2, Trash2, Plus, Image as ImageIcon, ArrowUp, ArrowDown, Phone, Mail, MapPin, Facebook, Instagram, Save, RefreshCw, ExternalLink } from 'lucide-react';
+import { Upload, Loader2, Trash2, Plus, Image as ImageIcon, ArrowUp, ArrowDown, Phone, Mail, MapPin, Facebook, Instagram, Save, RefreshCw, ExternalLink, Video, Link2 } from 'lucide-react';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -108,6 +107,10 @@ export default function HomepageSettings() {
         if (!content.homepage_services || content.homepage_services.length === 0) {
           content.homepage_services = defaultServices;
         }
+        // Ensure custom_social_links exists
+        if (!content.custom_social_links) {
+          content.custom_social_links = [];
+        }
         setHomepageContent(content);
         setOriginalHomepageContent(content);
       } else {
@@ -126,6 +129,8 @@ export default function HomepageSettings() {
           contact_location: 'Dasmarinas, Cavite',
           facebook_url: 'https://facebook.com/marasigancts',
           instagram_url: 'https://www.instagram.com/marasigancts',
+          tiktok_url: '',
+          custom_social_links: [],
           company_description: 'Professional printing and design solutions for businesses of all sizes.'
         });
         setHomepageContent(defaultContent);
@@ -190,6 +195,25 @@ export default function HomepageSettings() {
     const newServices = [...homepageContent.homepage_services];
     newServices[index][field] = value;
     setHomepageContent(prev => ({ ...prev, homepage_services: newServices }));
+  };
+
+  const addCustomSocialLink = () => {
+    const currentLinks = homepageContent.custom_social_links || [];
+    setHomepageContent(prev => ({
+      ...prev,
+      custom_social_links: [...currentLinks, { name: '', url: '' }]
+    }));
+  };
+
+  const updateCustomSocialLink = (index, field, value) => {
+    const newLinks = [...(homepageContent.custom_social_links || [])];
+    newLinks[index][field] = value;
+    setHomepageContent(prev => ({ ...prev, custom_social_links: newLinks }));
+  };
+
+  const removeCustomSocialLink = (index) => {
+    const newLinks = (homepageContent.custom_social_links || []).filter((_, i) => i !== index);
+    setHomepageContent(prev => ({ ...prev, custom_social_links: newLinks }));
   };
 
   const handleSaveChanges = async () => {
@@ -779,11 +803,11 @@ export default function HomepageSettings() {
                               </div>
                               <div className="flex items-center space-x-2">
                                 <Checkbox
-                                  id={`active-client-${client.id}`}
+                                  id={`active-${client.id}`}
                                   checked={client.is_active}
                                   onCheckedChange={(checked) => updateNotableClient(client.id, 'is_active', checked)}
                                 />
-                                <Label htmlFor={`active-client-${client.id}`} className="cursor-pointer">
+                                <Label htmlFor={`active-${client.id}`} className="cursor-pointer">
                                   Display on homepage
                                 </Label>
                               </div>
@@ -1000,6 +1024,73 @@ export default function HomepageSettings() {
                       placeholder="https://instagram.com/yourprofile"
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tiktok_url" className="flex items-center gap-2">
+                      <Video className="w-4 h-4" />
+                      TikTok Profile URL
+                    </Label>
+                    <Input
+                      id="tiktok_url"
+                      type="url"
+                      value={homepageContent?.tiktok_url || ''}
+                      onChange={(e) => setHomepageContent(prev => ({ ...prev, tiktok_url: e.target.value }))}
+                      placeholder="https://tiktok.com/@yourprofile"
+                    />
+                  </div>
+                </div>
+
+                <div className="border-t pt-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-lg">Custom Links</h3>
+                      <p className="text-sm text-muted-foreground">Add custom social media or other links</p>
+                    </div>
+                    <Button onClick={addCustomSocialLink} variant="outline" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Link
+                    </Button>
+                  </div>
+
+                  {(homepageContent?.custom_social_links || []).length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground bg-secondary/30 rounded-lg">
+                      <Link2 className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No custom links yet. Click "Add Link" to create one.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {(homepageContent.custom_social_links || []).map((link, index) => (
+                        <div key={index} className="grid grid-cols-12 gap-3 items-end p-3 bg-secondary/30 rounded-lg">
+                          <div className="col-span-5 space-y-2">
+                            <Label className="text-xs">Link Name</Label>
+                            <Input
+                              value={link.name || ''}
+                              onChange={(e) => updateCustomSocialLink(index, 'name', e.target.value)}
+                              placeholder="e.g., LinkedIn, WhatsApp"
+                            />
+                          </div>
+                          <div className="col-span-6 space-y-2">
+                            <Label className="text-xs">URL</Label>
+                            <Input
+                              type="url"
+                              value={link.url || ''}
+                              onChange={(e) => updateCustomSocialLink(index, 'url', e.target.value)}
+                              placeholder="https://..."
+                            />
+                          </div>
+                          <div className="col-span-1 flex items-end">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeCustomSocialLink(index)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-t pt-6 space-y-2">
