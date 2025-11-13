@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,9 @@ import {
   Plus,
   Minus,
   Search,
-  Tag } from "lucide-react";
+  Tag,
+  Shield
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 import { createPageUrl } from "@/utils";
@@ -41,6 +42,35 @@ export default function ClientOrderFormPage() {
   const [error, setError] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
   const [homepageContent, setHomepageContent] = useState(null);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [recaptchaError, setRecaptchaError] = useState('');
+  const recaptchaRef = useRef(null);
+
+  // Load Google reCAPTCHA script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://www.google.com/recaptcha/api.js';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    // Make callback available globally
+    window.onRecaptchaSuccess = (token) => {
+      setRecaptchaToken(token);
+      setRecaptchaError('');
+    };
+
+    window.onRecaptchaExpired = () => {
+      setRecaptchaToken(null);
+      setRecaptchaError('CAPTCHA expired. Please verify again.');
+    };
+
+    return () => {
+      document.body.removeChild(script);
+      delete window.onRecaptchaSuccess;
+      delete window.onRecaptchaExpired;
+    };
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -193,8 +223,15 @@ export default function ClientOrderFormPage() {
       return;
     }
 
+    if (!recaptchaToken) {
+      setRecaptchaError("Please complete the security verification.");
+      setError("Please complete the security verification to submit your order.");
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
+    setRecaptchaError('');
 
     try {
       const year = new Date().getFullYear();
@@ -220,6 +257,11 @@ export default function ClientOrderFormPage() {
     } catch (err) {
       setError("Failed to submit order. Please try again or contact us directly.");
       console.error('Order submission error:', err);
+      // Reset reCAPTCHA on error
+      if (window.grecaptcha) {
+        window.grecaptcha.reset();
+        setRecaptchaToken(null);
+      }
     }
 
     setIsSubmitting(false);
@@ -300,6 +342,9 @@ export default function ClientOrderFormPage() {
 
   return (
     <div className="relative min-h-screen">
+      {/* Load reCAPTCHA Script */}
+      <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+      
       {/* Fixed Background */}
       <OptimizedImage
         src={heroBackground}
@@ -610,13 +655,52 @@ export default function ClientOrderFormPage() {
                       </div>
                     </div>
 
+                    {/* Security Verification */}
+                    <div className="pt-4 border-t space-y-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                        <h3 className="font-semibold text-gray-900">Security Verification</h3>
+                      </div>
+                      <div className="flex justify-center">
+                        <div 
+                          className="g-recaptcha" 
+                          data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+                          data-callback="onRecaptchaSuccess"
+                          data-expired-callback="onRecaptchaExpired"
+                          ref={recaptchaRef}
+                        ></div>
+                      </div>
+                      {recaptchaError && (
+                        <p className="text-xs text-red-500 flex items-center gap-1 justify-center">
+                          <AlertTriangle className="w-3 h-3" />
+                          {recaptchaError}
+                        </p>
+                      )}
+                      {recaptchaToken && (
+                        <div className="flex items-center justify-center gap-2 text-green-600 text-sm">
+                          <CheckCircle className="w-4 h-4" />
+                          <span>Verified successfully</span>
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-500 text-center">
+                        This helps us prevent automated spam orders
+                      </p>
+                    </div>
+
                     <Button
                       type="submit"
-                      disabled={isSubmitting || formData.items.length === 0}
-                      className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700">
+                      disabled={isSubmitting || formData.items.length === 0 || !recaptchaToken}
+                      className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
 
                       {isSubmitting ? "Submitting Order..." : "Submit Order"}
                     </Button>
+                    
+                    {!recaptchaToken && formData.items.length > 0 && (
+                      <p className="text-xs text-amber-600 text-center flex items-center justify-center gap-1">
+                        <AlertTriangle className="w-3 h-3" />
+                        Please complete the security verification above
+                      </p>
+                    )}
                   </form>
                 </CardContent>
               </Card>
