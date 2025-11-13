@@ -16,7 +16,8 @@ import {
   Minus,
   Search,
   Tag,
-  Shield
+  Shield,
+  Home
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import OptimizedImage from "@/components/ui/OptimizedImage";
@@ -272,16 +273,8 @@ export default function ClientOrderFormPage() {
     const discount = calculateDiscount();
     const total = calculateTotal();
     return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
-        <OptimizedImage
-          src={heroBackground}
-          alt="Background"
-          className="absolute inset-0 w-full h-full"
-          objectFit="cover"
-        />
-        <div className="absolute inset-0 bg-[#2053E6] opacity-30"></div>
-        
-        <Card className="max-w-md w-full text-center shadow-2xl bg-white relative z-10">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full text-center shadow-2xl bg-white">
           <CardHeader>
             <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-white" />
@@ -341,24 +334,31 @@ export default function ClientOrderFormPage() {
   const itemServices = filteredItems.filter((item) => item.category === 'service');
 
   return (
-    <div className="relative min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Load reCAPTCHA Script */}
       <script src="https://www.google.com/recaptcha/api.js" async defer></script>
       
-      {/* Fixed Background */}
-      <OptimizedImage
-        src={heroBackground}
-        alt="Background"
-        className="fixed inset-0 w-full h-full"
-        objectFit="cover"
-      />
-      <div className="fixed inset-0 bg-[#2053E6] opacity-30"></div>
+      {/* Header with Back Button */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Place Your Order</h1>
+            <p className="text-sm text-gray-600">Select items and submit your order request</p>
+          </div>
+          <a href={createPageUrl('Home')}>
+            <Button variant="outline" className="gap-2">
+              <Home className="w-4 h-4" />
+              Back to Homepage
+            </Button>
+          </a>
+        </div>
+      </div>
       
-      {/* Scrollable Content */}
-      <div className="relative z-10 min-h-screen overflow-auto p-4">
+      {/* Main Content */}
+      <div className="p-4">
         <div className="max-w-6xl mx-auto">
           {error &&
-          <Alert variant="destructive" className="mb-6 max-w-3xl mx-auto">
+          <Alert variant="destructive" className="mb-6">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -463,7 +463,7 @@ export default function ClientOrderFormPage() {
 
             {/* Right side - Order Summary & Contact Form */}
             <div className="space-y-4">
-              <Card className="shadow-lg border-none bg-white text-gray-800 sticky top-4">
+              <Card className="shadow-lg border-none bg-white text-gray-800 sticky top-24">
                 <CardHeader>
                   <CardTitle className="text-gray-900">Your Order</CardTitle>
                 </CardHeader>
