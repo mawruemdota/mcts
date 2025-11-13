@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { createPageUrl } from '@/utils';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import {
@@ -33,15 +33,17 @@ export default function HomePage() {
   const [selectedService, setSelectedService] = useState(null);
   const [homepageContent, setHomepageContent] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [notableClients, setNotableClients] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const [contentData, galleryData] = await Promise.all([
+        const [contentData, galleryData, clientsData] = await Promise.all([
           base44.entities.HomePageContent.list(),
-          base44.entities.GalleryImage.filter({ is_active: true })
+          base44.entities.GalleryImage.filter({ is_active: true }),
+          base44.entities.NotableClient.filter({ is_active: true })
         ]);
         
         if (contentData.length > 0) {
@@ -50,6 +52,9 @@ export default function HomePage() {
         
         const sortedGallery = galleryData.sort((a, b) => a.order - b.order);
         setGalleryImages(sortedGallery);
+        
+        const sortedClients = clientsData.sort((a, b) => a.order - b.order);
+        setNotableClients(sortedClients);
       } catch (error) {
         console.error('Error loading content:', error);
       }
@@ -245,6 +250,7 @@ export default function HomePage() {
                 src={mainLogo}
                 alt="MCTS Logo"
                 className="h-14 w-auto"
+                objectFit="contain"
                 priority={true}
               />
               <h1 className="text-2xl font-bold text-white">MCTS</h1>
@@ -366,6 +372,74 @@ export default function HomePage() {
                   </div>
                 </>
               )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Notable Clients Section */}
+      {notableClients.length > 0 && (
+        <section className="py-16 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+          <div className="absolute inset-0 opacity-5">
+            <OptimizedImage
+              src={patternBackground}
+              alt="Pattern"
+              className="w-full h-full"
+              objectFit="repeat"
+            />
+          </div>
+          
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-12">
+              <Badge className="mb-4 bg-indigo-100 text-indigo-700 border-indigo-200">
+                Trusted By
+              </Badge>
+              <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                Our Notable Clients
+              </h3>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Proud to serve businesses of all sizes with quality and excellence
+              </p>
+            </div>
+
+            <div className="relative">
+              <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <TooltipProvider>
+                  <div className="flex gap-6 px-4" style={{ minWidth: 'min-content' }}>
+                    {notableClients.map((client) => (
+                      <Tooltip key={client.id}>
+                        <TooltipTrigger asChild>
+                          <a
+                            href={client.website_url || '#'}
+                            target={client.website_url ? '_blank' : '_self'}
+                            rel={client.website_url ? 'noopener noreferrer' : ''}
+                            className={`flex-shrink-0 w-48 h-32 bg-white rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-300 flex items-center justify-center p-6 group ${
+                              client.website_url ? 'cursor-pointer' : 'cursor-default'
+                            }`}
+                          >
+                            <OptimizedImage
+                              src={client.logo_url}
+                              alt={client.client_name}
+                              className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
+                              objectFit="contain"
+                            />
+                          </a>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="font-semibold">{client.client_name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                </TooltipProvider>
+              </div>
+              
+              {/* Scroll Hint */}
+              <div className="flex justify-center mt-4 gap-2 text-sm text-gray-500">
+                <ChevronLeft className="w-4 h-4" />
+                <span>Scroll to see more</span>
+                <ChevronRight className="w-4 h-4" />
+              </div>
             </div>
           </div>
         </section>

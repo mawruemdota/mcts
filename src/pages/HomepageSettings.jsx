@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Loader2, Trash2, Plus, Image as ImageIcon, ArrowUp, ArrowDown, Phone, Mail, MapPin, Facebook, Instagram, Save, RefreshCw } from 'lucide-react';
+import { Upload, Loader2, Trash2, Plus, Image as ImageIcon, ArrowUp, ArrowDown, Phone, Mail, MapPin, Facebook, Instagram, Save, RefreshCw, ExternalLink } from 'lucide-react';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -19,6 +19,7 @@ export default function HomepageSettings() {
   const [homepageContent, setHomepageContent] = useState(null);
   const [originalHomepageContent, setOriginalHomepageContent] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [notableClients, setNotableClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingField, setUploadingField] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -95,9 +96,10 @@ export default function HomepageSettings() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [contentData, galleryData] = await Promise.all([
+      const [contentData, galleryData, clientsData] = await Promise.all([
         base44.entities.HomePageContent.list(),
-        base44.entities.GalleryImage.list()
+        base44.entities.GalleryImage.list(),
+        base44.entities.NotableClient.list()
       ]);
       
       if (contentData.length > 0) {
@@ -131,6 +133,7 @@ export default function HomepageSettings() {
       }
       
       setGalleryImages(galleryData.sort((a, b) => a.order - b.order));
+      setNotableClients(clientsData.sort((a, b) => a.order - b.order));
     } catch (error) {
       console.error('Error loading data:', error);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to load homepage settings.' });
@@ -279,6 +282,78 @@ export default function HomepageSettings() {
     }
   };
 
+  // Notable Clients Functions
+  const addNotableClient = async () => {
+    try {
+      const newClient = await base44.entities.NotableClient.create({
+        client_name: '',
+        logo_url: '',
+        website_url: '',
+        order: notableClients.length,
+        is_active: true
+      });
+      setNotableClients([...notableClients, newClient]);
+      toast({ title: 'Success', description: 'New client slot added. Upload a logo to complete.' });
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to add client.' });
+    }
+  };
+
+  const uploadClientLogo = async (clientId, file) => {
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.NotableClient.update(clientId, { logo_url: file_url });
+      setNotableClients(prev => prev.map(client => client.id === clientId ? { ...client, logo_url: file_url } : client));
+      toast({ title: 'Success', description: 'Client logo uploaded!' });
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to upload logo.' });
+    }
+  };
+
+  const updateNotableClient = async (clientId, field, value) => {
+    try {
+      await base44.entities.NotableClient.update(clientId, { [field]: value });
+      setNotableClients(prev => prev.map(client => client.id === clientId ? { ...client, [field]: value } : client));
+    } catch (error) {
+      console.error('Update error:', error);
+    }
+  };
+
+  const deleteNotableClient = async (clientId) => {
+    if (!window.confirm('Are you sure you want to delete this client?')) return;
+    
+    try {
+      await base44.entities.NotableClient.delete(clientId);
+      setNotableClients(prev => prev.filter(client => client.id !== clientId));
+      toast({ title: 'Success', description: 'Client deleted.' });
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete client.' });
+    }
+  };
+
+  const moveNotableClient = async (clientId, direction) => {
+    const currentIndex = notableClients.findIndex(client => client.id === clientId);
+    if (
+      (direction === 'up' && currentIndex === 0) || 
+      (direction === 'down' && currentIndex === notableClients.length - 1)
+    ) return;
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const newClients = [...notableClients];
+    [newClients[currentIndex], newClients[newIndex]] = [newClients[newIndex], newClients[currentIndex]];
+
+    try {
+      await Promise.all(
+        newClients.map((client, idx) => 
+          base44.entities.NotableClient.update(client.id, { order: idx })
+        )
+      );
+      setNotableClients(newClients.map((client, idx) => ({ ...client, order: idx })));
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to reorder clients.' });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -331,6 +406,7 @@ export default function HomepageSettings() {
           <TabsList>
             <TabsTrigger value="general">General Settings</TabsTrigger>
             <TabsTrigger value="services">Services (6 Cards)</TabsTrigger>
+            <TabsTrigger value="clients">Notable Clients</TabsTrigger>
             <TabsTrigger value="gallery">Gallery Carousel</TabsTrigger>
             <TabsTrigger value="contact">Contact Information</TabsTrigger>
           </TabsList>
@@ -618,6 +694,130 @@ export default function HomepageSettings() {
                       </CardContent>
                     </Card>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="clients" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Notable Clients</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Add client logos that will be displayed on the homepage
+                  </p>
+                </div>
+                <Button onClick={addNotableClient}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Client
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {notableClients.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <ImageIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No clients added yet. Click "Add Client" to get started.</p>
+                    </div>
+                  ) : (
+                    notableClients.map((client, index) => (
+                      <Card key={client.id}>
+                        <CardContent className="p-4">
+                          <div className="grid grid-cols-12 gap-4 items-start">
+                            <div className="col-span-2">
+                              {client.logo_url ? (
+                                <OptimizedImage
+                                  src={client.logo_url}
+                                  alt={client.client_name || 'Client logo'}
+                                  className="w-full h-24 rounded-lg border-2 border-gray-200"
+                                  objectFit="contain"
+                                />
+                              ) : (
+                                <div className="w-full h-24 bg-secondary rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                                </div>
+                              )}
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) uploadClientLogo(client.id, file);
+                                }}
+                                className="mt-2"
+                              />
+                            </div>
+                            <div className="col-span-8 space-y-3">
+                              <div>
+                                <Label>Client Name *</Label>
+                                <Input
+                                  value={client.client_name || ''}
+                                  onChange={(e) => updateNotableClient(client.id, 'client_name', e.target.value)}
+                                  placeholder="Company name..."
+                                />
+                              </div>
+                              <div>
+                                <Label>Website URL (Optional)</Label>
+                                <div className="flex gap-2">
+                                  <Input
+                                    type="url"
+                                    value={client.website_url || ''}
+                                    onChange={(e) => updateNotableClient(client.id, 'website_url', e.target.value)}
+                                    placeholder="https://example.com"
+                                  />
+                                  {client.website_url && (
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => window.open(client.website_url, '_blank')}
+                                    >
+                                      <ExternalLink className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`active-client-${client.id}`}
+                                  checked={client.is_active}
+                                  onCheckedChange={(checked) => updateNotableClient(client.id, 'is_active', checked)}
+                                />
+                                <Label htmlFor={`active-client-${client.id}`} className="cursor-pointer">
+                                  Display on homepage
+                                </Label>
+                              </div>
+                            </div>
+                            <div className="col-span-2 flex flex-col gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => moveNotableClient(client.id, 'up')}
+                                disabled={index === 0}
+                              >
+                                <ArrowUp className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => moveNotableClient(client.id, 'down')}
+                                disabled={index === notableClients.length - 1}
+                              >
+                                <ArrowDown className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => deleteNotableClient(client.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
