@@ -32,6 +32,8 @@ import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import HomepageSettings from './pages/HomepageSettings';
 import OrderTracking from './pages/OrderTracking';
+import ARStickerManager from './pages/ARStickerManager';
+import ARViewer from './pages/ARViewer';
 import Layout from './Layout.jsx';
 
 
@@ -70,6 +72,8 @@ export const PAGES = {
     "NotFound": NotFound,
     "HomepageSettings": HomepageSettings,
     "OrderTracking": OrderTracking,
+    "ARStickerManager": ARStickerManager,
+    "ARViewer": ARViewer,
 }
 
 export const pagesConfig = {
