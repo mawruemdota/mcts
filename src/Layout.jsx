@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -68,6 +69,7 @@ export default function Layout({ children, currentPageName }) {
                        location.pathname.startsWith(createPageUrl("ClientQuote")) || 
                        location.pathname.startsWith(createPageUrl("PublicContentView")) ||
                        location.pathname.startsWith(createPageUrl("ARView")) ||
+                       location.pathname.startsWith(createPageUrl("ARViewer")) ||
                        location.pathname.startsWith(createPageUrl("ReimbursementPrintView")) ||
                        location.pathname.startsWith(createPageUrl("ClientOrderForm")) ||
                        location.pathname.startsWith(createPageUrl("OrderTracking"));

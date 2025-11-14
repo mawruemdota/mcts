@@ -3,9 +3,12 @@ import { User, Client } from '@/entities/all';
 import { Palette } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CaptionMaker from "../components/creatives/CaptionMaker";
-import WebARManager from "../components/creatives/WebARManager";
 import SocialMediaExecutions from "../components/creatives/SocialMediaExecutions";
 import ImageGeneratorAI from "../components/creatives/ImageGeneratorAI";
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-react';
 
 export default function CreativesPage() {
     const [clients, setClients] = useState([]);
@@ -46,21 +49,28 @@ export default function CreativesPage() {
     return (
         <div className="px-6 md:px-8 py-4 md:py-8 bg-background min-h-screen">
             <div className="w-full space-y-6">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                        <Palette className="w-6 h-6 text-white" />
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                            <Palette className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Creative Hub</h1>
+                            <p className="text-muted-foreground">Tools for content creation, captions, and AR experiences.</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Creative Hub</h1>
-                        <p className="text-muted-foreground">Tools for content creation, captions, and AR experiences.</p>
-                    </div>
+                    <Link to={createPageUrl('ARStickerManager')}>
+                        <Button variant="outline">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            AR Sticker Manager
+                        </Button>
+                    </Link>
                 </div>
 
                 <Tabs defaultValue="creative-tasks" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="creative-tasks">Creative Tasks</TabsTrigger>
                         <TabsTrigger value="caption-maker">Caption Maker</TabsTrigger>
-                        <TabsTrigger value="ar-manager">AR Manager</TabsTrigger>
                         <TabsTrigger value="image-generator">AI Image Gen</TabsTrigger>
                     </TabsList>
 
@@ -70,10 +80,6 @@ export default function CreativesPage() {
 
                     <TabsContent value="caption-maker" className="mt-6">
                         <CaptionMaker clients={clients} />
-                    </TabsContent>
-
-                    <TabsContent value="ar-manager" className="mt-6">
-                        <WebARManager />
                     </TabsContent>
 
                     <TabsContent value="image-generator" className="mt-6">
