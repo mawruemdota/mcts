@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +17,6 @@ import {
   Loader2,
   Edit,
   Trash2,
-  Upload,
   Filter,
   Calendar,
   User,
@@ -24,7 +25,11 @@ import {
   AlertCircle,
   CheckCircle2,
   PlayCircle,
-  Palette
+  Palette,
+  Sparkles,
+  Image as ImageIcon,
+  MessageSquare,
+  X
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -56,6 +61,20 @@ export default function CreativesPage() {
     file_urls: [],
     output_urls: []
   });
+
+  // Batch upload state - array of tasks
+  const [batchTasks, setBatchTasks] = useState([
+    {
+      title: "",
+      client_id: "",
+      client_name: "",
+      assignee_email: "",
+      assignee_name: "",
+      request_description: "",
+      deadline: "",
+      priority: "normal"
+    }
+  ]);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -209,63 +228,98 @@ export default function CreativesPage() {
     }
   };
 
-  const handleBatchUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploadingFiles(true);
-    try {
-      // Upload the file first
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-
-      // Extract data using the schema
-      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url,
-        json_schema: {
-          type: "object",
-          properties: {
-            tasks: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  client_name: { type: "string" },
-                  assignee_email: { type: "string" },
-                  request_description: { type: "string" },
-                  additional_info: { type: "string" },
-                  deadline: { type: "string" },
-                  status: { type: "string" },
-                  priority: { type: "string" }
-                }
-              }
-            }
-          }
-        }
-      });
-
-      if (result.status === "success" && result.output?.tasks) {
-        const tasksToCreate = result.output.tasks.map(task => ({
-          ...task,
-          status: task.status || "pending",
-          priority: task.priority || "normal",
-          assignee_name: users.find(u => u.email === task.assignee_email)?.nickname || 
-                        users.find(u => u.email === task.assignee_email)?.full_name || 
-                        task.assignee_email
-        }));
-
-        await base44.entities.CreativeTask.bulkCreate(tasksToCreate);
-        toast({ title: "Success", description: `${tasksToCreate.length} creative tasks imported successfully.` });
-        setShowBatchDialog(false);
-        loadData();
-      } else {
-        toast({ variant: "destructive", title: "Error", description: result.details || "Failed to parse file." });
+  // Batch upload functions
+  const addBatchRow = () => {
+    setBatchTasks([
+      ...batchTasks,
+      {
+        title: "",
+        client_id: "",
+        client_name: "",
+        assignee_email: "",
+        assignee_name: "",
+        request_description: "",
+        deadline: "",
+        priority: "normal"
       }
-    } catch (error) {
-      console.error("Batch upload error:", error);
-      toast({ variant: "destructive", title: "Error", description: "Failed to import tasks." });
+    ]);
+  };
+
+  const removeBatchRow = (index) => {
+    setBatchTasks(batchTasks.filter((_, i) => i !== index));
+  };
+
+  const updateBatchTask = (index, field, value) => {
+    const newBatchTasks = [...batchTasks];
+    newBatchTasks[index][field] = value;
+    
+    // Handle client selection
+    if (field === "client_id") {
+      const client = clients.find(c => c.id === value);
+      if (client) {
+        newBatchTasks[index].client_name = client.client_name;
+      }
     }
-    setUploadingFiles(false);
+    
+    // Handle assignee selection
+    if (field === "assignee_email") {
+      const user = users.find(u => u.email === value);
+      if (user) {
+        newBatchTasks[index].assignee_name = user.nickname || user.full_name;
+      }
+    }
+    
+    setBatchTasks(newBatchTasks);
+  };
+
+  const handleBatchSubmit = async () => {
+    // Validate all tasks
+    const validTasks = batchTasks.filter(task => 
+      task.title && task.client_name && task.assignee_email && task.request_description && task.deadline
+    );
+
+    if (validTasks.length === 0) {
+      toast({ variant: "destructive", title: "Error", description: "Please fill in at least one complete task." });
+      return;
+    }
+
+    if (validTasks.length < batchTasks.length) {
+      toast({ 
+        variant: "destructive", 
+        title: "Warning", 
+        description: `Only ${validTasks.length} out of ${batchTasks.length} tasks are complete. Incomplete tasks will be skipped.` 
+      });
+    }
+
+    try {
+      const tasksToCreate = validTasks.map(task => ({
+        ...task,
+        status: "pending"
+      }));
+
+      await base44.entities.CreativeTask.bulkCreate(tasksToCreate);
+      toast({ title: "Success", description: `${tasksToCreate.length} creative task(s) created successfully.` });
+      
+      // Reset batch form
+      setBatchTasks([
+        {
+          title: "",
+          client_id: "",
+          client_name: "",
+          assignee_email: "",
+          assignee_name: "",
+          request_description: "",
+          deadline: "",
+          priority: "normal"
+        }
+      ]);
+      
+      setShowBatchDialog(false);
+      loadData();
+    } catch (error) {
+      console.error("Batch create error:", error);
+      toast({ variant: "destructive", title: "Error", description: "Failed to create tasks." });
+    }
   };
 
   const getStatusIcon = (status) => {
@@ -313,7 +367,7 @@ export default function CreativesPage() {
     <div className="p-6 bg-background min-h-screen">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
               <Palette className="w-8 h-8 text-purple-600" />
@@ -321,35 +375,171 @@ export default function CreativesPage() {
             </h1>
             <p className="text-muted-foreground mt-1">Manage all creative requests and assignments</p>
           </div>
-          <div className="flex gap-2">
+          
+          <div className="flex flex-wrap gap-2">
+            {/* Creative Tool Buttons */}
+            <Link to={createPageUrl("ARStickerManager")}>
+              <Button variant="outline" size="sm">
+                <Sparkles className="w-4 h-4 mr-2" />
+                AR Stickers
+              </Button>
+            </Link>
+            
+            <Button variant="outline" size="sm" onClick={() => {
+              // You can implement a dialog or navigate to image generator
+              toast({ title: "Coming Soon", description: "Image Generator will open here" });
+            }}>
+              <ImageIcon className="w-4 h-4 mr-2" />
+              AI Image Gen
+            </Button>
+            
+            <Button variant="outline" size="sm" onClick={() => {
+              // You can implement a dialog or navigate to caption maker
+              toast({ title: "Coming Soon", description: "Caption Maker will open here" });
+            }}>
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Caption Maker
+            </Button>
+
+            {/* Main Action Buttons */}
             <Dialog open={showBatchDialog} onOpenChange={setShowBatchDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Batch Upload
+                  <Plus className="w-4 h-4 mr-2" />
+                  Batch Add
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Batch Upload Creative Tasks</DialogTitle>
+                  <DialogTitle>Batch Add Creative Tasks</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Upload a CSV or Excel file with columns: title, client_name, assignee_email, request_description, additional_info, deadline, status, priority
+                    Add multiple creative tasks at once. Fill in the details for each task below.
                   </p>
-                  <Input
-                    type="file"
-                    accept=".csv,.xlsx,.xls"
-                    onChange={handleBatchUpload}
-                    disabled={uploadingFiles}
-                  />
-                  {uploadingFiles && (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm">Processing file...</span>
-                    </div>
-                  )}
+                  
+                  <div className="space-y-4">
+                    {batchTasks.map((task, index) => (
+                      <Card key={index} className="relative">
+                        <CardContent className="pt-6">
+                          <div className="absolute top-2 right-2">
+                            {batchTasks.length > 1 && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeBatchRow(index)}
+                              >
+                                <X className="w-4 h-4 text-red-500" />
+                              </Button>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <Label className="text-xs">Title *</Label>
+                              <Input
+                                value={task.title}
+                                onChange={(e) => updateBatchTask(index, "title", e.target.value)}
+                                placeholder="Task title"
+                                className="h-9"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label className="text-xs">Client *</Label>
+                              <Select 
+                                value={task.client_id} 
+                                onValueChange={(value) => updateBatchTask(index, "client_id", value)}
+                              >
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder="Select client" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {clients.map(client => (
+                                    <SelectItem key={client.id} value={client.id}>
+                                      {client.client_name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div>
+                              <Label className="text-xs">Assignee *</Label>
+                              <Select 
+                                value={task.assignee_email} 
+                                onValueChange={(value) => updateBatchTask(index, "assignee_email", value)}
+                              >
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder="Select assignee" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {users.map(user => (
+                                    <SelectItem key={user.email} value={user.email}>
+                                      {user.nickname || user.full_name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="md:col-span-2">
+                              <Label className="text-xs">Request Description *</Label>
+                              <Input
+                                value={task.request_description}
+                                onChange={(e) => updateBatchTask(index, "request_description", e.target.value)}
+                                placeholder="What needs to be created..."
+                                className="h-9"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label className="text-xs">Deadline *</Label>
+                              <Input
+                                type="date"
+                                value={task.deadline}
+                                onChange={(e) => updateBatchTask(index, "deadline", e.target.value)}
+                                className="h-9"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label className="text-xs">Priority</Label>
+                              <Select 
+                                value={task.priority} 
+                                onValueChange={(value) => updateBatchTask(index, "priority", value)}
+                              >
+                                <SelectTrigger className="h-9">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="low">Low</SelectItem>
+                                  <SelectItem value="normal">Normal</SelectItem>
+                                  <SelectItem value="high">High</SelectItem>
+                                  <SelectItem value="urgent">Urgent</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  
+                  <Button variant="outline" onClick={addBatchRow} className="w-full">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Another Task
+                  </Button>
                 </div>
+                
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowBatchDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleBatchSubmit}>
+                    Create {batchTasks.length} Task{batchTasks.length !== 1 ? 's' : ''}
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
 
@@ -363,7 +553,7 @@ export default function CreativesPage() {
               <DialogTrigger asChild>
                 <Button className="bg-purple-600 hover:bg-purple-700">
                   <Plus className="w-4 h-4 mr-2" />
-                  New Creative Task
+                  New Task
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
