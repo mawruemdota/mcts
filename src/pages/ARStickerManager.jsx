@@ -29,7 +29,6 @@ import {
   BarChart3,
   Sparkles
 } from 'lucide-react';
-import QRCode from 'qrcode';
 
 export default function ARStickerManager() {
   const [arStickers, setArStickers] = useState([]);
@@ -125,22 +124,15 @@ export default function ARStickerManager() {
     try {
       const viewerUrl = `${window.location.origin}${createPageUrl('ARViewer')}?id=${stickerId}`;
       
-      // Generate QR code as data URL
-      const qrDataUrl = await QRCode.toDataURL(viewerUrl, {
-        width: 512,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
-
-      // Convert data URL to Blob
-      const response = await fetch(qrDataUrl);
+      // Use external QR code API service
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(viewerUrl)}`;
+      
+      // Fetch the QR code image
+      const response = await fetch(qrApiUrl);
       const blob = await response.blob();
       const file = new File([blob], `qr-${stickerId}.png`, { type: 'image/png' });
 
-      // Upload QR code
+      // Upload QR code to our storage
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       
       // Update sticker with QR code URL
