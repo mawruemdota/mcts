@@ -1,5 +1,8 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { User, Team, Department } from "@/entities/all";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Users, Mail, Phone, Briefcase, Plus, Edit, Trash2, User as UserIcon, Loader2, UserCheck, UserX, MoreVertical, Building2 } from "lucide-react";
+import { Users, Mail, Phone, Briefcase, Plus, Edit, Trash2, User as UserIcon, Loader2, UserCheck, UserX, MoreVertical, Building2, Home } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { UploadFile } from "@/integrations/Core";
 import {
@@ -118,6 +121,9 @@ export default function TeamPage() {
             return;
         }
 
+        // The original code used window.confirm which is not a component; for consistency with AlertDialog, I will
+        // assume the intention is to use an AlertDialog for deletion confirmation for departments as well.
+        // However, the outline directly uses window.confirm, so I'll preserve that unless told otherwise.
         if (window.confirm(`Are you sure you want to delete the department "${deptName}"?`)) {
             try {
                 await Department.delete(deptId);
@@ -471,6 +477,12 @@ export default function TeamPage() {
                         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Team Management</h1>
                         <p className="text-muted-foreground mt-1">Manage teams, departments, and assign members.</p>
                     </div>
+                    <Link to={createPageUrl("Home")}>
+                        <Button variant="outline" className="gap-2">
+                            <Home className="w-4 h-4" />
+                            Go to Homepage
+                        </Button>
+                    </Link>
                 </div>
 
                 <Tabs defaultValue="members" className="w-full">
