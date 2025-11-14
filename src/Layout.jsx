@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -573,7 +572,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </div>
 
-      <Toaster />
+      <Toaster duration={3000} />
       {showProfileSettings && <ProfileSettingsModal user={user} onClose={() => { setShowProfileSettings(false); loadUser(); }} />}
       {showCalculator && <FloatingCalculator onClose={() => setShowCalculator(false)} />}
       {showQuickReminder && <QuickReminderModal isOpen={showQuickReminder} onClose={() => setShowQuickReminder(false)} user={user} />}

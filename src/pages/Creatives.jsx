@@ -62,14 +62,14 @@ export default function CreativesPage() {
     output_urls: []
   });
 
-  // Batch upload state - array of tasks
+  // Batch upload state - shared client and assignee, then array of simplified tasks
+  const [batchClient, setBatchClient] = useState("");
+  const [batchClientName, setBatchClientName] = useState("");
+  const [batchAssignee, setBatchAssignee] = useState("");
+  const [batchAssigneeName, setBatchAssigneeName] = useState("");
   const [batchTasks, setBatchTasks] = useState([
     {
       title: "",
-      client_id: "",
-      client_name: "",
-      assignee_email: "",
-      assignee_name: "",
       request_description: "",
       deadline: "",
       priority: "normal"
@@ -115,6 +115,21 @@ export default function CreativesPage() {
     });
   };
 
+  const resetBatchForm = () => {
+    setBatchClient("");
+    setBatchClientName("");
+    setBatchAssignee("");
+    setBatchAssigneeName("");
+    setBatchTasks([
+      {
+        title: "",
+        request_description: "",
+        deadline: "",
+        priority: "normal"
+      }
+    ]);
+  };
+
   const handleClientChange = (clientId) => {
     const client = clients.find(c => c.id === clientId);
     if (client) {
@@ -137,6 +152,22 @@ export default function CreativesPage() {
     }
   };
 
+  const handleBatchClientChange = (clientId) => {
+    const client = clients.find(c => c.id === clientId);
+    if (client) {
+      setBatchClient(clientId);
+      setBatchClientName(client.client_name);
+    }
+  };
+
+  const handleBatchAssigneeChange = (userEmail) => {
+    const user = users.find(u => u.email === userEmail);
+    if (user) {
+      setBatchAssignee(userEmail);
+      setBatchAssigneeName(user.nickname || user.full_name);
+    }
+  };
+
   const handleFileUpload = async (e, fieldName) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -152,10 +183,10 @@ export default function CreativesPage() {
         [fieldName]: [...(prev[fieldName] || []), ...fileUrls]
       }));
 
-      toast({ title: "Success", description: `${files.length} file(s) uploaded successfully.` });
+      toast({ title: "Files uploaded" });
     } catch (error) {
       console.error("Upload error:", error);
-      toast({ variant: "destructive", title: "Error", description: "Failed to upload files." });
+      toast({ variant: "destructive", title: "Upload failed" });
     }
     setUploadingFiles(false);
   };
@@ -164,17 +195,17 @@ export default function CreativesPage() {
     e.preventDefault();
 
     if (!formData.title || !formData.client_name || !formData.assignee_email || !formData.request_description || !formData.deadline) {
-      toast({ variant: "destructive", title: "Error", description: "Please fill in all required fields." });
+      toast({ variant: "destructive", title: "Missing required fields" });
       return;
     }
 
     try {
       if (editingTask) {
         await base44.entities.CreativeTask.update(editingTask.id, formData);
-        toast({ title: "Success", description: "Creative task updated successfully." });
+        toast({ title: "Task updated" });
       } else {
         await base44.entities.CreativeTask.create(formData);
-        toast({ title: "Success", description: "Creative task created successfully." });
+        toast({ title: "Task created" });
       }
 
       resetForm();
@@ -183,7 +214,7 @@ export default function CreativesPage() {
       loadData();
     } catch (error) {
       console.error("Save error:", error);
-      toast({ variant: "destructive", title: "Error", description: "Failed to save creative task." });
+      toast({ variant: "destructive", title: "Failed to save task" });
     }
   };
 
@@ -207,24 +238,24 @@ export default function CreativesPage() {
   };
 
   const handleDelete = async (taskId) => {
-    if (!window.confirm("Are you sure you want to delete this creative task?")) return;
+    if (!window.confirm("Delete this task?")) return;
 
     try {
       await base44.entities.CreativeTask.delete(taskId);
-      toast({ title: "Success", description: "Creative task deleted." });
+      toast({ title: "Task deleted" });
       loadData();
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to delete task." });
+      toast({ variant: "destructive", title: "Failed to delete" });
     }
   };
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
       await base44.entities.CreativeTask.update(taskId, { status: newStatus });
-      toast({ title: "Success", description: "Status updated successfully." });
+      toast({ title: "Status updated" });
       loadData();
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to update status." });
+      toast({ variant: "destructive", title: "Update failed" });
     }
   };
 
@@ -234,10 +265,6 @@ export default function CreativesPage() {
       ...batchTasks,
       {
         title: "",
-        client_id: "",
-        client_name: "",
-        assignee_email: "",
-        assignee_name: "",
         request_description: "",
         deadline: "",
         priority: "normal"
@@ -252,73 +279,44 @@ export default function CreativesPage() {
   const updateBatchTask = (index, field, value) => {
     const newBatchTasks = [...batchTasks];
     newBatchTasks[index][field] = value;
-    
-    // Handle client selection
-    if (field === "client_id") {
-      const client = clients.find(c => c.id === value);
-      if (client) {
-        newBatchTasks[index].client_name = client.client_name;
-      }
-    }
-    
-    // Handle assignee selection
-    if (field === "assignee_email") {
-      const user = users.find(u => u.email === value);
-      if (user) {
-        newBatchTasks[index].assignee_name = user.nickname || user.full_name;
-      }
-    }
-    
     setBatchTasks(newBatchTasks);
   };
 
   const handleBatchSubmit = async () => {
-    // Validate all tasks
-    const validTasks = batchTasks.filter(task => 
-      task.title && task.client_name && task.assignee_email && task.request_description && task.deadline
-    );
-
-    if (validTasks.length === 0) {
-      toast({ variant: "destructive", title: "Error", description: "Please fill in at least one complete task." });
+    if (!batchClient || !batchAssignee) {
+      toast({ variant: "destructive", title: "Select client and assignee" });
       return;
     }
 
-    if (validTasks.length < batchTasks.length) {
-      toast({ 
-        variant: "destructive", 
-        title: "Warning", 
-        description: `Only ${validTasks.length} out of ${batchTasks.length} tasks are complete. Incomplete tasks will be skipped.` 
-      });
+    // Validate all tasks
+    const validTasks = batchTasks.filter(task => 
+      task.title && task.request_description && task.deadline
+    );
+
+    if (validTasks.length === 0) {
+      toast({ variant: "destructive", title: "Fill in at least one complete task" });
+      return;
     }
 
     try {
       const tasksToCreate = validTasks.map(task => ({
         ...task,
+        client_id: batchClient,
+        client_name: batchClientName,
+        assignee_email: batchAssignee,
+        assignee_name: batchAssigneeName,
         status: "pending"
       }));
 
       await base44.entities.CreativeTask.bulkCreate(tasksToCreate);
-      toast({ title: "Success", description: `${tasksToCreate.length} creative task(s) created successfully.` });
+      toast({ title: `${tasksToCreate.length} task${tasksToCreate.length > 1 ? 's' : ''} created` });
       
-      // Reset batch form
-      setBatchTasks([
-        {
-          title: "",
-          client_id: "",
-          client_name: "",
-          assignee_email: "",
-          assignee_name: "",
-          request_description: "",
-          deadline: "",
-          priority: "normal"
-        }
-      ]);
-      
+      resetBatchForm();
       setShowBatchDialog(false);
       loadData();
     } catch (error) {
       console.error("Batch create error:", error);
-      toast({ variant: "destructive", title: "Error", description: "Failed to create tasks." });
+      toast({ variant: "destructive", title: "Failed to create tasks" });
     }
   };
 
@@ -386,7 +384,6 @@ export default function CreativesPage() {
             </Link>
             
             <Button variant="outline" size="sm" onClick={() => {
-              // You can implement a dialog or navigate to image generator
               toast({ title: "Coming Soon", description: "Image Generator will open here" });
             }}>
               <ImageIcon className="w-4 h-4 mr-2" />
@@ -394,7 +391,6 @@ export default function CreativesPage() {
             </Button>
             
             <Button variant="outline" size="sm" onClick={() => {
-              // You can implement a dialog or navigate to caption maker
               toast({ title: "Coming Soon", description: "Caption Maker will open here" });
             }}>
               <MessageSquare className="w-4 h-4 mr-2" />
@@ -402,127 +398,118 @@ export default function CreativesPage() {
             </Button>
 
             {/* Main Action Buttons */}
-            <Dialog open={showBatchDialog} onOpenChange={setShowBatchDialog}>
+            <Dialog open={showBatchDialog} onOpenChange={(open) => {
+              setShowBatchDialog(open);
+              if (!open) resetBatchForm();
+            }}>
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
                   Batch Add
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Batch Add Creative Tasks</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <p className="text-sm text-muted-foreground">
-                    Add multiple creative tasks at once. Fill in the details for each task below.
+                    Set the client and assignee once, then add multiple tasks below.
                   </p>
                   
-                  <div className="space-y-4">
+                  {/* Shared Client and Assignee */}
+                  <Card className="bg-muted/50">
+                    <CardContent className="pt-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="font-semibold">Client (for all tasks) *</Label>
+                          <Select value={batchClient} onValueChange={handleBatchClientChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select client" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {clients.map(client => (
+                                <SelectItem key={client.id} value={client.id}>
+                                  {client.client_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div>
+                          <Label className="font-semibold">Assignee (for all tasks) *</Label>
+                          <Select value={batchAssignee} onValueChange={handleBatchAssigneeChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select assignee" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {users.map(user => (
+                                <SelectItem key={user.email} value={user.email}>
+                                  {user.nickname || user.full_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Task Rows */}
+                  <div className="space-y-2">
+                    <Label className="font-semibold">Tasks</Label>
                     {batchTasks.map((task, index) => (
-                      <Card key={index} className="relative">
-                        <CardContent className="pt-6">
-                          <div className="absolute top-2 right-2">
-                            {batchTasks.length > 1 && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => removeBatchRow(index)}
-                              >
-                                <X className="w-4 h-4 text-red-500" />
-                              </Button>
-                            )}
-                          </div>
+                      <div key={index} className="flex items-center gap-2 p-3 bg-card border rounded-lg">
+                        <div className="flex-1 grid grid-cols-5 gap-2">
+                          <Input
+                            placeholder="Task title *"
+                            value={task.title}
+                            onChange={(e) => updateBatchTask(index, "title", e.target.value)}
+                            className="h-9"
+                          />
                           
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div>
-                              <Label className="text-xs">Title *</Label>
-                              <Input
-                                value={task.title}
-                                onChange={(e) => updateBatchTask(index, "title", e.target.value)}
-                                placeholder="Task title"
-                                className="h-9"
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label className="text-xs">Client *</Label>
-                              <Select 
-                                value={task.client_id} 
-                                onValueChange={(value) => updateBatchTask(index, "client_id", value)}
-                              >
-                                <SelectTrigger className="h-9">
-                                  <SelectValue placeholder="Select client" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {clients.map(client => (
-                                    <SelectItem key={client.id} value={client.id}>
-                                      {client.client_name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div>
-                              <Label className="text-xs">Assignee *</Label>
-                              <Select 
-                                value={task.assignee_email} 
-                                onValueChange={(value) => updateBatchTask(index, "assignee_email", value)}
-                              >
-                                <SelectTrigger className="h-9">
-                                  <SelectValue placeholder="Select assignee" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {users.map(user => (
-                                    <SelectItem key={user.email} value={user.email}>
-                                      {user.nickname || user.full_name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div className="md:col-span-2">
-                              <Label className="text-xs">Request Description *</Label>
-                              <Input
-                                value={task.request_description}
-                                onChange={(e) => updateBatchTask(index, "request_description", e.target.value)}
-                                placeholder="What needs to be created..."
-                                className="h-9"
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label className="text-xs">Deadline *</Label>
-                              <Input
-                                type="date"
-                                value={task.deadline}
-                                onChange={(e) => updateBatchTask(index, "deadline", e.target.value)}
-                                className="h-9"
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label className="text-xs">Priority</Label>
-                              <Select 
-                                value={task.priority} 
-                                onValueChange={(value) => updateBatchTask(index, "priority", value)}
-                              >
-                                <SelectTrigger className="h-9">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="low">Low</SelectItem>
-                                  <SelectItem value="normal">Normal</SelectItem>
-                                  <SelectItem value="high">High</SelectItem>
-                                  <SelectItem value="urgent">Urgent</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                          <Input
+                            placeholder="What needs to be done *"
+                            value={task.request_description}
+                            onChange={(e) => updateBatchTask(index, "request_description", e.target.value)}
+                            className="h-9 col-span-2"
+                          />
+                          
+                          <Input
+                            type="date"
+                            value={task.deadline}
+                            onChange={(e) => updateBatchTask(index, "deadline", e.target.value)}
+                            className="h-9"
+                          />
+                          
+                          <Select 
+                            value={task.priority} 
+                            onValueChange={(value) => updateBatchTask(index, "priority", value)}
+                          >
+                            <SelectTrigger className="h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="normal">Normal</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                              <SelectItem value="urgent">Urgent</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        {batchTasks.length > 1 && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => removeBatchRow(index)}
+                            className="h-9 w-9 flex-shrink-0"
+                          >
+                            <X className="w-4 h-4 text-red-500" />
+                          </Button>
+                        )}
+                      </div>
                     ))}
                   </div>
                   
@@ -533,7 +520,10 @@ export default function CreativesPage() {
                 </div>
                 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowBatchDialog(false)}>
+                  <Button variant="outline" onClick={() => {
+                    setShowBatchDialog(false);
+                    resetBatchForm();
+                  }}>
                     Cancel
                   </Button>
                   <Button onClick={handleBatchSubmit}>
