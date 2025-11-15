@@ -29,6 +29,7 @@ import {
   UserX,
   Home,
   PieChart,
+  Search,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ import FloatingCalculator from "@/components/ui/FloatingCalculator";
 import QueueStatsHeader from "@/components/dashboard/QueueStatsHeader";
 import QuickReminderModal from "@/components/reminders/QuickReminderModal";
 import NewTaskModal from "@/components/jobs/NewTaskModal";
+import GlobalSearch from "@/components/ui/GlobalSearch";
 import { cn } from "@/lib/utils";
 
 export default function Layout({ children, currentPageName }) {
@@ -59,6 +61,7 @@ export default function Layout({ children, currentPageName }) {
   const [showCalculator, setShowCalculator] = useState(false);
   const [showQuickReminder, setShowQuickReminder] = useState(false);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const [isInactiveUser, setIsInactiveUser] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -86,6 +89,19 @@ export default function Layout({ children, currentPageName }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Keyboard shortcut for global search (Cmd/Ctrl + K)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowGlobalSearch(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
   };
@@ -109,7 +125,6 @@ export default function Layout({ children, currentPageName }) {
       setUser(null);
       setIsInactiveUser(false);
       
-      // Redirect to homepage if user is not authenticated and trying to access dashboard
       if (!isPublicPage) {
         window.location.href = createPageUrl("Home");
       }
@@ -231,7 +246,6 @@ export default function Layout({ children, currentPageName }) {
         );
       }
     } else {
-      // For non-admin users, add Summary at the end
       baseItems.push({
         title: "Summary",
         url: createPageUrl("Summary"),
@@ -293,7 +307,6 @@ export default function Layout({ children, currentPageName }) {
       );
     }
 
-    // Redirect to homepage instead of showing login screen
     window.location.href = createPageUrl("Home");
     return null;
   }
@@ -415,7 +428,6 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
       
       <div className="min-h-screen bg-background text-foreground">
-        {/* Floating Menu Button */}
         <Button
           variant="outline"
           size="icon"
@@ -425,7 +437,6 @@ export default function Layout({ children, currentPageName }) {
           {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
 
-        {/* Overlay */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 transition-opacity"
@@ -433,7 +444,6 @@ export default function Layout({ children, currentPageName }) {
           />
         )}
 
-        {/* Floating Sidebar Menu */}
         <div
           className={cn(
             "fixed top-0 left-0 h-full w-64 bg-card border-r border-border z-50 transition-transform duration-300 ease-in-out overflow-y-auto",
@@ -441,7 +451,6 @@ export default function Layout({ children, currentPageName }) {
           )}
         >
           <div className="p-6">
-            {/* Logo */}
             <div className="flex items-center gap-3 mb-8">
               <OptimizedImage
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/7aad79b47_logo3.png"
@@ -456,7 +465,6 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </div>
 
-            {/* Navigation */}
             <div className="space-y-1 mb-8">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Main Menu</h3>
               {getNavigationItems().map((item) => (
@@ -477,7 +485,6 @@ export default function Layout({ children, currentPageName }) {
               ))}
             </div>
 
-            {/* Quick Access */}
             <div className="space-y-2 mb-8">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Quick Access</h3>
               <Button 
@@ -517,7 +524,6 @@ export default function Layout({ children, currentPageName }) {
               </Button>
             </div>
 
-            {/* User Profile */}
             <div className="border-t border-border pt-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -567,7 +573,6 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
 
-        {/* Main Content - Full Width */}
         <div className="min-h-screen flex flex-col w-full">
           <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4 ml-16">
@@ -575,7 +580,19 @@ export default function Layout({ children, currentPageName }) {
                 {format(new Date(), "EEEE, MMMM do")}
               </p>
             </div>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowGlobalSearch(true)}
+                className="gap-2 min-w-[200px] justify-start text-muted-foreground"
+              >
+                <Search className="w-4 h-4" />
+                <span className="hidden md:inline">Search...</span>
+                <kbd className="ml-auto pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                  <span className="text-xs">⌘</span>K
+                </kbd>
+              </Button>
               <QueueStatsHeader />
               <NotificationsPanel user={user}/>
             </div>
@@ -592,6 +609,7 @@ export default function Layout({ children, currentPageName }) {
       {showCalculator && <FloatingCalculator onClose={() => setShowCalculator(false)} />}
       {showQuickReminder && <QuickReminderModal isOpen={showQuickReminder} onClose={() => setShowQuickReminder(false)} user={user} />}
       {showNewTaskModal && <NewTaskModal isOpen={showNewTaskModal} onClose={() => setShowNewTaskModal(false)} onTaskCreated={handleTaskCreated} user={user} />}
+      {showGlobalSearch && <GlobalSearch isOpen={showGlobalSearch} onClose={() => setShowGlobalSearch(false)} user={user} />}
     </>
   );
 }
