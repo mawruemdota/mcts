@@ -30,6 +30,7 @@ import {
   Home,
   PieChart,
   Search,
+  Activity,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -89,7 +90,6 @@ export default function Layout({ children, currentPageName }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Keyboard shortcut for global search (Cmd/Ctrl + K)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -238,6 +238,12 @@ export default function Layout({ children, currentPageName }) {
             roles: ["admin", "user"]
           },
           {
+            title: "Activity Log",
+            url: createPageUrl("ActivityLog"),
+            icon: Activity,
+            roles: ["admin"]
+          },
+          {
             title: "Homepage",
             url: createPageUrl("HomepageSettings"),
             icon: Home,
@@ -255,7 +261,7 @@ export default function Layout({ children, currentPageName }) {
     }
 
     if (user?.role !== 'admin') {
-      const adminOnlyPages = ["Shop Cash", "Team", "Archive", "Homepage"];
+      const adminOnlyPages = ["Shop Cash", "Team", "Archive", "Homepage", "Activity Log"];
       return baseItems.filter(item => !adminOnlyPages.includes(item.title));
     }
 
