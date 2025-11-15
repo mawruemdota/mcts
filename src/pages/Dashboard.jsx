@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Job, User, Reminder, InventoryItem } from '@/entities/all';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Home } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 import ProductionQueue from '../components/dashboard/ProductionQueue';
 import InventoryAlerts from '../components/dashboard/InventoryAlerts';
 import RemindersSummary from '../components/dashboard/RemindersSummary';
@@ -46,17 +49,29 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Main Production Queue */}
-      <div className="lg:col-span-2">
-        <ProductionQueue user={user} initialFilter={filter} />
+    <div className="space-y-6">
+      {/* Homepage Button */}
+      <div className="flex justify-end">
+        <a href={createPageUrl('Home')}>
+          <Button variant="outline" className="gap-2">
+            <Home className="w-4 h-4" />
+            Go to Homepage
+          </Button>
+        </a>
       </div>
 
-      {/* Sidebar with Calendar, Reminders and Alerts */}
-      <div className="space-y-6">
-        <DashboardCalendar user={user} />
-        <RemindersSummary user={user} />
-        <InventoryAlerts user={user} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Production Queue */}
+        <div className="lg:col-span-2">
+          <ProductionQueue user={user} initialFilter={filter} />
+        </div>
+
+        {/* Sidebar with Calendar, Reminders and Alerts */}
+        <div className="space-y-6">
+          <DashboardCalendar user={user} />
+          <RemindersSummary user={user} />
+          <InventoryAlerts user={user} />
+        </div>
       </div>
     </div>
   );
