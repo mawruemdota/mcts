@@ -68,11 +68,6 @@ export default function DashboardCalendar({ user }) {
     return { jobs: jobsOnDate, creativeTasks: creativeTasksOnDate, reminders: remindersOnDate };
   };
 
-  const hasEventsOnDate = (date) => {
-    const { jobs, creativeTasks, reminders } = getEventsForDate(date);
-    return jobs.length > 0 || creativeTasks.length > 0 || reminders.length > 0;
-  };
-
   const getDaysInMonth = () => {
     const start = startOfMonth(currentMonth);
     const end = endOfMonth(currentMonth);
@@ -168,7 +163,7 @@ export default function DashboardCalendar({ user }) {
                 return <div key={`empty-${index}`} className="aspect-square border-r border-b" />;
               }
 
-              const hasEvents = hasEventsOnDate(date);
+              const events = getEventsForDate(date);
               const today = isToday(date);
               const selected = isSelected(date);
 
@@ -187,10 +182,25 @@ export default function DashboardCalendar({ user }) {
                     <span className={`text-sm ${selected ? 'font-bold' : ''}`}>
                       {date.getDate()}
                     </span>
-                    {hasEvents && (
-                      <div className={`w-1.5 h-1.5 rounded-full mt-1 ${
-                        selected ? 'bg-primary-foreground' : 'bg-purple-500'
-                      }`} />
+                    {/* Event markers */}
+                    {(events.jobs.length > 0 || events.creativeTasks.length > 0 || events.reminders.length > 0) && (
+                      <div className="flex gap-0.5 mt-1">
+                        {events.jobs.length > 0 && (
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                            selected ? 'bg-primary-foreground' : 'bg-red-500'
+                          }`} />
+                        )}
+                        {events.creativeTasks.length > 0 && (
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                            selected ? 'bg-primary-foreground' : 'bg-blue-500'
+                          }`} />
+                        )}
+                        {events.reminders.length > 0 && (
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                            selected ? 'bg-primary-foreground' : 'bg-yellow-500'
+                          }`} />
+                        )}
+                      </div>
                     )}
                   </div>
                 </button>
@@ -213,7 +223,7 @@ export default function DashboardCalendar({ user }) {
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {selectedDateEvents.jobs.map(job => (
                 <div key={job.id} className="flex items-start gap-2 p-2 bg-secondary rounded-lg">
-                  <Briefcase className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <Briefcase className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
                     <p className="text-xs text-muted-foreground">{job.client_name}</p>
@@ -223,7 +233,7 @@ export default function DashboardCalendar({ user }) {
               
               {selectedDateEvents.creativeTasks.map(task => (
                 <div key={task.id} className="flex items-start gap-2 p-2 bg-secondary rounded-lg">
-                  <Palette className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                  <Palette className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
                     <p className="text-xs text-muted-foreground">{task.client_name}</p>
@@ -233,7 +243,7 @@ export default function DashboardCalendar({ user }) {
               
               {selectedDateEvents.reminders.map(reminder => (
                 <div key={reminder.id} className="flex items-start gap-2 p-2 bg-secondary rounded-lg">
-                  <Bell className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                  <Bell className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{reminder.title}</p>
                     {reminder.description && (
