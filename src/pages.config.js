@@ -35,6 +35,7 @@ import OrderTracking from './pages/OrderTracking';
 import ARStickerManager from './pages/ARStickerManager';
 import ARViewer from './pages/ARViewer';
 import Summary from './pages/Summary';
+import ActivityLog from './pages/ActivityLog';
 import Layout from './Layout.jsx';
 
 
@@ -76,6 +77,7 @@ export const PAGES = {
     "ARStickerManager": ARStickerManager,
     "ARViewer": ARViewer,
     "Summary": Summary,
+    "ActivityLog": ActivityLog,
 }
 
 export const pagesConfig = {

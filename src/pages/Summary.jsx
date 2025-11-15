@@ -21,6 +21,7 @@ import {
 import { format, parseISO, isToday, isTomorrow, isPast } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import RecentActivityWidget from '@/components/activity/RecentActivityWidget';
 
 export default function SummaryPage() {
   const [jobs, setJobs] = useState([]);
@@ -322,9 +323,12 @@ export default function SummaryPage() {
           </CardContent>
         </Card>
 
+        {/* Recent Activity Widget */}
+        <RecentActivityWidget limit={8} />
+
         {/* Shop Cash (Admin Only) */}
         {user?.role === 'admin' && shopCashRecords.length > 0 && (
-          <Card className="lg:col-span-2">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Wallet className="w-4 h-4 text-green-500" />
