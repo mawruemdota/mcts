@@ -34,6 +34,7 @@ import HomepageSettings from './pages/HomepageSettings';
 import OrderTracking from './pages/OrderTracking';
 import ARStickerManager from './pages/ARStickerManager';
 import ARViewer from './pages/ARViewer';
+import Summary from './pages/Summary';
 import Layout from './Layout.jsx';
 
 
@@ -74,6 +75,7 @@ export const PAGES = {
     "OrderTracking": OrderTracking,
     "ARStickerManager": ARStickerManager,
     "ARViewer": ARViewer,
+    "Summary": Summary,
 }
 
 export const pagesConfig = {

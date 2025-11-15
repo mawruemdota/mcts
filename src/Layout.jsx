@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -29,6 +28,7 @@ import {
   Palette,
   UserX,
   Home,
+  PieChart,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -146,7 +146,13 @@ export default function Layout({ children, currentPageName }) {
   const getNavigationItems = () => {
     const baseItems = [
       {
-        title: "Dashboard",
+        title: "Summary",
+        url: createPageUrl("Summary"),
+        icon: PieChart,
+        roles: ["admin", "user"]
+      },
+      {
+        title: "Operations",
         url: createPageUrl("Dashboard"),
         icon: LayoutDashboard,
         roles: ["admin", "user"]
