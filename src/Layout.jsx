@@ -146,12 +146,6 @@ export default function Layout({ children, currentPageName }) {
   const getNavigationItems = () => {
     const baseItems = [
       {
-        title: "Summary",
-        url: createPageUrl("Summary"),
-        icon: PieChart,
-        roles: ["admin", "user"]
-      },
-      {
         title: "Operations",
         url: createPageUrl("Dashboard"),
         icon: LayoutDashboard,
@@ -223,6 +217,12 @@ export default function Layout({ children, currentPageName }) {
             roles: ["admin"]
           },
           {
+            title: "Summary",
+            url: createPageUrl("Summary"),
+            icon: PieChart,
+            roles: ["admin", "user"]
+          },
+          {
             title: "Homepage",
             url: createPageUrl("HomepageSettings"),
             icon: Home,
@@ -230,6 +230,14 @@ export default function Layout({ children, currentPageName }) {
           }
         );
       }
+    } else {
+      // For non-admin users, add Summary at the end
+      baseItems.push({
+        title: "Summary",
+        url: createPageUrl("Summary"),
+        icon: PieChart,
+        roles: ["admin", "user"]
+      });
     }
 
     if (user?.role !== 'admin') {
