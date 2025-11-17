@@ -36,7 +36,7 @@ import ARStickerManager from './pages/ARStickerManager';
 import ARViewer from './pages/ARViewer';
 import Summary from './pages/Summary';
 import ActivityLog from './pages/ActivityLog';
-import Layout from './Layout.jsx';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -83,5 +83,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Home",
     Pages: PAGES,
-    Layout: Layout,
+    Layout: __Layout,
 };

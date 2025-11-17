@@ -76,7 +76,10 @@ export default function Layout({ children, currentPageName }) {
                        location.pathname.startsWith(createPageUrl("ARViewer")) ||
                        location.pathname.startsWith(createPageUrl("ReimbursementPrintView")) ||
                        location.pathname.startsWith(createPageUrl("ClientOrderForm")) ||
-                       location.pathname.startsWith(createPageUrl("OrderTracking"));
+                       location.pathname.startsWith(createPageUrl("OrderTracking")) ||
+                       location.pathname.startsWith(createPageUrl("InvoicePrintView")) ||
+                       location.pathname.startsWith(createPageUrl("QuotationPrintView")) ||
+                       location.pathname.startsWith(createPageUrl("PurchaseOrderPrintView"));
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'dark';
