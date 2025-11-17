@@ -568,7 +568,8 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
             price: item.price
         })) || []) : [],
         discount: editingInvoice?.discount || 0,
-        notes: editingInvoice?.notes || ''
+        notes: editingInvoice?.notes || '',
+        prepared_by: editingInvoice?.prepared_by || '' // Added prepared_by
     });
     const [clients, setClients] = useState([]);
     const [pricelist, setPricelist] = useState([]);
@@ -779,7 +780,8 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                 discount: discount,
                 amount: finalAmount,
                 status: editingInvoice?.status || 'unpaid', // Preserve status for editing, default to unpaid for new
-                notes: formData.notes
+                notes: formData.notes,
+                prepared_by: formData.prepared_by // Include prepared_by
             };
 
             // Ensure client_name and client_email are most up-to-date from selectedClient
@@ -823,7 +825,8 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                     job_ids: [],
                     manual_items: [],
                     discount: 0,
-                    notes: ''
+                    notes: '',
+                    prepared_by: '' // Reset prepared_by
                 });
                 setSelectedClient(null); // Clear selected client after new invoice creation
             }
@@ -858,7 +861,7 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label>Client *</Label>
                     <Select onValueChange={handleClientChange} value={formData.client_id}>
@@ -872,11 +875,19 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                     <Label>Issue Date</Label>
                     <Input type="date" value={formData.issue_date} onChange={e => setFormData({...formData, issue_date: e.target.value})} />
                 </div>
+                <div className="space-y-2">
+                    <Label>Due Date</Label>
+                    <Input type="date" value={formData.due_date} onChange={e => setFormData({...formData, due_date: e.target.value})} />
+                </div>
             </div>
 
             <div className="space-y-2">
-                <Label>Due Date</Label>
-                <Input type="date" value={formData.due_date} onChange={e => setFormData({...formData, due_date: e.target.value})} />
+                <Label>Prepared By</Label>
+                <Input 
+                    value={formData.prepared_by} 
+                    onChange={e => setFormData({...formData, prepared_by: e.target.value})}
+                    placeholder="Name of person preparing this invoice..."
+                />
             </div>
 
             {selectedClient && (
@@ -3584,3 +3595,4 @@ export default function FormsPage() {
         </div>
     );
 }
+

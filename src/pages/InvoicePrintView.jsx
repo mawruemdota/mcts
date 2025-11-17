@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Invoice, Job, IDPrintRecord } from "@/entities/all";
 import { format } from "date-fns";
@@ -23,7 +22,6 @@ export default function InvoicePrintView() {
             const inv = invoiceData[0];
             setInvoice(inv);
             
-            // Load related jobs if any
             if (inv.job_ids && inv.job_ids.length > 0) {
               const jobs = await Promise.all(
                 inv.job_ids.map(async jobId => {
@@ -34,39 +32,31 @@ export default function InvoicePrintView() {
               setRelatedJobs(jobs.filter(Boolean));
             }
             
-            // Load ID records that were specifically included in this invoice
             const idCardItems = inv.items?.filter(item => 
               item.description.toLowerCase().includes('id card')
             ) || [];
             
             if (idCardItems.length > 0) {
-              // Get all ID records for this client that were updated around the time of invoice creation
-              // This matches the records that were changed to 'invoiced' status when this invoice was created
               const allClientIdRecords = await IDPrintRecord.filter({ 
                 client_id: inv.client_id, 
                 status: 'invoiced' 
               });
               
-              // Match records based on when they were updated to 'invoiced' status
-              // This should correspond to when this specific invoice was created
               const invoiceCreatedDate = new Date(inv.created_date);
               
               const matchingRecords = allClientIdRecords.filter(record => {
                 const recordUpdatedDate = new Date(record.updated_date);
-                // Look for records that were updated within 1 hour of invoice creation
                 const timeDiff = Math.abs((invoiceCreatedDate - recordUpdatedDate) / (1000 * 60 * 60));
-                return timeDiff <= 1; // Within 1 hour
+                return timeDiff <= 1;
               });
               
-              // If no records match by update time, fall back to print date matching
               if (matchingRecords.length === 0) {
                 const fallbackRecords = allClientIdRecords.filter(record => {
                   const recordDate = new Date(record.print_date);
                   const daysDiff = Math.abs((invoiceCreatedDate - recordDate) / (1000 * 60 * 60 * 24));
-                  return daysDiff <= 7; // Within a week of invoice
+                  return daysDiff <= 7;
                 });
                 
-                // Calculate expected quantity from invoice items
                 const totalIdCards = idCardItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
                 setRelatedIdRecords(fallbackRecords.slice(0, totalIdCards));
               } else {
@@ -89,9 +79,7 @@ export default function InvoicePrintView() {
   };
 
   const handleDownloadPDF = () => {
-    // Use the browser's print dialog with PDF as default destination
     if (window.print) {
-      // Create a temporary style to hide the print controls during PDF generation
       const style = document.createElement('style');
       style.textContent = `
         @media print {
@@ -100,10 +88,8 @@ export default function InvoicePrintView() {
       `;
       document.head.appendChild(style);
       
-      // Trigger print dialog (user can choose "Save as PDF")
       window.print();
       
-      // Clean up
       setTimeout(() => {
         document.head.removeChild(style);
       }, 1000);
@@ -249,6 +235,13 @@ export default function InvoicePrintView() {
             <div className="notes-section">
               <h3 className="notes-title">Notes:</h3>
               <p className="notes-content">{invoice.notes}</p>
+            </div>
+          )}
+
+          {/* Prepared By */}
+          {invoice.prepared_by && (
+            <div className="prepared-by-section">
+              <p className="prepared-by-text">Prepared by: {invoice.prepared_by}</p>
             </div>
           )}
 
@@ -485,7 +478,7 @@ export default function InvoicePrintView() {
         }
 
         .qr-section {
-          width: 130px; /* Changed from 104px to 130px */
+          width: 130px;
           flex-shrink: 0;
         }
 
@@ -529,6 +522,18 @@ export default function InvoicePrintView() {
         .notes-content {
           color: #6b7280;
           font-size: 12px;
+          margin: 0;
+        }
+
+        .prepared-by-section {
+          margin-bottom: 15px;
+          text-align: right;
+        }
+
+        .prepared-by-text {
+          color: #6b7280;
+          font-size: 12px;
+          font-style: italic;
           margin: 0;
         }
 
@@ -587,28 +592,6 @@ export default function InvoicePrintView() {
 
           .id-details-page {
             page-break-before: always;
-          }
-
-          /* Hide any layout/navigation elements during print */
-          header, nav, .sidebar, .topbar, [data-sidebar] {
-            display: none !important;
-          }
-
-          /* Ensure proper spacing for print */
-          .invoice-header {
-            margin-bottom: 20px;
-          }
-
-          .items-section {
-            margin-bottom: 20px;
-          }
-
-          .totals-section {
-            margin-bottom: 15px;
-          }
-
-          .payment-section {
-            margin-bottom: 15px;
           }
         }
 
