@@ -29,7 +29,8 @@ import {
   Sparkles,
   Image as ImageIcon,
   MessageSquare,
-  X
+  X,
+  QrCode
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -396,6 +397,13 @@ export default function CreativesPage() {
               <MessageSquare className="w-4 h-4 mr-2" />
               Caption Maker
             </Button>
+
+            <Link to={createPageUrl("QRGenerator")}>
+              <Button variant="outline" size="sm">
+                <QrCode className="w-4 h-4 mr-2" />
+                QR Code Gen
+              </Button>
+            </Link>
 
             {/* Main Action Buttons */}
             <Dialog open={showBatchDialog} onOpenChange={(open) => {
