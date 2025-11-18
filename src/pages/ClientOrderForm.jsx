@@ -664,7 +664,7 @@ export default function ClientOrderFormPage() {
                       <div className="flex justify-center">
                         <div 
                           className="g-recaptcha" 
-                          data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+                          data-sitekey="6LegRBAsAAAAAOG6SQbS96zG3vPGQeh-TubAOwy6"
                           data-callback="onRecaptchaSuccess"
                           data-expired-callback="onRecaptchaExpired"
                           ref={recaptchaRef}
