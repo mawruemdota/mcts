@@ -594,6 +594,96 @@ export default function HomePage() {
         </DialogContent>
       </Dialog>
 
+      {/* Creative Hub Section */}
+      <section className="py-20 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <OptimizedImage
+            src={patternBackground}
+            alt="Pattern"
+            className="w-full h-full"
+            objectFit="repeat"
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-purple-500/20 text-purple-200 border-purple-400/30">
+              🎨 Creative Hub
+            </Badge>
+            <h3 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Advanced Creative Tools
+            </h3>
+            <p className="text-lg text-purple-200 max-w-2xl mx-auto">
+              Access our suite of professional creative tools designed for modern marketing and engagement
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {/* Photobooth */}
+            <Card className="bg-slate-800/50 border-purple-500/30 hover:border-purple-400 transition-all duration-300 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-white font-bold text-lg mb-2">Photobooth</h4>
+                <p className="text-purple-200 text-sm">
+                  Professional photo capture with templates, printing, and sharing capabilities
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Live Overlay */}
+            <Card className="bg-slate-800/50 border-purple-500/30 hover:border-purple-400 transition-all duration-300 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Video className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-white font-bold text-lg mb-2">Live Overlay</h4>
+                <p className="text-purple-200 text-sm">
+                  Real-time broadcast overlay system for OBS with controller and display modes
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Snaps */}
+            <Card className="bg-slate-800/50 border-purple-500/30 hover:border-purple-400 transition-all duration-300 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-white font-bold text-lg mb-2">Snaps</h4>
+                <p className="text-purple-200 text-sm">
+                  Collaborative photo collection rooms with QR code uploads and live slideshows
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Games */}
+            <Card className="bg-slate-800/50 border-purple-500/30 hover:border-purple-400 transition-all duration-300 backdrop-blur-sm">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Palette className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-white font-bold text-lg mb-2">Interactive Games</h4>
+                <p className="text-purple-200 text-sm">
+                  Custom quizzes, prize wheels, and interactive games for audience engagement
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center">
+            <a href="https://hub.marasigancreatives.com" target="_blank" rel="noopener noreferrer">
+              <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-6 text-lg shadow-xl">
+                <Sparkles className="w-5 h-5 mr-2" />
+                Explore Creative Hub
+                <ExternalLink className="w-5 h-5 ml-2" />
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
