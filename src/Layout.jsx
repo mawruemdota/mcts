@@ -280,13 +280,8 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
-  if (!user) {
-    if (isInactiveUser) {
-      window.location.href = createPageUrl("UnauthorizedAccess");
-      return null;
-    }
-
-    window.location.href = createPageUrl("Home");
+  if (!user || isInactiveUser) {
+    window.location.href = createPageUrl("UnauthorizedAccess");
     return null;
   }
 
