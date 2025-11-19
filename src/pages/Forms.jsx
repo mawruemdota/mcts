@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Quotation, Invoice, Client, Job, PriceListItem, Notification, User, IDPrintRecord, ReimbursementRequest, Order, Supplier, PurchaseOrder } from '@/entities/all';
 import { Button } from '@/components/ui/button';
@@ -38,6 +37,8 @@ import { Calendar as CalendarIcon, Trash2 as TrashIcon } from "lucide-react";
 import ReimbursementForm from '@/components/forms/ReimbursementForm';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import IDBatchUpload from '@/components/forms/IDBatchUpload';
+import FormDefinitionManager from '@/components/forms/FormDefinitionManager';
+import FormSubmissionsViewer from '@/components/forms/FormSubmissionsViewer';
 
 
 const EmailModal = ({ isOpen, onClose, recipient, subject, defaultBody, onSend }) => {
@@ -3269,6 +3270,13 @@ export default function FormsPage() {
                             <ShoppingCart className="w-4 h-4 mr-2" />
                             Client Orders
                         </TabsTrigger>
+                        <TabsTrigger 
+                            value="dynamic-forms"
+                            className="flex-1 data-[state=active]:bg-background"
+                        >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Dynamic Forms
+                        </TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="invoices" className="mt-6">
@@ -3578,6 +3586,23 @@ export default function FormsPage() {
                         onRefresh={loadAllData}
                         />
                     </TabsContent>
+
+                    <TabsContent value="dynamic-forms" className="mt-6">
+                        <Tabs defaultValue="manage" className="w-full">
+                            <TabsList>
+                                <TabsTrigger value="manage">Manage Forms</TabsTrigger>
+                                <TabsTrigger value="submissions">View Submissions</TabsTrigger>
+                            </TabsList>
+                            
+                            <TabsContent value="manage" className="mt-6">
+                                <FormDefinitionManager />
+                            </TabsContent>
+                            
+                            <TabsContent value="submissions" className="mt-6">
+                                <FormSubmissionsViewer />
+                            </TabsContent>
+                        </Tabs>
+                    </TabsContent>
                 </Tabs>
             </div>
              {/* Edit Invoice Dialog (moved here from InvoicesList) */}
@@ -3595,4 +3620,3 @@ export default function FormsPage() {
         </div>
     );
 }
-
