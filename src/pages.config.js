@@ -38,6 +38,7 @@ import Summary from './pages/Summary';
 import ActivityLog from './pages/ActivityLog';
 import QRGenerator from './pages/QRGenerator';
 import UnauthorizedAccess from './pages/UnauthorizedAccess';
+import DynamicForm from './pages/DynamicForm';
 import __Layout from './Layout.jsx';
 
 
@@ -82,6 +83,7 @@ export const PAGES = {
     "ActivityLog": ActivityLog,
     "QRGenerator": QRGenerator,
     "UnauthorizedAccess": UnauthorizedAccess,
+    "DynamicForm": DynamicForm,
 }
 
 export const pagesConfig = {
