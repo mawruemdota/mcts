@@ -77,6 +77,7 @@ export default function Layout({ children, currentPageName }) {
                        location.pathname.startsWith(createPageUrl("ARViewer")) ||
                        location.pathname.startsWith(createPageUrl("ReimbursementPrintView")) ||
                        location.pathname.startsWith(createPageUrl("ClientOrderForm")) ||
+                       location.pathname.startsWith(createPageUrl("DynamicForm")) ||
                        location.pathname.startsWith(createPageUrl("OrderTracking")) ||
                        location.pathname.startsWith(createPageUrl("InvoicePrintView")) ||
                        location.pathname.startsWith(createPageUrl("QuotationPrintView")) ||
