@@ -37,6 +37,7 @@ import ARViewer from './pages/ARViewer';
 import Summary from './pages/Summary';
 import ActivityLog from './pages/ActivityLog';
 import QRGenerator from './pages/QRGenerator';
+import UnauthorizedAccess from './pages/UnauthorizedAccess';
 import __Layout from './Layout.jsx';
 
 
@@ -80,6 +81,7 @@ export const PAGES = {
     "Summary": Summary,
     "ActivityLog": ActivityLog,
     "QRGenerator": QRGenerator,
+    "UnauthorizedAccess": UnauthorizedAccess,
 }
 
 export const pagesConfig = {

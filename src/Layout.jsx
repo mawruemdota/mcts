@@ -70,6 +70,7 @@ export default function Layout({ children, currentPageName }) {
                        location.pathname === '/' ||
                        location.pathname === '/Home' ||
                        location.pathname === createPageUrl("NotFound") ||
+                       location.pathname === createPageUrl("UnauthorizedAccess") ||
                        location.pathname.startsWith(createPageUrl("ClientQuote")) || 
                        location.pathname.startsWith(createPageUrl("PublicContentView")) ||
                        location.pathname.startsWith(createPageUrl("ARView")) ||
@@ -281,39 +282,8 @@ export default function Layout({ children, currentPageName }) {
 
   if (!user) {
     if (isInactiveUser) {
-      return (
-        <div className="min-h-screen flex items-center justify-center relative">
-          <OptimizedImage
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68ad86205308585a8db5f4bc/b878ac35a_bg.png"
-            alt="Background"
-            className="absolute inset-0 w-full h-full"
-            objectFit="cover"
-          />
-          <div className="absolute inset-0 bg-red-900/40 backdrop-blur-sm"></div>
-          <div className="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 relative z-10">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-red-600 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UserX className="w-8 h-8 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">Access Pending Authorization</h1>
-              <p className="text-gray-600 mt-2">Your account requires administrator approval before you can access this application. Please contact your administrator for assistance.</p>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={handleLogout}
-                className="w-full bg-red-600 hover:bg-red-700"
-              >
-                Sign Out
-              </Button>
-              <a href={createPageUrl('Home')} className="w-full">
-                <Button variant="outline" className="w-full">
-                  Go to Homepage
-                </Button>
-              </a>
-            </div>
-          </div>
-        </div>
-      );
+      window.location.href = createPageUrl("UnauthorizedAccess");
+      return null;
     }
 
     window.location.href = createPageUrl("Home");
