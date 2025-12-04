@@ -39,6 +39,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import IDBatchUpload from '@/components/forms/IDBatchUpload';
 import FormDefinitionManager from '@/components/forms/FormDefinitionManager';
 import FormSubmissionsViewer from '@/components/forms/FormSubmissionsViewer';
+import DeliveryFormManager from '@/components/forms/DeliveryFormManager';
 
 
 const EmailModal = ({ isOpen, onClose, recipient, subject, defaultBody, onSend }) => {
@@ -3277,6 +3278,13 @@ export default function FormsPage() {
                             <FileText className="w-4 h-4 mr-2" />
                             Dynamic Forms
                         </TabsTrigger>
+                        <TabsTrigger 
+                            value="delivery-forms"
+                            className="flex-1 data-[state=active]:bg-background"
+                        >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Delivery Forms
+                        </TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="invoices" className="mt-6">
@@ -3602,6 +3610,10 @@ export default function FormsPage() {
                                 <FormSubmissionsViewer />
                             </TabsContent>
                         </Tabs>
+                    </TabsContent>
+
+                    <TabsContent value="delivery-forms" className="mt-6">
+                        <DeliveryFormManager />
                     </TabsContent>
                 </Tabs>
             </div>
