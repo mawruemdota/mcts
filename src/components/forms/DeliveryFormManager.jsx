@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Plus, Trash2, Printer, Edit, X } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
+import { notifyDeliveryScheduled } from '@/components/utils/notificationService';
 
 export default function DeliveryFormManager() {
   const [deliveries, setDeliveries] = useState([]);
@@ -165,7 +166,13 @@ export default function DeliveryFormManager() {
         await base44.entities.DeliveryForm.update(editingDelivery.id, formData);
         toast({ title: 'Delivery form updated' });
       } else {
-        await base44.entities.DeliveryForm.create(formData);
+        const newDelivery = await base44.entities.DeliveryForm.create(formData);
+        
+        // Notify team about scheduled delivery
+        const users = await base44.entities.User.list();
+        const teamEmails = users.map(u => u.email);
+        await notifyDeliveryScheduled(newDelivery, teamEmails);
+        
         toast({ title: 'Delivery form created' });
       }
 
