@@ -3,7 +3,7 @@ import { Job, User } from '@/entities/all';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, UserCheck, Plus, Loader2, Package, Edit, User as UserIcon, Calendar, Check } from 'lucide-react';
+import { Search, UserCheck, Plus, Loader2, Package, Edit, User as UserIcon, Calendar, Check, Truck, Receipt } from 'lucide-react';
 import { formatDistanceToNow, isToday } from 'date-fns';
 import JobDetails from '@/components/jobs/JobDetails';
 import NewTaskModal from '@/components/jobs/NewTaskModal';
@@ -62,14 +62,40 @@ const JobCard = ({ job, onSelect, userMap, onArchive }) => {
             {job.title}
           </div>
           <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+            {job.status === 'ready_pickup' && (
+              <Link to={createPageUrl(`CreateDeliveryForm?jobId=${job.id}`)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10"
+                  title="Create Delivery Receipt"
+                >
+                  <Truck className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            )}
             {isCompleted && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onArchive(job)}
-                className="h-7 w-7">
-                <Check className="w-3.5 h-3.5" />
-              </Button>
+              <>
+                <Link to={createPageUrl(`CreateInvoice?jobId=${job.id}`)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-green-500 hover:text-green-600 hover:bg-green-500/10"
+                    title="Create Invoice"
+                  >
+                    <Receipt className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onArchive(job)}
+                  className="h-7 w-7"
+                  title="Archive"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                </Button>
+              </>
             )}
           </div>
         </div>
