@@ -16,6 +16,7 @@ import { createPageUrl } from '@/utils';
 import { cn } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { notifyTaskStatusChange } from '@/components/utils/notificationService';
 
 const statusConfig = {
   pending_approval: { label: 'Pending', color: 'bg-orange-500', headerColor: 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200' },
@@ -236,7 +237,9 @@ export default function ProductionQueue({ user, initialFilter }) {
     setJobs(prevJobs => prevJobs.map(j => j.id === draggableId ? { ...j, status: newStatus } : j));
 
     Job.update(draggableId, { status: newStatus })
-        .then(() => {
+        .then(async () => {
+            // Send notifications for status change
+            await notifyTaskStatusChange(job, job.status, newStatus, user?.email);
             toast({
                 title: "Task Updated",
                 description: `Moved to "${statusConfig[newStatus]?.label}".`,

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Job, User, JobUpdate } from "@/entities/all";
 import { Button } from "@/components/ui/button";
@@ -35,6 +34,7 @@ import JobsTable from "../components/jobs/JobsTable";
 import JobFilters from "../components/jobs/JobFilters";
 import JobDetails from "../components/jobs/JobDetails";
 import NewTaskModal from "@/components/jobs/NewTaskModal";
+import { notifyTaskStatusChange } from "@/components/utils/notificationService";
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([]);
@@ -91,19 +91,25 @@ export default function JobsPage() {
         updateData.approved_date = new Date().toISOString();
       }
 
-      await Job.update(jobId, updateData);
-
       const jobsArray = Array.isArray(jobs) ? jobs : [];
       const job = jobsArray.find(j => j.id === jobId);
+      const oldStatus = job?.status;
+
+      await Job.update(jobId, updateData);
 
       await JobUpdate.create({
         job_id: jobId,
         update_type: 'status_change',
-        old_status: job?.status,
+        old_status: oldStatus,
         new_status: updateData.status,
         message: `Status updated to ${updateData.status}${updateData.approved_by ? ` (Approved by: ${user?.nickname || user?.full_name})` : ''}`,
         updated_by: user?.email
       });
+
+      // Send notifications for status change
+      if (job && updateData.status) {
+        await notifyTaskStatusChange(job, oldStatus, updateData.status, user?.email);
+      }
 
       loadData();
     } catch (error) {

@@ -40,6 +40,7 @@ import IDBatchUpload from '@/components/forms/IDBatchUpload';
 import FormDefinitionManager from '@/components/forms/FormDefinitionManager';
 import FormSubmissionsViewer from '@/components/forms/FormSubmissionsViewer';
 import DeliveryFormManager from '@/components/forms/DeliveryFormManager';
+import { notifyPurchaseOrderApproval } from '@/components/utils/notificationService';
 
 
 const EmailModal = ({ isOpen, onClose, recipient, subject, defaultBody, onSend }) => {
@@ -2575,7 +2576,7 @@ const PurchaseOrderForm = ({ onSubmitted, suppliers }) => {
 
       try {
           const currentUser = await User.me();
-          await PurchaseOrder.create({
+          const newPO = await PurchaseOrder.create({
               ...formData,
               items: validItems,
               subtotal,
@@ -2583,6 +2584,11 @@ const PurchaseOrderForm = ({ onSubmitted, suppliers }) => {
               requested_by_email: currentUser.email,
               status: 'draft'
           });
+
+          // Notify approver if one is selected
+          if (formData.approved_by_email) {
+            await notifyPurchaseOrderApproval(newPO, formData.approved_by_email);
+          }
 
           toast({ title: 'Success', description: 'Purchase Order created successfully.' });
           onSubmitted();
