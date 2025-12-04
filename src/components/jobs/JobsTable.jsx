@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,8 @@ import {
   AlertTriangle,
   Receipt,
   Trash2,
-  User
+  User,
+  Truck
 } from "lucide-react";
 import { format, isToday, isPast } from "date-fns";
 import { Link } from "react-router-dom";
@@ -179,11 +179,19 @@ export default function JobsTable({ jobs, onJobUpdate, onJobSelect, user, team, 
                           Approve Task
                         </DropdownMenuItem>
                       )}
+                      {job.status === 'ready_pickup' && (
+                        <DropdownMenuItem asChild onClick={(e) => e.stopPropagation()}>
+                          <Link to={createPageUrl(`CreateDeliveryForm?jobId=${job.id}`)}>
+                            <Truck className="w-4 h-4 mr-2" />
+                            Create Delivery Receipt
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
                       {job.status === 'completed' && (
                         <DropdownMenuItem asChild onClick={(e) => e.stopPropagation()}>
                           <Link to={createPageUrl(`CreateInvoice?jobId=${job.id}`)}>
                             <Receipt className="w-4 h-4 mr-2" />
-                            Create Receipt
+                            Create Invoice
                           </Link>
                         </DropdownMenuItem>
                       )}

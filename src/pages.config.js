@@ -40,6 +40,7 @@ import QRGenerator from './pages/QRGenerator';
 import UnauthorizedAccess from './pages/UnauthorizedAccess';
 import DynamicForm from './pages/DynamicForm';
 import DeliveryFormPrint from './pages/DeliveryFormPrint';
+import CreateDeliveryForm from './pages/CreateDeliveryForm';
 import __Layout from './Layout.jsx';
 
 
@@ -86,6 +87,7 @@ export const PAGES = {
     "UnauthorizedAccess": UnauthorizedAccess,
     "DynamicForm": DynamicForm,
     "DeliveryFormPrint": DeliveryFormPrint,
+    "CreateDeliveryForm": CreateDeliveryForm,
 }
 
 export const pagesConfig = {
