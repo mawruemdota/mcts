@@ -39,7 +39,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
 
             if (initialJobId) {
                 const jobData = await base44.entities.Job.filter({ id: initialJobId });
-                const job = jobData && jobData.length > 0 ? jobData[0] : null;
+                const job = jobData && Array.isArray(jobData) && jobData.length > 0 ? jobData[0] : null;
                 if (job) {
                     const client = allClients.find(c => c.id === job.client_id);
                     if (client) {
@@ -83,8 +83,8 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
                 const clientJobs = await base44.entities.Job.filter({ client_id: clientId, status: 'completed' });
 
                 const allInvoices = await base44.entities.Invoice.list();
-                const unbilledJobs = clientJobs.filter(job => {
-                    const isInvoiced = allInvoices.some(inv => 
+                const unbilledJobs = (Array.isArray(clientJobs) ? clientJobs : []).filter(job => {
+                    const isInvoiced = Array.isArray(allInvoices) && allInvoices.some(inv => 
                         inv.job_ids && inv.job_ids.includes(job.id) && inv.status !== 'archived'
                     );
                     return !isInvoiced || (initialJobId && job.id === initialJobId);
@@ -133,8 +133,9 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
         let totalAmount = 0;
         let invoiceItems = [];
 
+        const jobsList = Array.isArray(jobs) ? jobs : [];
         selectedJobIds.forEach(jobId => {
-            const job = jobs.find(j => j.id === jobId);
+            const job = jobsList.find(j => j.id === jobId);
             if (job) {
                 const jobAmount = (job.actual_price || job.estimated_price || 0);
                 totalAmount += jobAmount;
