@@ -22,9 +22,6 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
     const [selectedClientEmail, setSelectedClientEmail] = useState('');
     const [isLoadingData, setIsLoadingData] = useState(true);
 
-    // Ensure jobs is always an array
-    const safeJobs = Array.isArray(jobs) ? jobs : [];
-
     const [formData, setFormData] = useState({
         invoice_number: `INV-${Date.now().toString().slice(-6)}`,
         issue_date: format(new Date(), 'yyyy-MM-dd'),
@@ -85,8 +82,9 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
             try {
                 const clientJobs = await base44.entities.Job.filter({ client_id: clientId, status: 'completed' });
 
-                const allInvoices = await base44.entities.Invoice.list();
-                const unbilledJobs = (Array.isArray(clientJobs) ? clientJobs : []).filter(job => {
+                const allInvoices = await base44.entities.Invoice.list() || [];
+                const jobsArray = Array.isArray(clientJobs) ? clientJobs : [];
+                const unbilledJobs = jobsArray.filter(job => {
                     const isInvoiced = Array.isArray(allInvoices) && allInvoices.some(inv => 
                         inv.job_ids && inv.job_ids.includes(job.id) && inv.status !== 'archived'
                     );
@@ -103,6 +101,11 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
                 setJobs([]);
                 setSelectedJobIds([]);
             }
+        } else {
+            setJobs([]);
+            setSelectedJobIds([]);
+        }
+    }, [toast, initialJobId]);
         } else {
             setJobs([]);
             setSelectedJobIds([]);
@@ -133,11 +136,13 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
     }, [selectedClientId, clients]);
 
     useEffect(() => {
+        if (!Array.isArray(jobs)) return;
+        
         let totalAmount = 0;
         let invoiceItems = [];
 
         selectedJobIds.forEach(jobId => {
-            const job = safeJobs.find(j => j.id === jobId);
+            const job = jobs.find(j => j.id === jobId);
             if (job) {
                 const jobAmount = (job.actual_price || job.estimated_price || 0);
                 totalAmount += jobAmount;
@@ -150,7 +155,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
             }
         });
         setFormData(prev => ({ ...prev, amount: totalAmount, items: invoiceItems }));
-    }, [selectedJobIds, safeJobs]);
+    }, [selectedJobIds, jobs]);
 
     const handleClientSelect = (clientId) => {
         const client = clients.find(c => c.id === clientId);
@@ -264,11 +269,11 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
                         </div>
                     </div>
 
-                    {selectedClientId && !initialJobId && safeJobs.length > 0 && (
+                    {selectedClientId && !initialJobId && Array.isArray(jobs) && jobs.length > 0 && (
                         <div className="space-y-3">
                             <Label>Completed Tasks</Label>
                             <div className="border border-border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
-                                {safeJobs.map(job => (
+                                {jobs.map(job => (
                                     <div key={job.id} className="flex items-center space-x-2">
                                         <Checkbox
                                             id={`job-${job.id}`}
