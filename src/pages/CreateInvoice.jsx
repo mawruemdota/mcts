@@ -22,6 +22,9 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
     const [selectedClientEmail, setSelectedClientEmail] = useState('');
     const [isLoadingData, setIsLoadingData] = useState(true);
 
+    // Ensure jobs is always an array
+    const safeJobs = Array.isArray(jobs) ? jobs : [];
+
     const [formData, setFormData] = useState({
         invoice_number: `INV-${Date.now().toString().slice(-6)}`,
         issue_date: format(new Date(), 'yyyy-MM-dd'),
@@ -133,9 +136,8 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
         let totalAmount = 0;
         let invoiceItems = [];
 
-        const jobsList = Array.isArray(jobs) ? jobs : [];
         selectedJobIds.forEach(jobId => {
-            const job = jobsList.find(j => j.id === jobId);
+            const job = safeJobs.find(j => j.id === jobId);
             if (job) {
                 const jobAmount = (job.actual_price || job.estimated_price || 0);
                 totalAmount += jobAmount;
@@ -148,7 +150,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
             }
         });
         setFormData(prev => ({ ...prev, amount: totalAmount, items: invoiceItems }));
-    }, [selectedJobIds, jobs]);
+    }, [selectedJobIds, safeJobs]);
 
     const handleClientSelect = (clientId) => {
         const client = clients.find(c => c.id === clientId);
@@ -262,11 +264,11 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
                         </div>
                     </div>
 
-                    {selectedClientId && !initialJobId && Array.isArray(jobs) && jobs.length > 0 && (
+                    {selectedClientId && !initialJobId && safeJobs.length > 0 && (
                         <div className="space-y-3">
                             <Label>Completed Tasks</Label>
                             <div className="border border-border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
-                                {jobs.map(job => (
+                                {safeJobs.map(job => (
                                     <div key={job.id} className="flex items-center space-x-2">
                                         <Checkbox
                                             id={`job-${job.id}`}
