@@ -262,7 +262,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
                         </div>
                     </div>
 
-                    {selectedClientId && !initialJobId && jobs.length > 0 && (
+                    {selectedClientId && !initialJobId && Array.isArray(jobs) && jobs.length > 0 && (
                         <div className="space-y-3">
                             <Label>Completed Tasks</Label>
                             <div className="border border-border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
