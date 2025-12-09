@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { base44 } from '@/api/base44Client';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Invoice, Job, Client } from '@/entities/all'; // Added Client entity
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,94 +9,54 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 import { createPageUrl } from '@/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Added Select components
+import { Checkbox } from '@/components/ui/checkbox'; // Added Checkbox
 
-export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobId }) {
+export default function CreateInvoice() { // Renamed component from CreateInvoicePage
+    const location = useLocation();
+    const navigate = useNavigate();
     const { toast } = useToast();
 
+    // Replaced 'job' state with client and jobs selection
     const [clients, setClients] = useState([]);
     const [jobs, setJobs] = useState([]);
     const [selectedClientId, setSelectedClientId] = useState('');
     const [selectedJobIds, setSelectedJobIds] = useState([]);
     const [selectedClientName, setSelectedClientName] = useState('');
     const [selectedClientEmail, setSelectedClientEmail] = useState('');
-    const [isLoadingData, setIsLoadingData] = useState(true);
 
     const [formData, setFormData] = useState({
         invoice_number: `INV-${Date.now().toString().slice(-6)}`,
         issue_date: format(new Date(), 'yyyy-MM-dd'),
         due_date: format(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
-        amount: 0,
-        notes: '',
-        items: [],
+        amount: 0, // This will be calculated dynamically
+        notes: ''
     });
 
-    const loadClientsAndJobs = useCallback(async () => {
-        setIsLoadingData(true);
+    // Function to load all clients
+    const loadClients = useCallback(async () => {
         try {
-            const allClients = await base44.entities.Client.list();
+            const allClients = await Client.filter({});
             setClients(allClients);
-
-            if (initialJobId) {
-                const jobData = await base44.entities.Job.filter({ id: initialJobId });
-                const job = jobData && Array.isArray(jobData) && jobData.length > 0 ? jobData[0] : null;
-                if (job) {
-                    const client = allClients.find(c => c.id === job.client_id);
-                    if (client) {
-                        setSelectedClientId(client.id);
-                        setSelectedClientName(client.client_name);
-                        setSelectedClientEmail(client.email || '');
-                    }
-
-                    setFormData(prev => ({
-                        ...prev,
-                        client_name: job.client_name || '',
-                        client_email: job.client_email || '',
-                        notes: job.title ? `Task: ${job.title}` : '',
-                        items: job.items?.map(item => ({
-                            description: item.item_name,
-                            quantity: item.quantity,
-                            price: item.price,
-                            job_id: job.id
-                        })) || [{
-                            description: job.title || '',
-                            quantity: job.quantity || 1,
-                            price: job.actual_price || job.estimated_price || 0,
-                            job_id: job.id
-                        }]
-                    }));
-                    setSelectedJobIds([job.id]);
-                    setJobs([job]);
-                }
-            }
         } catch (error) {
-            console.error('Error loading clients or initial job:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load initial data.' });
-        } finally {
-            setIsLoadingData(false);
+            console.error('Error loading clients:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to load client list.' });
         }
-    }, [initialJobId, toast]);
+    }, [toast]);
 
+    // Function to fetch completed and unbilled jobs for a selected client
     const fetchJobsForClient = useCallback(async (clientId) => {
         if (clientId) {
             try {
-                const clientJobs = await base44.entities.Job.filter({ client_id: clientId, status: 'completed' });
+                // Filter by status 'completed' and ensure job_id is not already linked to an invoice
+                const clientJobs = await Job.filter({ client_id: clientId, status: 'completed' });
 
-                const allInvoices = await base44.entities.Invoice.list() || [];
-                const jobsArray = Array.isArray(clientJobs) ? clientJobs : [];
-                const unbilledJobs = jobsArray.filter(job => {
-                    const isInvoiced = Array.isArray(allInvoices) && allInvoices.some(inv => 
-                        inv.job_ids && inv.job_ids.includes(job.id) && inv.status !== 'archived'
-                    );
-                    return !isInvoiced || (initialJobId && job.id === initialJobId);
-                });
-                setJobs(unbilledJobs);
-                
-                if (!initialJobId) {
-                    setSelectedJobIds([]);
-                }
+                const unbilledJobs = await Promise.all(clientJobs.map(async (job) => {
+                    const existingInvoices = await Invoice.filter({ job_ids: [job.id] });
+                    return existingInvoices.length === 0 ? job : null;
+                }));
+                setJobs(unbilledJobs.filter(Boolean)); // Filter out nulls
+                setSelectedJobIds([]); // Reset selected jobs when client changes
             } catch (error) {
                 console.error('Error fetching jobs for client:', error);
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to load client tasks.' });
@@ -105,63 +67,41 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
             setJobs([]);
             setSelectedJobIds([]);
         }
-    }, [toast, initialJobId]);
-        } else {
-            setJobs([]);
-            setSelectedJobIds([]);
-        }
-    }, [toast, initialJobId]);
+    }, [toast]);
 
+    // Effect to load clients on component mount
     useEffect(() => {
-        if (isOpen) {
-            loadClientsAndJobs();
-        }
-    }, [isOpen, loadClientsAndJobs]);
+        loadClients();
+    }, [loadClients]);
 
+    // Effect to fetch jobs when the selected client changes
     useEffect(() => {
-        if (selectedClientId && !initialJobId) {
-            fetchJobsForClient(selectedClientId);
-        }
-    }, [selectedClientId, fetchJobsForClient, initialJobId]);
-
-    useEffect(() => {
+        fetchJobsForClient(selectedClientId);
+        // Update selected client details for display and invoice creation
         const client = clients.find(c => c.id === selectedClientId);
         if (client) {
-            setSelectedClientName(client.client_name || 'Unknown Client');
+            setSelectedClientName(client.name || 'Unknown Client');
             setSelectedClientEmail(client.email || '');
         } else {
             setSelectedClientName('');
             setSelectedClientEmail('');
         }
-    }, [selectedClientId, clients]);
+    }, [selectedClientId, fetchJobsForClient, clients]);
 
+    // Effect to calculate total amount whenever selected jobs change
     useEffect(() => {
-        if (!Array.isArray(jobs)) return;
-        
         let totalAmount = 0;
-        let invoiceItems = [];
-
         selectedJobIds.forEach(jobId => {
             const job = jobs.find(j => j.id === jobId);
             if (job) {
-                const jobAmount = (job.actual_price || job.estimated_price || 0);
-                totalAmount += jobAmount;
-                invoiceItems.push({
-                    description: job.title || (job.job_type || 'Service').replace(/_/g, ' '),
-                    quantity: job.quantity || 1,
-                    price: jobAmount,
-                    job_id: job.id
-                });
+                totalAmount += (job.actual_price || job.estimated_price || 0);
             }
         });
-        setFormData(prev => ({ ...prev, amount: totalAmount, items: invoiceItems }));
+        setFormData(prev => ({ ...prev, amount: totalAmount }));
     }, [selectedJobIds, jobs]);
 
     const handleClientSelect = (clientId) => {
-        const client = clients.find(c => c.id === clientId);
         setSelectedClientId(clientId);
-        setSelectedClientName(client?.client_name || '');
-        setSelectedClientEmail(client?.email || '');
     };
 
     const handleJobSelection = (jobId) => {
@@ -184,62 +124,121 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
             return;
         }
 
-        if (formData.items.length === 0) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Please select at least one task or add items.' });
+        if (selectedJobIds.length === 0) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Please select at least one task for the invoice.' });
             return;
         }
 
-        const invoiceItems = formData.items;
+        const invoiceItems = selectedJobIds.map(jobId => {
+            const job = jobs.find(j => j.id === jobId);
+            if (!job) return null; // Should not happen if `jobs` state is consistent
+
+            const jobAmount = job.actual_price || job.estimated_price || 0;
+            const jobQuantity = job.quantity || 1;
+            // Prioritize job.title, fallback to job_type
+            const description = job.title || (job.job_type || 'Service').replace(/_/g, ' ');
+            const unitPrice = jobQuantity > 0 ? jobAmount / jobQuantity : jobAmount; // Handle division by zero
+
+            return {
+                description: description,
+                quantity: jobQuantity,
+                price: unitPrice,
+                job_id: job.id // Include job_id for reference
+            };
+        }).filter(Boolean); // Remove any null items
 
         try {
-            const newInvoice = await base44.entities.Invoice.create({
+            await Invoice.create({
                 invoice_number: formData.invoice_number,
                 issue_date: formData.issue_date,
                 due_date: formData.due_date,
                 amount: formData.amount,
                 notes: formData.notes,
-                job_ids: selectedJobIds,
+                job_ids: selectedJobIds, // Array of selected job IDs
                 client_name: selectedClientName,
                 client_email: selectedClientEmail,
                 status: 'unpaid',
-                items: invoiceItems,
-                subtotal: formData.amount,
+                items: invoiceItems, // Items derived from selected jobs
+                subtotal: formData.amount, // For simplicity, subtotal is the same as total amount for now
                 discount: 0
             });
 
-            if (initialJobId) {
-                await base44.entities.Job.update(initialJobId, { status: 'completed' });
-            }
-            
             toast({ title: "Success", description: "Invoice created successfully." });
-            window.open(createPageUrl('InvoicePrintView') + `?id=${newInvoice.id}`, '_blank');
-            onClose();
+            navigate(createPageUrl('Sales'));
         } catch (err) {
             console.error('Invoice creation error:', err);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to create invoice.' });
         }
     };
 
-    if (isLoadingData) {
+    // Loading state for clients
+    if (clients.length === 0 && !selectedClientId) {
         return (
-            <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="dialog-content">
-                    <div className="flex justify-center items-center p-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <div className="p-8 bg-background text-foreground min-h-screen">
+                <div className="max-w-2xl mx-auto">
+                    <div className="text-center">Loading clients...</div>
+                </div>
+            </div>
         );
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="dialog-content max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="text-card-foreground">Create New Invoice</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-6 text-card-foreground">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-8 bg-background text-foreground min-h-screen">
+            <div className="max-w-2xl mx-auto">
+                {/* Prioritize Task Titles - Updated H1 */}
+                <h1 className="text-3xl font-bold mb-6">Create New Invoice</h1>
+
+                {/* Client Selection */}
+                <div className="mb-6 space-y-2">
+                    <Label htmlFor="client-select">Select Client</Label>
+                    <Select
+                        value={selectedClientId}
+                        onValueChange={handleClientSelect}
+                    >
+                        <SelectTrigger id="client-select">
+                            <SelectValue placeholder="Select a client" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {clients.map(client => (
+                                <SelectItem key={client.id} value={client.id}>
+                                    {client.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {/* Hide Job Type/ID - Replaced old "Task Details" with a list of selectable tasks */}
+                {selectedClientId && (
+                    <div className="mb-6 p-4 bg-card border border-border rounded-lg">
+                        <div className="space-y-4">
+                            <h3 className="font-semibold text-foreground">Completed Tasks ({jobs.length} available)</h3>
+                            <div className="space-y-2">
+                                {jobs.length > 0 ? (
+                                    jobs.map((job) => (
+                                        <div key={job.id} className="flex items-center space-x-2 bg-secondary p-3 rounded-lg">
+                                            <Checkbox
+                                                id={`job-${job.id}`}
+                                                checked={selectedJobIds.includes(job.id)}
+                                                onCheckedChange={() => handleJobSelection(job.id)}
+                                            />
+                                            <label htmlFor={`job-${job.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">
+                                                {/* Prioritize job.title */}
+                                                {job.title} (Qty: {job.quantity}) - ₱{job.actual_price?.toFixed(2) || job.estimated_price?.toFixed(2) || '0.00'}
+                                                {job.completion_date && ` (Completed: ${format(new Date(job.completion_date), "MMM d, yyyy")})`}
+                                            </label>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-muted-foreground text-sm">No new completed tasks for this client that are not yet billed.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Invoice Number</Label>
                             <Input
@@ -249,47 +248,12 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Select Client</Label>
-                            <Select
-                                value={selectedClientId}
-                                onValueChange={handleClientSelect}
-                                disabled={!!initialJobId}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a client" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {clients.map(client => (
-                                        <SelectItem key={client.id} value={client.id}>
-                                            {client.client_name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Label>Client Name</Label>
+                            <Input value={selectedClientName} disabled /> {/* Displays selected client's name */}
                         </div>
                     </div>
 
-                    {selectedClientId && !initialJobId && Array.isArray(jobs) && jobs.length > 0 && (
-                        <div className="space-y-3">
-                            <Label>Completed Tasks</Label>
-                            <div className="border border-border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
-                                {jobs.map(job => (
-                                    <div key={job.id} className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`job-${job.id}`}
-                                            checked={selectedJobIds.includes(job.id)}
-                                            onCheckedChange={() => handleJobSelection(job.id)}
-                                        />
-                                        <Label htmlFor={`job-${job.id}`} className="flex-1 cursor-pointer text-foreground">
-                                            {job.title} (Qty: {job.quantity}) - ₱{(job.actual_price || job.estimated_price || 0).toFixed(2)}
-                                        </Label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label>Issue Date</Label>
                             <Input
@@ -311,22 +275,18 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Items to be Invoiced</Label>
-                        {formData.items.length > 0 ? (
-                            <ul className="border rounded-md p-3 space-y-2 bg-secondary/30">
-                                {formData.items.map((item, index) => (
-                                    <li key={index} className="flex justify-between text-sm">
-                                        <span>{item.description} (x{item.quantity})</span>
-                                        <span className="font-medium">₱{(item.price * item.quantity).toFixed(2)}</span>
-                                    </li>
-                                ))}
-                                <li className="flex justify-between text-base font-bold border-t pt-2 mt-2">
-                                    <span>Total:</span>
-                                    <span>₱{formData.amount.toFixed(2)}</span>
-                                </li>
-                            </ul>
-                        ) : (
-                            <p className="text-muted-foreground text-sm border rounded-md p-3">No items added yet. Select tasks above.</p>
+                        <Label>Total Amount (₱)</Label>
+                        <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={formData.amount.toFixed(2)}
+                            onChange={e => handleChange('amount', parseFloat(e.target.value) || 0)}
+                            required
+                            disabled={selectedJobIds.length > 0} // Disable if jobs are selected, as amount is calculated
+                        />
+                        {selectedJobIds.length > 0 && (
+                            <p className="text-xs text-muted-foreground">Amount automatically calculated from selected tasks.</p>
                         )}
                     </div>
 
@@ -339,20 +299,18 @@ export default function CreateInvoiceModal({ isOpen, onClose, jobId: initialJobI
                         />
                     </div>
 
-                    <DialogFooter>
+                    <div className="flex justify-end gap-3">
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={onClose}
+                            onClick={() => navigate(createPageUrl('Sales'))}
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={!selectedClientId || formData.items.length === 0}>
-                            Create Invoice
-                        </Button>
-                    </DialogFooter>
+                        <Button type="submit" disabled={!selectedClientId || selectedJobIds.length === 0}>Create Invoice</Button>
+                    </div>
                 </form>
-            </DialogContent>
-        </Dialog>
+            </div>
+        </div>
     );
 }
