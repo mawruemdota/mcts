@@ -8,6 +8,8 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format, isPast, isToday } from 'date-fns';
 import CreateInvoiceModal from '@/pages/CreateInvoice';
+import { notifyTaskStatusChange } from '@/components/utils/notificationService';
+import { base44 } from '@/api/base44Client';
 
 export default function ProductionQueue({ jobs, team, onUpdateJob, onArchive }) {
   const [search, setSearch] = useState('');
