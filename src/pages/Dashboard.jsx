@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Home } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import ProductionQueue from '../components/dashboard/ProductionQueue';
-import InventoryAlerts from '../components/dashboard/InventoryAlerts';
+import RecentActivityWidget from '../components/activity/RecentActivityWidget';
 import RemindersSummary from '../components/dashboard/RemindersSummary';
 import DashboardCalendar from '../components/dashboard/DashboardCalendar';
 import { useToast } from "@/components/ui/use-toast";
@@ -70,7 +70,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           <DashboardCalendar user={user} />
           <RemindersSummary user={user} />
-          <InventoryAlerts user={user} />
+          <RecentActivityWidget limit={10} />
         </div>
       </div>
     </div>

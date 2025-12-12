@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -76,16 +77,15 @@ const JobCard = ({ job, onSelect, userMap, onArchive }) => {
             )}
             {isCompleted && (
               <>
-                <Link to={createPageUrl(`CreateInvoice?jobId=${job.id}`)}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-green-500 hover:text-green-600 hover:bg-green-500/10"
-                    title="Create Invoice"
-                  >
-                    <Receipt className="w-3.5 h-3.5" />
-                  </Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleCreateInvoice(job)}
+                  className="h-7 w-7 text-green-500 hover:text-green-600 hover:bg-green-500/10"
+                  title="Create Invoice"
+                >
+                  <Receipt className="w-3.5 h-3.5" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

@@ -215,7 +215,7 @@ export default function Layout({ children, currentPageName }) {
       },
       {
         title: "Reports",
-        url: createPageUrl("Reports"),
+        url: createPageUrl("AdvancedReports"),
         icon: BarChart3,
         roles: ["admin", "user"]
       },
