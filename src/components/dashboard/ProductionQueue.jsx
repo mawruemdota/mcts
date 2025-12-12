@@ -39,7 +39,7 @@ const getNextStatus = (currentStatus) => {
   return null;
 };
 
-const JobCard = ({ job, onSelect, userMap, onArchive }) => {
+const JobCard = ({ job, onSelect, userMap, onArchive, onCreateInvoice }) => {
   const isOverdue = job.deadline && new Date(job.deadline) < new Date();
   const isCompleted = job.status === 'completed';
   const assignee = userMap.get(job.assigned_to);
@@ -80,7 +80,7 @@ const JobCard = ({ job, onSelect, userMap, onArchive }) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleCreateInvoice(job)}
+                  onClick={() => onCreateInvoice(job)}
                   className="h-7 w-7 text-green-500 hover:text-green-600 hover:bg-green-500/10"
                   title="Create Invoice"
                 >
@@ -137,6 +137,8 @@ export default function ProductionQueue({ user, initialFilter }) {
   const [showMyTasks, setShowMyTasks] = useState(false);
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [allUsers, setAllUsers] = useState([]);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [invoicePrefilledData, setInvoicePrefilledData] = useState(null);
   const { toast } = useToast();
 
   const fetchJobsAndUsers = useCallback(async () => {
@@ -172,6 +174,27 @@ export default function ProductionQueue({ user, initialFilter }) {
       setFilter(initialFilter);
     }
   }, [initialFilter]);
+
+  const handleCreateInvoice = useCallback((job) => {
+    const prefilledData = {
+      client_id: job.client_id || '',
+      client_name: job.client_name || '',
+      client_email: job.client_email || '',
+      items: job.items?.map(item => ({
+        description: item.item_name,
+        quantity: item.quantity,
+        price: item.price
+      })) || (job.title ? [{
+        description: job.title,
+        quantity: job.quantity || 1,
+        price: job.actual_price || job.estimated_price || ''
+      }] : []),
+      notes: job.title ? `Task: ${job.title}` : '',
+      job_ids: [job.id]
+    };
+    setInvoicePrefilledData(prefilledData);
+    setShowInvoiceModal(true);
+  }, []);
 
   const handleArchiveJob = useCallback(async (job) => {
     await Job.update(job.id, { status: 'archived' });
@@ -389,6 +412,7 @@ export default function ProductionQueue({ user, initialFilter }) {
                                       job={job}
                                       onSelect={handleJobSelect}
                                       onArchive={handleArchiveJob}
+                                      onCreateInvoice={handleCreateInvoice}
                                       userMap={usersMap}
                                     />
                                   </div>
@@ -428,6 +452,18 @@ export default function ProductionQueue({ user, initialFilter }) {
             fetchJobsAndUsers();
           }}
           user={user}
+        />
+      )}
+      
+      {showInvoiceModal && (
+        <InvoiceModal
+          isOpen={showInvoiceModal}
+          onClose={() => {
+            setShowInvoiceModal(false);
+            setInvoicePrefilledData(null);
+            fetchJobsAndUsers();
+          }}
+          prefilledData={invoicePrefilledData}
         />
       )}
     </>
