@@ -27,7 +27,10 @@ import {
   Palette,
   Sparkles,
   Video,
-  ExternalLink
+  ExternalLink,
+  Menu,
+  X,
+  Wrench
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -38,6 +41,7 @@ export default function HomePage() {
   const [notableClients, setNotableClients] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -259,11 +263,19 @@ export default function HomePage() {
               />
               <h1 className="text-2xl font-bold text-white">MCTS</h1>
             </div>
-            <div className="flex items-center gap-4">
-              <a href="#services" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Services</a>
-              <a href="#contact" className="text-white/90 font-bold hover:text-white transition-colors hidden md:block">Contact</a>
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-4">
+              <a href="#services" className="text-white/90 font-bold hover:text-white transition-colors">Services</a>
+              <a href="#contact" className="text-white/90 font-bold hover:text-white transition-colors">Contact</a>
+              <a href={createPageUrl('MCTSToolbox')}>
+                <Button variant="ghost" className="text-white hover:bg-white/10">
+                  <Wrench className="w-4 h-4 mr-2" />
+                  Tools
+                </Button>
+              </a>
               <a href={createPageUrl('OrderTracking')}>
-                <Button variant="ghost" className="text-white hover:bg-white/10 hidden md:inline-flex">
+                <Button variant="ghost" className="text-white hover:bg-white/10">
                   Track Order
                 </Button>
               </a>
@@ -273,7 +285,45 @@ export default function HomePage() {
                 </Button>
               </a>
             </div>
+
+            {/* Mobile Navigation */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </Button>
+            </div>
           </div>
+
+          {/* Mobile Menu Dropdown */}
+          {mobileMenuOpen && (
+            <div className="md:hidden py-4 border-t border-[#1a45c4]">
+              <div className="flex flex-col space-y-3">
+                <a href="#services" className="text-white/90 font-bold hover:text-white transition-colors px-4 py-2" onClick={() => setMobileMenuOpen(false)}>
+                  Services
+                </a>
+                <a href="#contact" className="text-white/90 font-bold hover:text-white transition-colors px-4 py-2" onClick={() => setMobileMenuOpen(false)}>
+                  Contact
+                </a>
+                <a href={createPageUrl('MCTSToolbox')} className="text-white/90 font-bold hover:text-white transition-colors px-4 py-2" onClick={() => setMobileMenuOpen(false)}>
+                  <Wrench className="w-4 h-4 inline mr-2" />
+                  Tools
+                </a>
+                <a href={createPageUrl('OrderTracking')} className="text-white/90 font-bold hover:text-white transition-colors px-4 py-2" onClick={() => setMobileMenuOpen(false)}>
+                  Track Order
+                </a>
+                <a href={createPageUrl('ClientOrderForm')} className="px-4 py-2" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="bg-white text-[#2053E6] hover:bg-gray-100 w-full">
+                    Order
+                  </Button>
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
