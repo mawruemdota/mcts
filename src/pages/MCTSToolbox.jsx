@@ -56,11 +56,6 @@ export default function MCTSToolbox() {
                     <span className="sm:hidden">Back</span>
                   </Button>
                 )}
-                <a href={createPageUrl('Home')}>
-                  <Button variant="ghost" className="text-white hover:bg-white/10">
-                    Visit MCTS.com
-                  </Button>
-                </a>
               </div>
             </div>
           </div>

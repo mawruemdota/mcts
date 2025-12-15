@@ -81,7 +81,8 @@ export default function Layout({ children, currentPageName }) {
                        location.pathname.startsWith(createPageUrl("OrderTracking")) ||
                        location.pathname.startsWith(createPageUrl("InvoicePrintView")) ||
                        location.pathname.startsWith(createPageUrl("QuotationPrintView")) ||
-                       location.pathname.startsWith(createPageUrl("PurchaseOrderPrintView"));
+                       location.pathname.startsWith(createPageUrl("PurchaseOrderPrintView")) ||
+                       location.pathname.startsWith(createPageUrl("MCTSToolbox"));
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'dark';
