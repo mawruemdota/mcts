@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, Calculator, TrendingDown, TrendingUp, Minus, Save, Users, Zap, Wrench, Package } from 'lucide-react';
+import { Plus, Trash2, Calculator, TrendingDown, TrendingUp, Minus, Save, Users, Zap, Wrench, Package, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Dialog,
@@ -137,6 +138,18 @@ export default function CostingCalculator({ onSaveSuccess }) {
         }]);
     };
 
+    const addQuickItem = (itemType) => {
+        const newId = Math.max(...materials.map(m => m.id), 0) + 1;
+        const quickItems = {
+            'ink_bw': { name: 'Ink (B&W)', pricePerPack: 0.15, itemsPerPack: 1, quantityNeeded: 1 },
+            'ink_color': { name: 'Ink (Color)', pricePerPack: 2.00, itemsPerPack: 1, quantityNeeded: 1 }
+        };
+        const item = quickItems[itemType];
+        if (item) {
+            setMaterials([...materials, { id: newId, ...item }]);
+        }
+    };
+
     const removeMaterial = (id) => {
         if (materials.length > 1) {
             setMaterials(materials.filter(m => m.id !== id));
@@ -200,6 +213,77 @@ export default function CostingCalculator({ onSaveSuccess }) {
         toast({ title: "Calculator Reset", description: "All values have been reset to defaults." });
     };
 
+    const downloadComputation = () => {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        
+        doc.setFontSize(18);
+        doc.text('MCTS Costing Computation', pageWidth / 2, 20, { align: 'center' });
+        
+        doc.setFontSize(12);
+        let yPos = 35;
+        
+        if (productName) {
+            doc.setFont(undefined, 'bold');
+            doc.text(`Product: ${productName}`, 15, yPos);
+            yPos += 8;
+            doc.setFont(undefined, 'normal');
+        }
+        if (productDescription) {
+            doc.setFontSize(10);
+            doc.text(`Description: ${productDescription}`, 15, yPos);
+            yPos += 8;
+            doc.setFontSize(12);
+        }
+        
+        doc.text(`Quantity: ${usualQuantity} unit(s)`, 15, yPos);
+        yPos += 10;
+        
+        doc.setFont(undefined, 'bold');
+        doc.text('Materials & Components:', 15, yPos);
+        yPos += 8;
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(10);
+        
+        materialCosts.forEach((m) => {
+            doc.text(`- ${m.name || 'Unnamed'}`, 20, yPos);
+            doc.text(`₱${m.costPerItem.toFixed(2)}`, pageWidth - 40, yPos);
+            yPos += 6;
+        });
+        
+        yPos += 5;
+        doc.setFontSize(12);
+        doc.text(`Total Material Cost: ₱${totalMaterialCost.toFixed(2)}`, 15, yPos);
+        yPos += 8;
+        doc.text(`Overhead (${totalOverheadPercentage.toFixed(1)}%): ₱${overheadCost.toFixed(2)}`, 15, yPos);
+        yPos += 8;
+        doc.setFont(undefined, 'bold');
+        doc.text(`Base Cost per Unit: ₱${baseCostPerUnit.toFixed(2)}`, 15, yPos);
+        yPos += 8;
+        doc.text(`Total Base Cost (${usualQuantity} units): ₱${baseCostPerQuantity.toFixed(2)}`, 15, yPos);
+        yPos += 15;
+        
+        doc.setFontSize(14);
+        doc.text('Pricing Strategies:', 15, yPos);
+        yPos += 10;
+        doc.setFontSize(12);
+        
+        doc.setTextColor(59, 130, 246);
+        doc.text(`Aggressive (${((pricingMultipliers.aggressive - 1) * 100).toFixed(0)}% markup): ₱${pricingStrategies.aggressive.toFixed(2)}`, 20, yPos);
+        yPos += 8;
+        
+        doc.setTextColor(34, 197, 94);
+        doc.text(`Conservative (${((pricingMultipliers.conservative - 1) * 100).toFixed(0)}% markup): ₱${pricingStrategies.conservative.toFixed(2)}`, 20, yPos);
+        yPos += 8;
+        
+        doc.setTextColor(239, 68, 68);
+        doc.text(`Extreme (${((pricingMultipliers.extreme - 1) * 100).toFixed(0)}% markup): ₱${pricingStrategies.extreme.toFixed(2)}`, 20, yPos);
+        
+        doc.setTextColor(0, 0, 0);
+        doc.save(`${productName || 'costing'}_computation.pdf`);
+        toast({ title: "Downloaded", description: "Cost computation saved as PDF." });
+    };
+
     const overheadConfig = [
         { key: 'employee', label: 'Employee', icon: Users },
         { key: 'electricity', label: 'Electricity', icon: Zap },
@@ -221,27 +305,33 @@ export default function CostingCalculator({ onSaveSuccess }) {
                     <p className="text-sm text-muted-foreground">Calculate accurate pricing for your products</p>
                 </div>
                 <div className="flex gap-2">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant="default" disabled={!productName || baseCostPerUnit === 0}>
-                                <Save className="w-4 h-4 mr-2" />
-                                Save to Products
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Save New Product</DialogTitle>
-                            </DialogHeader>
-                            <SaveToPricelistForm
-                                productInfo={{
-                                    name: productName,
-                                    description: productDescription,
-                                    prices: unitPrices
-                                }}
-                                onSaveSuccess={onSaveSuccess}
-                            />
-                        </DialogContent>
-                    </Dialog>
+                    {onSaveSuccess && (
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="default" disabled={!productName || baseCostPerUnit === 0}>
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Save to Products
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Save New Product</DialogTitle>
+                                </DialogHeader>
+                                <SaveToPricelistForm
+                                    productInfo={{
+                                        name: productName,
+                                        description: productDescription,
+                                        prices: unitPrices
+                                    }}
+                                    onSaveSuccess={onSaveSuccess}
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    )}
+                    <Button variant="outline" onClick={downloadComputation} disabled={baseCostPerUnit === 0}>
+                        <Download className="w-4 h-4 mr-2" />
+                        Download PDF
+                    </Button>
                     <Button variant="outline" onClick={resetCalculator}>
                         Reset Calculator
                     </Button>
@@ -293,11 +383,19 @@ export default function CostingCalculator({ onSaveSuccess }) {
                     {/* Materials Section */}
                     <Card>
                         <CardHeader>
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center flex-wrap gap-2">
                                 <CardTitle className="text-lg">Materials & Components</CardTitle>
-                                <Button onClick={addMaterial} size="sm">
-                                    <Plus className="w-4 h-4 mr-1" /> Add Material
-                                </Button>
+                                <div className="flex gap-2 flex-wrap">
+                                    <Button onClick={() => addQuickItem('ink_bw')} size="sm" variant="outline">
+                                        Ink (B&W) ₱0.15
+                                    </Button>
+                                    <Button onClick={() => addQuickItem('ink_color')} size="sm" variant="outline">
+                                        Ink (Color) ₱2.00
+                                    </Button>
+                                    <Button onClick={addMaterial} size="sm">
+                                        <Plus className="w-4 h-4 mr-1" /> Add Material
+                                    </Button>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-3">

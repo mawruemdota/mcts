@@ -42,6 +42,7 @@ import DynamicForm from './pages/DynamicForm';
 import DeliveryFormPrint from './pages/DeliveryFormPrint';
 import CreateDeliveryForm from './pages/CreateDeliveryForm';
 import AdvancedReports from './pages/AdvancedReports';
+import MCTSToolbox from './pages/MCTSToolbox';
 import __Layout from './Layout.jsx';
 
 
@@ -90,6 +91,7 @@ export const PAGES = {
     "DeliveryFormPrint": DeliveryFormPrint,
     "CreateDeliveryForm": CreateDeliveryForm,
     "AdvancedReports": AdvancedReports,
+    "MCTSToolbox": MCTSToolbox,
 }
 
 export const pagesConfig = {
