@@ -734,17 +734,31 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
 
         // Add job-related items to the invoice
         selectedJobsInCurrentSubmission.forEach(job => {
-            const jobAmount = parseFloat(job.actual_price || job.estimated_price || 0);
-            const jobQuantity = parseInt(job.quantity) || 1;
-            const description = job.title || (job.job_type || 'Service').replace(/_/g, ' ');
-            const unitPrice = jobQuantity > 0 ? jobAmount / jobQuantity : jobAmount;
+            // Check if the job has items array
+            if (job.items && Array.isArray(job.items) && job.items.length > 0) {
+                // Add each item from the job separately
+                job.items.forEach(item => {
+                    items.push({
+                        description: `${job.title} - ${item.item_name}`,
+                        quantity: parseInt(item.quantity) || 1,
+                        price: parseFloat(item.price) || 0,
+                        job_id: job.id,
+                    });
+                });
+            } else {
+                // Fallback to old behavior if job has no items
+                const jobAmount = parseFloat(job.actual_price || job.estimated_price || 0);
+                const jobQuantity = parseInt(job.quantity) || 1;
+                const description = job.title || (job.job_type || 'Service').replace(/_/g, ' ');
+                const unitPrice = jobQuantity > 0 ? jobAmount / jobQuantity : jobAmount;
 
-            items.push({
-                description: description,
-                quantity: jobQuantity,
-                price: unitPrice,
-                job_id: job.id,
-            });
+                items.push({
+                    description: description,
+                    quantity: jobQuantity,
+                    price: unitPrice,
+                    job_id: job.id,
+                });
+            }
         });
 
         // Add manual items
