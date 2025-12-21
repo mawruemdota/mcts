@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import CostingCalculator from '@/components/products/CostingCalculator';
+import QRGenerator from '@/components/tools/QRGenerator';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/toaster';
-import { Calculator, ArrowLeft, Wrench } from 'lucide-react';
+import { Calculator, ArrowLeft, Wrench, QrCode } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
 export default function MCTSToolbox() {
@@ -19,6 +20,14 @@ export default function MCTSToolbox() {
       icon: Calculator,
       color: 'bg-blue-500',
       component: CostingCalculator
+    },
+    {
+      id: 'qr-generator',
+      name: 'QR Code Generator',
+      description: 'Create custom QR codes with logos, colors, and download as PNG',
+      icon: QrCode,
+      color: 'bg-purple-500',
+      component: QRGenerator
     }
   ];
 

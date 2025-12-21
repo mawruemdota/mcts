@@ -1,97 +1,97 @@
-import Jobs from './pages/Jobs';
-import CreateInvoice from './pages/CreateInvoice';
-import BudgetTracker from './pages/BudgetTracker';
-import Reports from './pages/Reports';
-import Team from './pages/Team';
-import Clients from './pages/Clients';
-import Suppliers from './pages/Suppliers';
-import InvoicePrintView from './pages/InvoicePrintView';
-import Settings from './pages/Settings';
-import Inventory from './pages/Inventory';
-import Reminders from './pages/Reminders';
-import QuotationForm from './pages/QuotationForm';
-import Requests from './pages/Requests';
-import Contacts from './pages/Contacts';
-import CreateQuotation from './pages/CreateQuotation';
-import ClientQuote from './pages/ClientQuote';
-import ItemsAndServices from './pages/ItemsAndServices';
-import ShopCash from './pages/ShopCash';
-import Dump from './pages/Dump';
-import PrinterMaintenance from './pages/PrinterMaintenance';
-import IDPrinting from './pages/IDPrinting';
-import Creatives from './pages/Creatives';
-import PublicContentView from './pages/PublicContentView';
-import Forms from './pages/Forms';
-import ReimbursementPrintView from './pages/ReimbursementPrintView';
-import ARView from './pages/ARView';
-import Dashboard from './pages/Dashboard';
-import QuotationPrintView from './pages/QuotationPrintView';
-import ClientOrderForm from './pages/ClientOrderForm';
-import PurchaseOrderPrintView from './pages/PurchaseOrderPrintView';
-import Home from './pages/Home';
-import NotFound from './pages/NotFound';
-import HomepageSettings from './pages/HomepageSettings';
-import OrderTracking from './pages/OrderTracking';
 import ARStickerManager from './pages/ARStickerManager';
+import ARView from './pages/ARView';
 import ARViewer from './pages/ARViewer';
-import Summary from './pages/Summary';
 import ActivityLog from './pages/ActivityLog';
-import QRGenerator from './pages/QRGenerator';
-import UnauthorizedAccess from './pages/UnauthorizedAccess';
-import DynamicForm from './pages/DynamicForm';
-import DeliveryFormPrint from './pages/DeliveryFormPrint';
-import CreateDeliveryForm from './pages/CreateDeliveryForm';
 import AdvancedReports from './pages/AdvancedReports';
+import BudgetTracker from './pages/BudgetTracker';
+import ClientOrderForm from './pages/ClientOrderForm';
+import ClientQuote from './pages/ClientQuote';
+import Clients from './pages/Clients';
+import Contacts from './pages/Contacts';
+import CreateDeliveryForm from './pages/CreateDeliveryForm';
+import CreateInvoice from './pages/CreateInvoice';
+import CreateQuotation from './pages/CreateQuotation';
+import Creatives from './pages/Creatives';
+import Dashboard from './pages/Dashboard';
+import DeliveryFormPrint from './pages/DeliveryFormPrint';
+import Dump from './pages/Dump';
+import DynamicForm from './pages/DynamicForm';
+import Forms from './pages/Forms';
+import Home from './pages/Home';
+import HomepageSettings from './pages/HomepageSettings';
+import IDPrinting from './pages/IDPrinting';
+import Inventory from './pages/Inventory';
+import InvoicePrintView from './pages/InvoicePrintView';
+import ItemsAndServices from './pages/ItemsAndServices';
+import Jobs from './pages/Jobs';
 import MCTSToolbox from './pages/MCTSToolbox';
+import NotFound from './pages/NotFound';
+import OrderTracking from './pages/OrderTracking';
+import PrinterMaintenance from './pages/PrinterMaintenance';
+import PublicContentView from './pages/PublicContentView';
+import PurchaseOrderPrintView from './pages/PurchaseOrderPrintView';
+import QRGenerator from './pages/QRGenerator';
+import QuotationForm from './pages/QuotationForm';
+import QuotationPrintView from './pages/QuotationPrintView';
+import ReimbursementPrintView from './pages/ReimbursementPrintView';
+import Reminders from './pages/Reminders';
+import Reports from './pages/Reports';
+import Requests from './pages/Requests';
+import Settings from './pages/Settings';
+import ShopCash from './pages/ShopCash';
+import Summary from './pages/Summary';
+import Suppliers from './pages/Suppliers';
+import Team from './pages/Team';
+import UnauthorizedAccess from './pages/UnauthorizedAccess';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Jobs": Jobs,
-    "CreateInvoice": CreateInvoice,
-    "BudgetTracker": BudgetTracker,
-    "Reports": Reports,
-    "Team": Team,
-    "Clients": Clients,
-    "Suppliers": Suppliers,
-    "InvoicePrintView": InvoicePrintView,
-    "Settings": Settings,
-    "Inventory": Inventory,
-    "Reminders": Reminders,
-    "QuotationForm": QuotationForm,
-    "Requests": Requests,
-    "Contacts": Contacts,
-    "CreateQuotation": CreateQuotation,
-    "ClientQuote": ClientQuote,
-    "ItemsAndServices": ItemsAndServices,
-    "ShopCash": ShopCash,
-    "Dump": Dump,
-    "PrinterMaintenance": PrinterMaintenance,
-    "IDPrinting": IDPrinting,
-    "Creatives": Creatives,
-    "PublicContentView": PublicContentView,
-    "Forms": Forms,
-    "ReimbursementPrintView": ReimbursementPrintView,
-    "ARView": ARView,
-    "Dashboard": Dashboard,
-    "QuotationPrintView": QuotationPrintView,
-    "ClientOrderForm": ClientOrderForm,
-    "PurchaseOrderPrintView": PurchaseOrderPrintView,
-    "Home": Home,
-    "NotFound": NotFound,
-    "HomepageSettings": HomepageSettings,
-    "OrderTracking": OrderTracking,
     "ARStickerManager": ARStickerManager,
+    "ARView": ARView,
     "ARViewer": ARViewer,
-    "Summary": Summary,
     "ActivityLog": ActivityLog,
-    "QRGenerator": QRGenerator,
-    "UnauthorizedAccess": UnauthorizedAccess,
-    "DynamicForm": DynamicForm,
-    "DeliveryFormPrint": DeliveryFormPrint,
-    "CreateDeliveryForm": CreateDeliveryForm,
     "AdvancedReports": AdvancedReports,
+    "BudgetTracker": BudgetTracker,
+    "ClientOrderForm": ClientOrderForm,
+    "ClientQuote": ClientQuote,
+    "Clients": Clients,
+    "Contacts": Contacts,
+    "CreateDeliveryForm": CreateDeliveryForm,
+    "CreateInvoice": CreateInvoice,
+    "CreateQuotation": CreateQuotation,
+    "Creatives": Creatives,
+    "Dashboard": Dashboard,
+    "DeliveryFormPrint": DeliveryFormPrint,
+    "Dump": Dump,
+    "DynamicForm": DynamicForm,
+    "Forms": Forms,
+    "Home": Home,
+    "HomepageSettings": HomepageSettings,
+    "IDPrinting": IDPrinting,
+    "Inventory": Inventory,
+    "InvoicePrintView": InvoicePrintView,
+    "ItemsAndServices": ItemsAndServices,
+    "Jobs": Jobs,
     "MCTSToolbox": MCTSToolbox,
+    "NotFound": NotFound,
+    "OrderTracking": OrderTracking,
+    "PrinterMaintenance": PrinterMaintenance,
+    "PublicContentView": PublicContentView,
+    "PurchaseOrderPrintView": PurchaseOrderPrintView,
+    "QRGenerator": QRGenerator,
+    "QuotationForm": QuotationForm,
+    "QuotationPrintView": QuotationPrintView,
+    "ReimbursementPrintView": ReimbursementPrintView,
+    "Reminders": Reminders,
+    "Reports": Reports,
+    "Requests": Requests,
+    "Settings": Settings,
+    "ShopCash": ShopCash,
+    "Summary": Summary,
+    "Suppliers": Suppliers,
+    "Team": Team,
+    "UnauthorizedAccess": UnauthorizedAccess,
 }
 
 export const pagesConfig = {
