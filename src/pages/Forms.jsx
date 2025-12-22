@@ -572,7 +572,8 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
         })) || []) : [],
         discount: editingInvoice?.discount || 0,
         notes: editingInvoice?.notes || '',
-        prepared_by: editingInvoice?.prepared_by || '' // Added prepared_by
+        prepared_by: editingInvoice?.prepared_by || '', // Added prepared_by
+        payment_footer_type: editingInvoice?.payment_footer_type || 'payment_options'
     });
     const [customReceiptType, setCustomReceiptType] = useState('');
     const [showDueDate, setShowDueDate] = useState(editingInvoice?.due_date ? true : false);
@@ -800,7 +801,8 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                 amount: finalAmount,
                 status: editingInvoice?.status || 'unpaid', // Preserve status for editing, default to unpaid for new
                 notes: formData.notes,
-                prepared_by: formData.prepared_by // Include prepared_by
+                prepared_by: formData.prepared_by, // Include prepared_by
+                payment_footer_type: formData.payment_footer_type
             };
 
             // Ensure client_name and client_email are most up-to-date from selectedClient
@@ -1079,6 +1081,19 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                     onChange={e => setFormData({...formData, notes: e.target.value})}
                     placeholder="Additional notes for this invoice..."
                 />
+            </div>
+
+            <div className="space-y-2">
+                <Label>Payment Footer Section</Label>
+                <Select value={formData.payment_footer_type} onValueChange={(value) => setFormData({...formData, payment_footer_type: value})}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select footer content" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="payment_options">Payment Options (Bank & GCash)</SelectItem>
+                        <SelectItem value="social_media">Social Media Accounts</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             <div className="flex justify-end">

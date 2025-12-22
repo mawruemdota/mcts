@@ -139,7 +139,7 @@ export default function InvoicePrintView() {
             </div>
             <div className="invoice-dates">
               <p>Issue Date: {format(new Date(invoice.issue_date), 'MMM d, yyyy')}</p>
-              <p>Due Date: {format(new Date(invoice.due_date), 'MMM d, yyyy')}</p>
+              {invoice.due_date && <p>Due Date: {format(new Date(invoice.due_date), 'MMM d, yyyy')}</p>}
             </div>
           </div>
 
@@ -202,32 +202,54 @@ export default function InvoicePrintView() {
             </div>
           </div>
 
-          {/* Payment Information */}
+          {/* Payment Information / Social Media */}
           <div className="payment-section">
-            <h3 className="payment-title">Payment Options:</h3>
-            <div className="payment-content">
-              <div className="payment-details">
-                <div className="qr-section">
-                  <img 
-                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/f53bad017_download.jpg" 
-                    alt="Payment QR Code" 
-                    className="qr-code"
-                  />
-                </div>
-                <div className="bank-details">
-                  <div className="bank-info">
-                    <p className="bank-name">BDO</p>
-                    <p>Mario Jonathan Marasigan</p>
-                    <p>007758011619</p>
+            {invoice.payment_footer_type === 'social_media' ? (
+              <>
+                <h3 className="payment-title">Connect With Us:</h3>
+                <div className="social-media-content">
+                  <div className="social-item">
+                    <p className="social-label">Facebook:</p>
+                    <p className="social-link">https://www.facebook.com/marasigancts</p>
                   </div>
-                  <div className="bank-info">
-                    <p className="bank-name">G-Cash</p>
-                    <p>Mario Jonathan Marasigan</p>
-                    <p>09778270150</p>
+                  <div className="social-item">
+                    <p className="social-label">Instagram:</p>
+                    <p className="social-link">https://instagram.com/marasigancts</p>
+                  </div>
+                  <div className="social-item">
+                    <p className="social-label">Website:</p>
+                    <p className="social-link">marasigancreatives.com</p>
                   </div>
                 </div>
-              </div>
-            </div>
+              </>
+            ) : (
+              <>
+                <h3 className="payment-title">Payment Options:</h3>
+                <div className="payment-content">
+                  <div className="payment-details">
+                    <div className="qr-section">
+                      <img 
+                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/f53bad017_download.jpg" 
+                        alt="Payment QR Code" 
+                        className="qr-code"
+                      />
+                    </div>
+                    <div className="bank-details">
+                      <div className="bank-info">
+                        <p className="bank-name">BDO</p>
+                        <p>Mario Jonathan Marasigan</p>
+                        <p>007758011619</p>
+                      </div>
+                      <div className="bank-info">
+                        <p className="bank-name">G-Cash</p>
+                        <p>Mario Jonathan Marasigan</p>
+                        <p>09778270150</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Notes */}
@@ -506,6 +528,25 @@ export default function InvoicePrintView() {
 
         .bank-info p {
           margin: 1px 0;
+        }
+
+        .social-media-content {
+          font-size: 13px;
+          color: #1f2937;
+        }
+
+        .social-item {
+          margin-bottom: 12px;
+        }
+
+        .social-label {
+          font-weight: 600;
+          margin: 0 0 2px 0;
+        }
+
+        .social-link {
+          color: #2563eb;
+          margin: 0;
         }
 
         .notes-section {
