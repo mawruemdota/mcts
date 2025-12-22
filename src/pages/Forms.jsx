@@ -575,6 +575,7 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
         prepared_by: editingInvoice?.prepared_by || '' // Added prepared_by
     });
     const [customReceiptType, setCustomReceiptType] = useState('');
+    const [showDueDate, setShowDueDate] = useState(editingInvoice?.due_date ? true : false);
     const [clients, setClients] = useState([]);
     const [pricelist, setPricelist] = useState([]);
     const [availableJobs, setAvailableJobs] = useState([]);
@@ -913,8 +914,20 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                     <Input type="date" value={formData.issue_date} onChange={e => setFormData({...formData, issue_date: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                    <Label>Due Date</Label>
-                    <Input type="date" value={formData.due_date} onChange={e => setFormData({...formData, due_date: e.target.value})} />
+                    <div className="flex items-center space-x-2 mb-2">
+                        <Checkbox 
+                            id="show-due-date" 
+                            checked={showDueDate} 
+                            onCheckedChange={(checked) => {
+                                setShowDueDate(checked);
+                                if (!checked) setFormData({...formData, due_date: null});
+                            }} 
+                        />
+                        <Label htmlFor="show-due-date" className="cursor-pointer">Include Due Date</Label>
+                    </div>
+                    {showDueDate && (
+                        <Input type="date" value={formData.due_date || ''} onChange={e => setFormData({...formData, due_date: e.target.value})} />
+                    )}
                 </div>
             </div>
 
