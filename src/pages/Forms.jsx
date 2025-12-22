@@ -574,6 +574,7 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
         notes: editingInvoice?.notes || '',
         prepared_by: editingInvoice?.prepared_by || '' // Added prepared_by
     });
+    const [customReceiptType, setCustomReceiptType] = useState('');
     const [clients, setClients] = useState([]);
     const [pricelist, setPricelist] = useState([]);
     const [availableJobs, setAvailableJobs] = useState([]);
@@ -864,7 +865,14 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                 </div>
                 <div className="space-y-2">
                     <Label>Receipt Type</Label>
-                    <Select value={formData.receipt_type} onValueChange={(value) => setFormData({...formData, receipt_type: value})}>
+                    <Select value={formData.receipt_type === customReceiptType && customReceiptType ? 'Custom' : formData.receipt_type} onValueChange={(value) => {
+                        if (value === 'Custom') {
+                            setFormData({...formData, receipt_type: customReceiptType || ''});
+                        } else {
+                            setFormData({...formData, receipt_type: value});
+                            setCustomReceiptType('');
+                        }
+                    }}>
                         <SelectTrigger>
                             <SelectValue placeholder="Select receipt type" />
                         </SelectTrigger>
@@ -872,9 +880,21 @@ const UnifiedInvoiceForm = ({ onSubmitted, editingInvoice = null }) => {
                             <SelectItem value="Collection Receipt">Collection Receipt</SelectItem>
                             <SelectItem value="Official Receipt">Official Receipt</SelectItem>
                             <SelectItem value="Acknowledgement Receipt">Acknowledgement Receipt</SelectItem>
+                            <SelectItem value="Delivery Receipt">Delivery Receipt</SelectItem>
                             <SelectItem value="Invoice">Invoice</SelectItem>
+                            <SelectItem value="Custom">Custom...</SelectItem>
                         </SelectContent>
                     </Select>
+                    {(formData.receipt_type === customReceiptType && customReceiptType) || (!['Collection Receipt', 'Official Receipt', 'Acknowledgement Receipt', 'Delivery Receipt', 'Invoice'].includes(formData.receipt_type)) ? (
+                        <Input 
+                            placeholder="Enter custom receipt type"
+                            value={customReceiptType || formData.receipt_type}
+                            onChange={(e) => {
+                                setCustomReceiptType(e.target.value);
+                                setFormData({...formData, receipt_type: e.target.value});
+                            }}
+                        />
+                    ) : null}
                 </div>
             </div>
 
