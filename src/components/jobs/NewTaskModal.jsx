@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useCallback } from "react";
-import { Job, Client, PriceListItem, User, Notification } from "@/entities/all";
+import { Job, Client, PriceListItem, User, Notification, TaskTemplate } from "@/entities/all";
 import { UploadFile } from "@/integrations/Core";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -174,6 +173,8 @@ export default function NewTaskModal({ isOpen, onClose, onTaskCreated, user }) {
   const [error, setError] = useState('');
   const [showClientForm, setShowClientForm] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   const statusOptions = [
     { value: 'pending_approval', label: 'Pending Approval' },
@@ -186,15 +187,17 @@ export default function NewTaskModal({ isOpen, onClose, onTaskCreated, user }) {
 
   const loadData = useCallback(async () => {
     try {
-      const [clientData, pricelistData, teamData] = await Promise.all([
+      const [clientData, pricelistData, teamData, templatesData] = await Promise.all([
         Client.list(),
         PriceListItem.list(),
-        User.list()
+        User.list(),
+        TaskTemplate.filter({ is_active: true })
       ]);
       setClients(clientData);
       const sortedPriceList = pricelistData.sort((a, b) => a.item_name.localeCompare(b.item_name));
       setPricelist(sortedPriceList);
       setTeamMembers(teamData.filter(u => u.role === 'user' || u.role === 'admin'));
+      setTemplates(templatesData);
     } catch (err) {
       setError("Failed to load data. Please try again.");
     }
@@ -238,6 +241,31 @@ export default function NewTaskModal({ isOpen, onClose, onTaskCreated, user }) {
     setSelectedClient(newClient);
     handleJobChange('client_id', newClient.id);
     setShowClientForm(false);
+  };
+
+  const handleTemplateSelect = (templateId) => {
+    if (!templateId || templateId === 'none') {
+      setSelectedTemplate(null);
+      return;
+    }
+    
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setSelectedTemplate(template);
+      setJobData(prev => ({
+        ...prev,
+        job_type: template.job_type || prev.job_type,
+        special_instructions: template.default_instructions || prev.special_instructions,
+        items: template.default_items?.map(item => ({
+          ...item,
+          id: `temp-${Date.now()}-${Math.random()}`,
+          is_custom: !item.item_id,
+          custom_price: item.price,
+          pricing_tier: 'custom',
+          completed: false
+        })) || prev.items
+      }));
+    }
   };
 
   const handleItemChange = (index, field, value) => {
@@ -364,8 +392,10 @@ export default function NewTaskModal({ isOpen, onClose, onTaskCreated, user }) {
           item_id: item.is_custom ? null : item.item_id,
           item_name: item.item_name,
           quantity: item.quantity,
-          price: item.custom_price
+          price: item.custom_price,
+          completed: false
         })),
+        checklist: selectedTemplate?.default_checklist || [],
         quantity: totalQuantity,
         status: 'pending_approval'
       };
@@ -435,6 +465,22 @@ export default function NewTaskModal({ isOpen, onClose, onTaskCreated, user }) {
                   <Label htmlFor="title">Task Title *</Label>
                   <Input id="title" placeholder="e.g., Rush Tarpaulin for Birthday" value={jobData.title} onChange={(e) => handleJobChange("title", e.target.value)} required />
                 </div>
+                {templates.length > 0 && (
+                  <div className="md:col-span-2">
+                    <Label>Use Template (Optional)</Label>
+                    <Select value={selectedTemplate?.id || 'none'} onValueChange={handleTemplateSelect}>
+                      <SelectTrigger><SelectValue placeholder="Start from scratch or use a template..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No Template (Start Fresh)</SelectItem>
+                        {templates.map(t => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.template_name} - {t.description}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 {selectedClient && (
                   <div className="md:col-span-2 bg-secondary p-4 rounded-lg text-sm">
                     <p><strong>Contact:</strong> {selectedClient.contact_person}</p>

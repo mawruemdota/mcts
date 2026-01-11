@@ -203,6 +203,12 @@ export default function Layout({ children, currentPageName }) {
         roles: ["admin", "user"]
       },
       {
+        title: "Templates",
+        url: createPageUrl("TaskTemplates"),
+        icon: ClipboardList,
+        roles: ["admin", "user"]
+      },
+      {
         title: "Shop Cash",
         url: createPageUrl("ShopCash"),
         icon: Wallet,

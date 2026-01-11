@@ -378,7 +378,25 @@ export default function JobDetails({ job, onClose, onUpdate, onDelete, user }) {
                 <div className="space-y-2">
                   {editableFields.items.map((item, index) => (
                     <div key={index} className="grid grid-cols-12 gap-2 items-center">
-                      <Input placeholder="Item Name" value={item.item_name} onChange={e => handleItemChange(index, 'item_name', e.target.value)} className="col-span-6" />
+                      <div className="col-span-1 flex justify-center">
+                        <Checkbox 
+                          checked={item.completed || false}
+                          onCheckedChange={async (checked) => {
+                            const updatedItems = [...editableFields.items];
+                            updatedItems[index] = { ...updatedItems[index], completed: checked };
+                            setEditableFields(prev => ({ ...prev, items: updatedItems }));
+                            try {
+                              await Job.update(job.id, { items: updatedItems });
+                              toast({ title: 'Item status updated' });
+                            } catch (error) {
+                              console.error('Failed to update item:', error);
+                              toast({ variant: 'destructive', title: 'Failed to update item' });
+                              setEditableFields(prev => ({ ...prev, items: editableFields.items }));
+                            }
+                          }}
+                        />
+                      </div>
+                      <Input placeholder="Item Name" value={item.item_name} onChange={e => handleItemChange(index, 'item_name', e.target.value)} className="col-span-5" />
                       <Input type="number" placeholder="Qty" value={item.quantity} onChange={e => handleItemChange(index, 'quantity', e.target.value)} className="col-span-2" />
                       <Input type="number" placeholder="Price" value={item.price} onChange={e => handleItemChange(index, 'price', e.target.value)} className="col-span-3" />
                       <Button variant="ghost" size="icon" onClick={() => removeItem(index)} className="col-span-1 text-muted-foreground hover:text-red-500">
