@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { X, User as UserIcon, Package, Clock, MessageSquare, Info, Plus, Trash2, Send, Calendar as CalendarIcon, Edit, Save } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { X, User as UserIcon, Package, Clock, MessageSquare, Info, Plus, Trash2, Send, Calendar as CalendarIcon, Edit, Save, CheckSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -28,7 +29,8 @@ export default function JobDetails({ job, onClose, onUpdate, onDelete, user }) {
     deadline: job?.deadline ? job.deadline.split('T')[0] : '',
     deadline_time: job?.deadline ? (job.deadline.includes('T') ? job.deadline.split('T')[1]?.slice(0,5) : '') : '',
     special_instructions: job?.special_instructions || '',
-    items: job?.items && job.items.length > 0 ? job.items : [{ item_name: '', quantity: 1, price: 0 }]
+    items: job?.items && job.items.length > 0 ? job.items : [{ item_name: '', quantity: 1, price: 0 }],
+    checklist: job?.checklist || []
   });
 
   const [comments, setComments] = useState([]);
@@ -90,6 +92,27 @@ export default function JobDetails({ job, onClose, onUpdate, onDelete, user }) {
       }));
     } else {
       toast({ variant: 'destructive', title: 'Cannot remove last item' });
+    }
+  };
+
+  const handleChecklistToggle = async (index) => {
+    const updatedChecklist = [...editableFields.checklist];
+    updatedChecklist[index] = {
+      ...updatedChecklist[index],
+      completed: !updatedChecklist[index].completed
+    };
+    
+    setEditableFields(prev => ({ ...prev, checklist: updatedChecklist }));
+    
+    // Immediately save to database
+    try {
+      await Job.update(job.id, { checklist: updatedChecklist });
+      toast({ title: 'Checklist updated' });
+    } catch (error) {
+      console.error('Failed to update checklist:', error);
+      toast({ variant: 'destructive', title: 'Failed to update checklist' });
+      // Revert on error
+      setEditableFields(prev => ({ ...prev, checklist: editableFields.checklist }));
     }
   };
 
@@ -256,7 +279,8 @@ export default function JobDetails({ job, onClose, onUpdate, onDelete, user }) {
         special_instructions: editableFields.special_instructions,
         estimated_price: calculatedTotal,
         actual_price: calculatedTotal,
-        items: editableFields.items.filter(item => item.item_name.trim() !== '')
+        items: editableFields.items.filter(item => item.item_name.trim() !== ''),
+        checklist: editableFields.checklist
       };
       
       await onUpdate(job?.id, updateData);
@@ -372,6 +396,37 @@ export default function JobDetails({ job, onClose, onUpdate, onDelete, user }) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Checklist Section */}
+          {editableFields.checklist && editableFields.checklist.length > 0 && (
+            <Card className="bg-secondary/50 border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base text-foreground">
+                  <CheckSquare className="w-5 h-5" />
+                  Task Checklist
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {editableFields.checklist.map((item, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-secondary/30 transition-colors">
+                      <Checkbox 
+                        checked={item.completed}
+                        onCheckedChange={() => handleChecklistToggle(index)}
+                        id={`checklist-${index}`}
+                      />
+                      <Label 
+                        htmlFor={`checklist-${index}`}
+                        className={`flex-1 cursor-pointer ${item.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}
+                      >
+                        {item.task}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
           
           {/* Row 3: Status & Notes */}
           <div className="grid md:grid-cols-2 gap-6">
