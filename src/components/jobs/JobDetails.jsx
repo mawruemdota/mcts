@@ -40,6 +40,7 @@ export default function JobDetails({ job, onClose, onUpdate, onDelete, user }) {
   const [mentionSearch, setMentionSearch] = useState('');
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionPosition, setMentionPosition] = useState(0);
+  const [newChecklistItem, setNewChecklistItem] = useState('');
 
   const statusOptions = [
     { value: 'pending_approval', label: 'Pending' },
@@ -92,6 +93,35 @@ export default function JobDetails({ job, onClose, onUpdate, onDelete, user }) {
       }));
     } else {
       toast({ variant: 'destructive', title: 'Cannot remove last item' });
+    }
+  };
+
+  const addChecklistItem = async () => {
+    if (newChecklistItem.trim()) {
+      const updatedChecklist = [...editableFields.checklist, { task: newChecklistItem.trim(), completed: false }];
+      setEditableFields(prev => ({ ...prev, checklist: updatedChecklist }));
+      setNewChecklistItem('');
+      try {
+        await Job.update(job.id, { checklist: updatedChecklist });
+        toast({ title: 'Checklist item added' });
+      } catch (error) {
+        console.error('Failed to add checklist item:', error);
+        toast({ variant: 'destructive', title: 'Failed to add checklist item' });
+        setEditableFields(prev => ({ ...prev, checklist: job.checklist }));
+      }
+    }
+  };
+
+  const removeChecklistItem = async (index) => {
+    const updatedChecklist = editableFields.checklist.filter((_, i) => i !== index);
+    setEditableFields(prev => ({ ...prev, checklist: updatedChecklist }));
+    try {
+      await Job.update(job.id, { checklist: updatedChecklist });
+      toast({ title: 'Checklist item removed' });
+    } catch (error) {
+      console.error('Failed to remove checklist item:', error);
+      toast({ variant: 'destructive', title: 'Failed to remove checklist item' });
+      setEditableFields(prev => ({ ...prev, checklist: job.checklist }));
     }
   };
 
@@ -398,17 +428,19 @@ export default function JobDetails({ job, onClose, onUpdate, onDelete, user }) {
           </Card>
 
           {/* Checklist Section */}
-          {editableFields.checklist && editableFields.checklist.length > 0 && (
-            <Card className="bg-secondary/50 border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base text-foreground">
-                  <CheckSquare className="w-5 h-5" />
-                  Task Checklist
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {editableFields.checklist.map((item, index) => (
+          <Card className="bg-secondary/50 border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base text-foreground">
+                <CheckSquare className="w-5 h-5" />
+                Task Checklist
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {editableFields.checklist.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">No checklist items yet. Add one below!</p>
+                ) : (
+                  editableFields.checklist.map((item, index) => (
                     <div key={index} className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-secondary/30 transition-colors">
                       <Checkbox 
                         checked={item.completed}
@@ -421,12 +453,36 @@ export default function JobDetails({ job, onClose, onUpdate, onDelete, user }) {
                       >
                         {item.task}
                       </Label>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => removeChecklistItem(index)}
+                        className="text-muted-foreground hover:text-red-500"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                  ))}
+                  ))
+                )}
+                <div className="flex gap-2 mt-4">
+                  <Input
+                    placeholder="Add a checklist item..."
+                    value={newChecklistItem}
+                    onChange={e => setNewChecklistItem(e.target.value)}
+                    onKeyPress={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addChecklistItem();
+                      }
+                    }}
+                  />
+                  <Button onClick={addChecklistItem} disabled={!newChecklistItem.trim()}>
+                    <Plus className="w-4 h-4" />
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardContent>
+          </Card>
           
           {/* Row 3: Status & Notes */}
           <div className="grid md:grid-cols-2 gap-6">
