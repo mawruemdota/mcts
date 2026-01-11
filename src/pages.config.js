@@ -43,6 +43,7 @@ import Summary from './pages/Summary';
 import Suppliers from './pages/Suppliers';
 import Team from './pages/Team';
 import UnauthorizedAccess from './pages/UnauthorizedAccess';
+import TaskTemplates from './pages/TaskTemplates';
 import __Layout from './Layout.jsx';
 
 
@@ -92,6 +93,7 @@ export const PAGES = {
     "Suppliers": Suppliers,
     "Team": Team,
     "UnauthorizedAccess": UnauthorizedAccess,
+    "TaskTemplates": TaskTemplates,
 }
 
 export const pagesConfig = {
