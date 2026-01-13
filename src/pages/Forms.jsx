@@ -1831,8 +1831,17 @@ const ReimbursementsList = ({ requests, isLoading, loadRequests, clients }) => {
     );
 };
 
-const IDPrintForm = ({ onSubmitted }) => {
-    const [formData, setFormData] = useState({
+const IDPrintForm = ({ onSubmitted, editingRecord = null }) => {
+    const [formData, setFormData] = useState(editingRecord ? {
+        employee_name: editingRecord.employee_name || '',
+        id_number: editingRecord.id_number || '',
+        position: editingRecord.position || '',
+        client_id: editingRecord.client_id || '',
+        client_name: editingRecord.client_name || '',
+        print_date: editingRecord.print_date || format(new Date(), 'yyyy-MM-dd'),
+        unit_price: editingRecord.unit_price || 50,
+        status: editingRecord.status || 'for_print'
+    } : {
         employee_name: '',
         id_number: '',
         position: '',
@@ -1871,22 +1880,27 @@ const IDPrintForm = ({ onSubmitted }) => {
         }
 
         try {
-            await IDPrintRecord.create(formData);
-            toast({ title: 'Success', description: 'ID Print record created.' });
-            setFormData({
-                employee_name: '',
-                id_number: '',
-                position: '',
-                client_id: '',
-                client_name: '',
-                print_date: format(new Date(), 'yyyy-MM-dd'),
-                unit_price: 50,
-                status: 'for_print'
-            });
+            if (editingRecord) {
+                await IDPrintRecord.update(editingRecord.id, formData);
+                toast({ title: 'Success', description: 'ID Print record updated.' });
+            } else {
+                await IDPrintRecord.create(formData);
+                toast({ title: 'Success', description: 'ID Print record created.' });
+                setFormData({
+                    employee_name: '',
+                    id_number: '',
+                    position: '',
+                    client_id: '',
+                    client_name: '',
+                    print_date: format(new Date(), 'yyyy-MM-dd'),
+                    unit_price: 50,
+                    status: 'for_print'
+                });
+            }
             onSubmitted();
         } catch (error) {
-            console.error('Error creating ID record:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to create record.' });
+            console.error('Error creating/updating ID record:', error);
+            toast({ variant: 'destructive', title: 'Error', description: `Failed to ${editingRecord ? 'update' : 'create'} record.` });
         }
     };
 
@@ -1952,7 +1966,7 @@ const IDPrintForm = ({ onSubmitted }) => {
             </div>
 
             <div className="flex justify-end">
-                <Button type="submit">Create ID Record</Button>
+                <Button type="submit">{editingRecord ? 'Update' : 'Create'} ID Record</Button>
             </div>
         </form>
     );
@@ -2975,6 +2989,7 @@ export default function FormsPage() {
     
     const [editingQuotation, setEditingQuotation] = useState(null);
     const [editingInvoice, setEditingInvoice] = useState(null);
+    const [editingIdRecord, setEditingIdRecord] = useState(null);
     const [showConvertModal, setShowConvertModal] = useState(false);
     const [convertingQuotation, setConvertingQuotation] = useState(null);
     const [showEditInvoiceModal, setShowEditInvoiceModal] = useState(false); 
@@ -3129,6 +3144,11 @@ export default function FormsPage() {
         }
     };
     
+    const handleEditIdRecord = (record) => {
+        setEditingIdRecord(record);
+        setShowNewIDForm(true);
+    };
+
     const handleDeleteIdRecord = async (recordId) => {
         if (window.confirm("Are you sure you want to delete this ID record?")) {
             try {
@@ -3139,6 +3159,11 @@ export default function FormsPage() {
                 toast({ variant: "destructive", title: "Error", description: "Could not delete record." });
             }
         }
+    };
+
+    const handleIdFormClose = () => {
+        setShowNewIDForm(false);
+        setEditingIdRecord(null);
     };
     
     const filteredIdRecords = idPrintRecords.filter(record => {
@@ -3531,15 +3556,15 @@ export default function FormsPage() {
                                                 />
                                             </DialogContent>
                                         </Dialog>
-                                        <Dialog open={showNewIDForm} onOpenChange={setShowNewIDForm}>
+                                        <Dialog open={showNewIDForm} onOpenChange={handleIdFormClose}>
                                             <DialogTrigger asChild>
                                                 <Button><Plus className="w-4 h-4 mr-2"/>Manual Entry</Button>
                                             </DialogTrigger>
                                             <DialogContent className="dialog-content max-w-4xl">
                                                 <DialogHeader>
-                                                    <DialogTitle className="text-card-foreground">New ID Print Record</DialogTitle>
+                                                    <DialogTitle className="text-card-foreground">{editingIdRecord ? 'Edit' : 'New'} ID Print Record</DialogTitle>
                                                 </DialogHeader>
-                                                <IDPrintForm onSubmitted={() => { setShowNewIDForm(false); loadAllData(); }} />
+                                                <IDPrintForm editingRecord={editingIdRecord} onSubmitted={() => { handleIdFormClose(); loadAllData(); }} />
                                             </DialogContent>
                                         </Dialog>
                                         <Button onClick={handlePrintReport} variant="outline" disabled={filteredIdRecords.length === 0}>
@@ -3641,7 +3666,14 @@ export default function FormsPage() {
                                                         <TableCell className="text-muted-foreground whitespace-nowrap">{format(new Date(record.print_date), 'MMM d, yyyy')}</TableCell>
                                                         <TableCell className="whitespace-nowrap">{getIdStatusBadge(record)}</TableCell>
                                                         <TableCell className="text-right">
-                                                            <Button variant="ghost" size="icon" onClick={() => handleDeleteIdRecord(record.id)}><Trash2 className="w-4 h-4 text-destructive"/></Button>
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <Button variant="ghost" size="icon" onClick={() => handleEditIdRecord(record)}>
+                                                                    <Edit className="w-4 h-4" />
+                                                                </Button>
+                                                                <Button variant="ghost" size="icon" onClick={() => handleDeleteIdRecord(record.id)}>
+                                                                    <Trash2 className="w-4 h-4 text-destructive"/>
+                                                                </Button>
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))
