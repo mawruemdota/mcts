@@ -41,9 +41,9 @@ import Settings from './pages/Settings';
 import ShopCash from './pages/ShopCash';
 import Summary from './pages/Summary';
 import Suppliers from './pages/Suppliers';
+import TaskTemplates from './pages/TaskTemplates';
 import Team from './pages/Team';
 import UnauthorizedAccess from './pages/UnauthorizedAccess';
-import TaskTemplates from './pages/TaskTemplates';
 import __Layout from './Layout.jsx';
 
 
@@ -91,9 +91,9 @@ export const PAGES = {
     "ShopCash": ShopCash,
     "Summary": Summary,
     "Suppliers": Suppliers,
+    "TaskTemplates": TaskTemplates,
     "Team": Team,
     "UnauthorizedAccess": UnauthorizedAccess,
-    "TaskTemplates": TaskTemplates,
 }
 
 export const pagesConfig = {

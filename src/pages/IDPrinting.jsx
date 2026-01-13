@@ -27,18 +27,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Printer, Plus, Check, FileText } from 'lucide-react';
+import { Printer, Plus, Check, FileText, Edit, Trash2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { format } from 'date-fns';
 
-const NewRecordForm = ({ onSubmitted, clients }) => {
-    const [formData, setFormData] = useState({
+const RecordForm = ({ onSubmitted, clients, editingRecord = null }) => {
+    const [formData, setFormData] = useState(editingRecord ? {
+        employee_name: editingRecord.employee_name || '',
+        position: editingRecord.position || '',
+        client_id: editingRecord.client_id || '',
+        client_name: editingRecord.client_name || '',
+        print_date: editingRecord.print_date || format(new Date(), 'yyyy-MM-dd'),
+        unit_price: editingRecord.unit_price || 50,
+        id_number: editingRecord.id_number || ''
+    } : {
         employee_name: '',
         position: '',
         client_id: '',
         client_name: '',
         print_date: format(new Date(), 'yyyy-MM-dd'),
-        unit_price: 50
+        unit_price: 50,
+        id_number: ''
     });
     const { toast } = useToast();
 
@@ -58,11 +67,16 @@ const NewRecordForm = ({ onSubmitted, clients }) => {
             return;
         }
         try {
-            await IDPrintRecord.create(formData);
-            toast({ title: 'Success', description: 'ID record created.' });
+            if (editingRecord) {
+                await IDPrintRecord.update(editingRecord.id, formData);
+                toast({ title: 'Success', description: 'ID record updated.' });
+            } else {
+                await IDPrintRecord.create(formData);
+                toast({ title: 'Success', description: 'ID record created.' });
+            }
             onSubmitted();
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to create record.' });
+            toast({ variant: 'destructive', title: 'Error', description: `Failed to ${editingRecord ? 'update' : 'create'} record.` });
         }
     };
 
@@ -84,11 +98,15 @@ const NewRecordForm = ({ onSubmitted, clients }) => {
                 <Input id="employee_name" value={formData.employee_name} onChange={e => setFormData({...formData, employee_name: e.target.value})} required />
             </div>
             <div className="space-y-2">
+                <Label htmlFor="id_number">ID Number</Label>
+                <Input id="id_number" value={formData.id_number} onChange={e => setFormData({...formData, id_number: e.target.value})} />
+            </div>
+            <div className="space-y-2">
                 <Label htmlFor="position">Position</Label>
                 <Input id="position" value={formData.position} onChange={e => setFormData({...formData, position: e.target.value})} />
             </div>
             <div className="flex justify-end">
-                <Button type="submit">Create Record</Button>
+                <Button type="submit">{editingRecord ? 'Update' : 'Create'} Record</Button>
             </div>
         </form>
     );
@@ -99,6 +117,7 @@ export default function IDPrintingPage() {
     const [clients, setClients] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
+    const [editingRecord, setEditingRecord] = useState(null);
     const { toast } = useToast();
 
     const loadData = useCallback(async () => {
@@ -131,6 +150,27 @@ export default function IDPrintingPage() {
         }
     };
 
+    const handleEdit = (record) => {
+        setEditingRecord(record);
+        setShowForm(true);
+    };
+
+    const handleDelete = async (recordId) => {
+        if (!confirm('Are you sure you want to delete this record?')) return;
+        try {
+            await IDPrintRecord.delete(recordId);
+            toast({ title: 'Deleted', description: 'Record deleted successfully.' });
+            loadData();
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete record.' });
+        }
+    };
+
+    const handleFormClose = () => {
+        setShowForm(false);
+        setEditingRecord(null);
+    };
+
     const getStatusBadge = (status) => {
         switch (status) {
             case 'for_print': return <Badge variant="destructive">For Print</Badge>;
@@ -151,15 +191,15 @@ export default function IDPrintingPage() {
                         </h1>
                         <p className="text-muted-foreground mt-1">Manage bulk and single ID printing jobs.</p>
                     </div>
-                    <Dialog open={showForm} onOpenChange={setShowForm}>
+                    <Dialog open={showForm} onOpenChange={handleFormClose}>
                         <DialogTrigger asChild>
                             <Button><Plus className="w-4 h-4 mr-2" /> New Record</Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Create New ID Print Record</DialogTitle>
+                                <DialogTitle>{editingRecord ? 'Edit' : 'Create New'} ID Print Record</DialogTitle>
                             </DialogHeader>
-                            <NewRecordForm clients={clients} onSubmitted={() => { setShowForm(false); loadData(); }} />
+                            <RecordForm clients={clients} editingRecord={editingRecord} onSubmitted={() => { handleFormClose(); loadData(); }} />
                         </DialogContent>
                     </Dialog>
                 </div>
@@ -188,15 +228,26 @@ export default function IDPrintingPage() {
                                         <TableCell>{format(new Date(record.print_date), 'MMM d, yyyy')}</TableCell>
                                         <TableCell>{getStatusBadge(record.status)}</TableCell>
                                         <TableCell className="text-right">
-                                            {record.status === 'for_print' ? (
-                                                <Button size="sm" onClick={() => handleStatusUpdate(record.id)}>
-                                                    <Check className="w-4 h-4 mr-2" /> Mark as Printed
+                                            <div className="flex items-center justify-end gap-2">
+                                                {record.status === 'for_print' && (
+                                                    <Button size="sm" onClick={() => handleStatusUpdate(record.id)}>
+                                                        <Check className="w-4 h-4 mr-2" /> Mark as Printed
+                                                    </Button>
+                                                )}
+                                                {record.status === 'invoiced' ? (
+                                                    <span className="text-xs text-muted-foreground">Billed in {record.invoice_id}</span>
+                                                ) : record.status === 'printed' && (
+                                                    <span className="text-xs text-muted-foreground">Ready for invoice</span>
+                                                )}
+                                                <Button variant="ghost" size="icon" onClick={() => handleEdit(record)}>
+                                                    <Edit className="w-4 h-4" />
                                                 </Button>
-                                            ) : record.status === 'invoiced' ? (
-                                                <span className="text-xs text-muted-foreground">Billed in {record.invoice_id}</span>
-                                            ) : (
-                                                <span className="text-xs text-muted-foreground">Ready for invoice</span>
-                                            )}
+                                                {record.status !== 'invoiced' && (
+                                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(record.id)}>
+                                                        <Trash2 className="w-4 h-4 text-destructive" />
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}
