@@ -298,22 +298,22 @@ export default function CostingCalculator({ onSaveSuccess }) {
     ];
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="space-y-4 md:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <div>
-                    <h2 className="text-xl font-semibold">Costing Calculator</h2>
-                    <p className="text-sm text-muted-foreground">Calculate accurate pricing for your products</p>
+                    <h2 className="text-lg md:text-xl font-semibold">Costing Calculator</h2>
+                    <p className="text-xs md:text-sm text-muted-foreground">Calculate accurate pricing for your products</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     {onSaveSuccess && (
                         <Dialog>
                             <DialogTrigger asChild>
-                                <Button variant="default" disabled={!productName || baseCostPerUnit === 0}>
-                                    <Save className="w-4 h-4 mr-2" />
-                                    Save to Products
+                                <Button variant="default" size="sm" disabled={!productName || baseCostPerUnit === 0}>
+                                    <Save className="w-4 h-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">Save to Products</span>
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                            <DialogContent className="max-w-[95vw] sm:max-w-md">
                                 <DialogHeader>
                                     <DialogTitle>Save New Product</DialogTitle>
                                 </DialogHeader>
@@ -328,12 +328,13 @@ export default function CostingCalculator({ onSaveSuccess }) {
                             </DialogContent>
                         </Dialog>
                     )}
-                    <Button variant="outline" onClick={downloadComputation} disabled={baseCostPerUnit === 0}>
-                        <Download className="w-4 h-4 mr-2" />
-                        Download PDF
+                    <Button variant="outline" size="sm" onClick={downloadComputation} disabled={baseCostPerUnit === 0}>
+                        <Download className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">PDF</span>
                     </Button>
-                    <Button variant="outline" onClick={resetCalculator}>
-                        Reset Calculator
+                    <Button variant="outline" size="sm" onClick={resetCalculator}>
+                        <span className="hidden sm:inline">Reset</span>
+                        <span className="sm:hidden">Reset</span>
                     </Button>
                 </div>
             </div>
@@ -346,35 +347,36 @@ export default function CostingCalculator({ onSaveSuccess }) {
                         <CardHeader>
                             <CardTitle className="text-lg">Product Information</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Product Name</Label>
-                                    <Input
-                                        value={productName}
-                                        onChange={(e) => setProductName(e.target.value)}
-                                        placeholder="e.g., Business Card, Tarpaulin 3x2ft"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Usual Quantity Per Selling</Label>
-                                    <Input
-                                        type="number"
-                                        step="1"
-                                        min="1"
-                                        value={usualQuantity}
-                                        onChange={(e) => setUsualQuantity(parseInt(e.target.value) || 1)}
-                                        placeholder="1"
-                                    />
-                                </div>
+                        <CardContent className="space-y-3 md:space-y-4">
+                            <div className="space-y-2">
+                                <Label className="text-sm">Product Name</Label>
+                                <Input
+                                    value={productName}
+                                    onChange={(e) => setProductName(e.target.value)}
+                                    placeholder="e.g., Business Card"
+                                    className="h-10"
+                                />
                             </div>
                             <div className="space-y-2">
-                                <Label>Description</Label>
+                                <Label className="text-sm">Usual Quantity Per Selling</Label>
+                                <Input
+                                    type="number"
+                                    step="1"
+                                    min="1"
+                                    value={usualQuantity}
+                                    onChange={(e) => setUsualQuantity(parseInt(e.target.value) || 1)}
+                                    placeholder="1"
+                                    className="h-10"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-sm">Description</Label>
                                 <Textarea
                                     value={productDescription}
                                     onChange={(e) => setProductDescription(e.target.value)}
                                     placeholder="Brief description of the product specifications"
                                     rows={2}
+                                    className="text-sm"
                                 />
                             </div>
                         </CardContent>
@@ -383,32 +385,33 @@ export default function CostingCalculator({ onSaveSuccess }) {
                     {/* Materials Section */}
                     <Card>
                         <CardHeader>
-                            <div className="flex justify-between items-center flex-wrap gap-2">
-                                <CardTitle className="text-lg">Materials & Components</CardTitle>
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                                <CardTitle className="text-base md:text-lg">Materials & Components</CardTitle>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Button onClick={() => addQuickItem('ink_bw')} size="sm" variant="outline">
+                                    <Button onClick={() => addQuickItem('ink_bw')} size="sm" variant="outline" className="text-xs">
                                         Ink (B&W) ₱0.15
                                     </Button>
-                                    <Button onClick={() => addQuickItem('ink_color')} size="sm" variant="outline">
+                                    <Button onClick={() => addQuickItem('ink_color')} size="sm" variant="outline" className="text-xs">
                                         Ink (Color) ₱2.00
                                     </Button>
                                     <Button onClick={addMaterial} size="sm">
-                                        <Plus className="w-4 h-4 mr-1" /> Add Material
+                                        <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                                        <span className="hidden sm:inline">Add Material</span>
                                     </Button>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-3">
                             {materials.map((material) => (
-                                <div key={material.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                                    <div className="flex-1 grid grid-cols-5 gap-3">
-                                        <div>
+                                <div key={material.id} className="border rounded-lg p-3 space-y-3 bg-card">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="col-span-2">
                                             <Label className="text-xs text-muted-foreground">Material Name</Label>
                                             <Input
                                                 value={material.name}
                                                 onChange={(e) => updateMaterial(material.id, 'name', e.target.value)}
-                                                placeholder="e.g., Photo Paper"
-                                                className="mt-1"
+                                                placeholder="e.g., Paper"
+                                                className="mt-1 h-9 text-sm"
                                             />
                                         </div>
                                         <div>
@@ -418,8 +421,8 @@ export default function CostingCalculator({ onSaveSuccess }) {
                                                 step="0.01"
                                                 value={material.pricePerPack}
                                                 onChange={(e) => updateMaterial(material.id, 'pricePerPack', e.target.value)}
-                                                placeholder="0.00"
-                                                className="mt-1"
+                                                placeholder="0"
+                                                className="mt-1 h-9 text-sm"
                                             />
                                         </div>
                                         <div>
@@ -430,7 +433,7 @@ export default function CostingCalculator({ onSaveSuccess }) {
                                                 value={material.itemsPerPack}
                                                 onChange={(e) => updateMaterial(material.id, 'itemsPerPack', e.target.value)}
                                                 placeholder="1"
-                                                className="mt-1"
+                                                className="mt-1 h-9 text-sm"
                                             />
                                         </div>
                                         <div>
@@ -441,12 +444,12 @@ export default function CostingCalculator({ onSaveSuccess }) {
                                                 value={material.quantityNeeded}
                                                 onChange={(e) => updateMaterial(material.id, 'quantityNeeded', e.target.value)}
                                                 placeholder="1"
-                                                className="mt-1"
+                                                className="mt-1 h-9 text-sm"
                                             />
                                         </div>
                                         <div>
                                             <Label className="text-xs text-muted-foreground">Cost</Label>
-                                            <div className="px-3 py-2 bg-secondary rounded text-sm font-medium mt-1">
+                                            <div className="px-2 py-1.5 bg-secondary rounded text-sm font-medium mt-1 h-9 flex items-center">
                                                 ₱{materialCosts.find(m => m.id === material.id)?.costPerItem.toFixed(2) || '0.00'}
                                             </div>
                                         </div>
@@ -454,11 +457,12 @@ export default function CostingCalculator({ onSaveSuccess }) {
                                     {materials.length > 1 && (
                                         <Button
                                             variant="ghost"
-                                            size="icon"
+                                            size="sm"
                                             onClick={() => removeMaterial(material.id)}
-                                            className="text-red-500 hover:text-red-700 flex-shrink-0"
+                                            className="text-red-500 hover:text-red-700 w-full"
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Remove
                                         </Button>
                                     )}
                                 </div>
@@ -469,13 +473,13 @@ export default function CostingCalculator({ onSaveSuccess }) {
                     {/* Overhead Costs */}
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">Overhead Costs</CardTitle>
+                            <CardTitle className="text-base md:text-lg">Overhead Costs</CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <CardContent className="grid grid-cols-2 gap-3 md:gap-4">
                             {overheadConfig.map(({ key, label, icon: Icon }) => (
                                 <div key={key} className="space-y-2">
-                                    <Label className="flex items-center gap-2 text-sm">
-                                        <Icon className="w-4 h-4 text-muted-foreground" />
+                                    <Label className="flex items-center gap-1.5 text-xs md:text-sm">
+                                        <Icon className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
                                         {label}
                                     </Label>
                                     <div className="flex items-center gap-2">
@@ -484,9 +488,9 @@ export default function CostingCalculator({ onSaveSuccess }) {
                                             step="0.1"
                                             value={overheadPercentages[key]}
                                             onChange={(e) => updateOverhead(key, e.target.value)}
-                                            className="w-24"
+                                            className="h-9 text-sm"
                                         />
-                                        <span className="text-muted-foreground">%</span>
+                                        <span className="text-xs md:text-sm text-muted-foreground">%</span>
                                     </div>
                                 </div>
                             ))}
@@ -496,23 +500,23 @@ export default function CostingCalculator({ onSaveSuccess }) {
                     {/* Pricing Strategy Multipliers */}
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">Pricing Strategy Multipliers</CardTitle>
+                            <CardTitle className="text-base md:text-lg">Pricing Strategy Multipliers</CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                             {pricingConfig.map(({ key, label, icon: Icon, color }) => (
                                 <div key={key} className="space-y-2">
-                                    <Label className={`flex items-center gap-2 ${color}`}>
-                                        <Icon className="w-4 h-4" />
+                                    <Label className={`flex items-center gap-2 text-xs md:text-sm ${color}`}>
+                                        <Icon className="w-3 h-3 md:w-4 md:h-4" />
                                         {label}
                                     </Label>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-muted-foreground">x</span>
+                                        <span className="text-xs md:text-sm text-muted-foreground">x</span>
                                         <Input
                                             type="number"
                                             step="0.1"
                                             value={pricingMultipliers[key]}
                                             onChange={(e) => updatePricingMultiplier(key, e.target.value)}
-                                            className="w-24"
+                                            className="h-9 text-sm flex-1"
                                         />
                                     </div>
                                 </div>
@@ -522,16 +526,16 @@ export default function CostingCalculator({ onSaveSuccess }) {
                 </div>
 
                 {/* Right Column - Results */}
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                     {/* Cost Breakdown */}
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Calculator className="w-5 h-5" />
+                            <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                                <Calculator className="w-4 h-4 md:w-5 md:h-5" />
                                 Cost Breakdown
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-3 md:space-y-4">
                             <div className="space-y-3">
                                 <div className="flex justify-between">
                                     <span className="text-sm">Material Costs:</span>
@@ -575,49 +579,49 @@ export default function CostingCalculator({ onSaveSuccess }) {
                     {/* Pricing Strategies */}
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">Pricing Strategies</CardTitle>
+                            <CardTitle className="text-base md:text-lg">Pricing Strategies</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-3">
+                        <CardContent className="space-y-3">
+                            <div className="space-y-2 md:space-y-3">
                                 <div className="p-3 border rounded-lg">
                                     <div className="flex justify-between items-center mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <TrendingDown className="w-4 h-4 text-blue-500" />
-                                            <span className="font-medium text-blue-700">Aggressive</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <TrendingDown className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />
+                                            <span className="text-sm md:text-base font-medium text-blue-700">Aggressive</span>
                                         </div>
-                                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
                                             {((pricingMultipliers.aggressive - 1) * 100).toFixed(0)}% markup
                                         </Badge>
                                     </div>
-                                    <p className="text-2xl font-bold text-blue-600">₱{pricingStrategies.aggressive.toFixed(2)}</p>
+                                    <p className="text-xl md:text-2xl font-bold text-blue-600">₱{pricingStrategies.aggressive.toFixed(2)}</p>
                                     <p className="text-xs text-muted-foreground">For {usualQuantity} unit(s)</p>
                                 </div>
 
                                 <div className="p-3 border rounded-lg">
                                     <div className="flex justify-between items-center mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <Minus className="w-4 h-4 text-green-500" />
-                                            <span className="font-medium text-green-700">Conservative</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <Minus className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
+                                            <span className="text-sm md:text-base font-medium text-green-700">Conservative</span>
                                         </div>
-                                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                        <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                                             {((pricingMultipliers.conservative - 1) * 100).toFixed(0)}% markup
                                         </Badge>
                                     </div>
-                                    <p className="text-2xl font-bold text-green-600">₱{pricingStrategies.conservative.toFixed(2)}</p>
+                                    <p className="text-xl md:text-2xl font-bold text-green-600">₱{pricingStrategies.conservative.toFixed(2)}</p>
                                     <p className="text-xs text-muted-foreground">For {usualQuantity} unit(s)</p>
                                 </div>
 
                                 <div className="p-3 border rounded-lg">
                                     <div className="flex justify-between items-center mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <TrendingUp className="w-4 h-4 text-red-500" />
-                                            <span className="font-medium text-red-700">Extreme</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <TrendingUp className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
+                                            <span className="text-sm md:text-base font-medium text-red-700">Extreme</span>
                                         </div>
-                                        <Badge variant="secondary" className="bg-red-100 text-red-800">
+                                        <Badge variant="secondary" className="bg-red-100 text-red-800 text-xs">
                                             {((pricingMultipliers.extreme - 1) * 100).toFixed(0)}% markup
                                         </Badge>
                                     </div>
-                                    <p className="text-2xl font-bold text-red-600">₱{pricingStrategies.extreme.toFixed(2)}</p>
+                                    <p className="text-xl md:text-2xl font-bold text-red-600">₱{pricingStrategies.extreme.toFixed(2)}</p>
                                     <p className="text-xs text-muted-foreground">For {usualQuantity} unit(s)</p>
                                 </div>
                             </div>
