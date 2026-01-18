@@ -2573,9 +2573,20 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
     );
 };
 
-const PurchaseOrderForm = ({ onSubmitted, suppliers }) => {
+const PurchaseOrderForm = ({ onSubmitted, suppliers, editingPO = null }) => {
   const [users, setUsers] = useState([]);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(editingPO ? {
+      po_number: editingPO.po_number || `PO-${Date.now().toString().slice(-6)}`,
+      supplier_id: editingPO.supplier_id || '',
+      supplier_name: editingPO.supplier_name || '',
+      issue_date: editingPO.issue_date || format(new Date(), 'yyyy-MM-dd'),
+      due_date: editingPO.due_date || format(addDays(new Date(), 14), 'yyyy-MM-dd'),
+      items: editingPO.items || [{ item_name: '', description: '', quantity: 1, unit_price: 0 }],
+      shipping_cost: editingPO.shipping_cost || 0,
+      tax_amount: editingPO.tax_amount || 0,
+      notes: editingPO.notes || '',
+      approved_by_email: editingPO.approved_by_email || ''
+  } : {
       po_number: `PO-${Date.now().toString().slice(-6)}`,
       supplier_id: '',
       supplier_name: '',
@@ -2651,26 +2662,36 @@ const PurchaseOrderForm = ({ onSubmitted, suppliers }) => {
       const { subtotal, total } = calculateTotals();
 
       try {
-          const currentUser = await User.me();
-          const newPO = await PurchaseOrder.create({
-              ...formData,
-              items: validItems,
-              subtotal,
-              total_amount: total,
-              requested_by_email: currentUser.email,
-              status: 'draft'
-          });
+          if (editingPO) {
+              await PurchaseOrder.update(editingPO.id, {
+                  ...formData,
+                  items: validItems,
+                  subtotal,
+                  total_amount: total
+              });
+              toast({ title: 'Success', description: 'Purchase Order updated successfully.' });
+          } else {
+              const currentUser = await User.me();
+              const newPO = await PurchaseOrder.create({
+                  ...formData,
+                  items: validItems,
+                  subtotal,
+                  total_amount: total,
+                  requested_by_email: currentUser.email,
+                  status: 'draft'
+              });
 
-          // Notify approver if one is selected
-          if (formData.approved_by_email) {
-            await notifyPurchaseOrderApproval(newPO, formData.approved_by_email);
+              // Notify approver if one is selected
+              if (formData.approved_by_email) {
+                await notifyPurchaseOrderApproval(newPO, formData.approved_by_email);
+              }
+
+              toast({ title: 'Success', description: 'Purchase Order created successfully.' });
           }
-
-          toast({ title: 'Success', description: 'Purchase Order created successfully.' });
           onSubmitted();
       } catch (error) {
-          console.error('Error creating purchase order:', error);
-          toast({ variant: 'destructive', title: 'Error', description: 'Failed to create purchase order.' });
+          console.error('Error creating/updating purchase order:', error);
+          toast({ variant: 'destructive', title: 'Error', description: `Failed to ${editingPO ? 'update' : 'create'} purchase order.` });
       }
   };
 
@@ -2827,13 +2848,13 @@ const PurchaseOrderForm = ({ onSubmitted, suppliers }) => {
           </div>
 
           <div className="flex justify-end">
-              <Button type="submit">Create Purchase Order</Button>
+              <Button type="submit">{editingPO ? 'Update' : 'Create'} Purchase Order</Button>
           </div>
       </form>
   );
 };
 
-const PurchaseOrdersList = ({ purchaseOrders, isLoading, loadPurchaseOrders }) => {
+const PurchaseOrdersList = ({ purchaseOrders, isLoading, loadPurchaseOrders, onEditPO }) => {
     const { toast } = useToast();
 
     const getStatusBadge = (status) => {
@@ -2916,6 +2937,9 @@ const PurchaseOrdersList = ({ purchaseOrders, isLoading, loadPurchaseOrders }) =
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => onEditPO(po)}>
+                                                <Edit className="w-4 h-4 mr-2" /> Edit
+                                            </DropdownMenuItem>
                                             <Link to={createPageUrl(`PurchaseOrderPrintView?id=${po.id}`)} target="_blank">
                                                 <DropdownMenuItem>
                                                     <Printer className="w-4 h-4 mr-2" /> Print/View
@@ -2990,6 +3014,7 @@ export default function FormsPage() {
     const [editingQuotation, setEditingQuotation] = useState(null);
     const [editingInvoice, setEditingInvoice] = useState(null);
     const [editingIdRecord, setEditingIdRecord] = useState(null);
+    const [editingPO, setEditingPO] = useState(null);
     const [showConvertModal, setShowConvertModal] = useState(false);
     const [convertingQuotation, setConvertingQuotation] = useState(null);
     const [showEditInvoiceModal, setShowEditInvoiceModal] = useState(false); 
@@ -3164,6 +3189,16 @@ export default function FormsPage() {
     const handleIdFormClose = () => {
         setShowNewIDForm(false);
         setEditingIdRecord(null);
+    };
+
+    const handleEditPO = (po) => {
+        setEditingPO(po);
+        setShowNewPOForm(true);
+    };
+
+    const handlePOFormClose = () => {
+        setShowNewPOForm(false);
+        setEditingPO(null);
     };
     
     const filteredIdRecords = idPrintRecords.filter(record => {
@@ -3471,18 +3506,19 @@ export default function FormsPage() {
                     <TabsContent value="purchase-orders" className="mt-6">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <h3 className="text-lg font-medium text-foreground">Purchase Orders</h3>
-                            <Dialog open={showNewPOForm} onOpenChange={setShowNewPOForm}>
+                            <Dialog open={showNewPOForm} onOpenChange={handlePOFormClose}>
                                 <DialogTrigger asChild>
                                     <Button><Plus className="w-4 h-4 mr-2" /> New Purchase Order</Button>
                                 </DialogTrigger>
                                 <DialogContent className="dialog-content max-w-4xl max-h-[90vh] overflow-y-auto">
                                     <DialogHeader>
-                                        <DialogTitle className="text-card-foreground">Create Purchase Order</DialogTitle>
+                                        <DialogTitle className="text-card-foreground">{editingPO ? 'Edit' : 'Create'} Purchase Order</DialogTitle>
                                     </DialogHeader>
                                     <PurchaseOrderForm 
                                         suppliers={suppliers}
+                                        editingPO={editingPO}
                                         onSubmitted={() => { 
-                                            setShowNewPOForm(false); 
+                                            handlePOFormClose(); 
                                             loadAllData(); 
                                         }} 
                                     />
@@ -3494,7 +3530,8 @@ export default function FormsPage() {
                                 <PurchaseOrdersList 
                                     purchaseOrders={purchaseOrders} 
                                     isLoading={isLoading} 
-                                    loadPurchaseOrders={loadAllData} 
+                                    loadPurchaseOrders={loadAllData}
+                                    onEditPO={handleEditPO}
                                 />
                             </CardContent>
                         </Card>
