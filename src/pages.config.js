@@ -44,6 +44,7 @@ import Suppliers from './pages/Suppliers';
 import TaskTemplates from './pages/TaskTemplates';
 import Team from './pages/Team';
 import UnauthorizedAccess from './pages/UnauthorizedAccess';
+import SalesReport from './pages/SalesReport';
 import __Layout from './Layout.jsx';
 
 
@@ -94,6 +95,7 @@ export const PAGES = {
     "TaskTemplates": TaskTemplates,
     "Team": Team,
     "UnauthorizedAccess": UnauthorizedAccess,
+    "SalesReport": SalesReport,
 }
 
 export const pagesConfig = {
