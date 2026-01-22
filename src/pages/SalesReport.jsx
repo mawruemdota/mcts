@@ -4,10 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Download, Printer } from "lucide-react";
+import { Download, Printer, Copy } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function SalesReport() {
+  const { toast } = useToast();
   const [invoices, setInvoices] = useState([]);
   const [clients, setClients] = useState({});
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,32 @@ export default function SalesReport() {
     window.print();
   };
 
+  const copyTableData = () => {
+    let tableText = "DATE\tSI NO\tTIN\tSOLD TO\tADDRESS\tSALES\n";
+    
+    invoices.forEach(invoice => {
+      const client = clients[invoice.client_id];
+      const row = [
+        format(new Date(invoice.issue_date), "MM/dd/yyyy"),
+        invoice.invoice_number,
+        client?.tin || "-",
+        invoice.client_name,
+        client?.address || "-",
+        invoice.amount.toFixed(2)
+      ].join("\t");
+      tableText += row + "\n";
+    });
+    
+    tableText += `\t\t\t\tTOTAL SALES:\t${totalSales.toFixed(2)}`;
+    
+    navigator.clipboard.writeText(tableText).then(() => {
+      toast({
+        title: "Table copied!",
+        description: "You can now paste it into Excel or Google Sheets"
+      });
+    });
+  };
+
   const totalSales = invoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
 
   return (
@@ -61,10 +89,16 @@ export default function SalesReport() {
           <h1 className="text-2xl font-bold">Sales Report</h1>
           <p className="text-sm text-muted-foreground">View and export sales data</p>
         </div>
-        <Button onClick={handlePrint} className="gap-2">
-          <Printer className="w-4 h-4" />
-          Print Report
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={copyTableData} variant="outline" className="gap-2">
+            <Copy className="w-4 h-4" />
+            Copy Table
+          </Button>
+          <Button onClick={handlePrint} className="gap-2">
+            <Printer className="w-4 h-4" />
+            Print Report
+          </Button>
+        </div>
       </div>
 
       <Card className="no-print">
