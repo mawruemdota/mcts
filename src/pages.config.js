@@ -37,6 +37,7 @@ import ReimbursementPrintView from './pages/ReimbursementPrintView';
 import Reminders from './pages/Reminders';
 import Reports from './pages/Reports';
 import Requests from './pages/Requests';
+import SalesReport from './pages/SalesReport';
 import Settings from './pages/Settings';
 import ShopCash from './pages/ShopCash';
 import Summary from './pages/Summary';
@@ -44,7 +45,6 @@ import Suppliers from './pages/Suppliers';
 import TaskTemplates from './pages/TaskTemplates';
 import Team from './pages/Team';
 import UnauthorizedAccess from './pages/UnauthorizedAccess';
-import SalesReport from './pages/SalesReport';
 import __Layout from './Layout.jsx';
 
 
@@ -88,6 +88,7 @@ export const PAGES = {
     "Reminders": Reminders,
     "Reports": Reports,
     "Requests": Requests,
+    "SalesReport": SalesReport,
     "Settings": Settings,
     "ShopCash": ShopCash,
     "Summary": Summary,
@@ -95,7 +96,6 @@ export const PAGES = {
     "TaskTemplates": TaskTemplates,
     "Team": Team,
     "UnauthorizedAccess": UnauthorizedAccess,
-    "SalesReport": SalesReport,
 }
 
 export const pagesConfig = {
