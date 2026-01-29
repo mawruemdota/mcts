@@ -480,7 +480,7 @@ export default function Layout({ children, currentPageName }) {
                 <Plus className="w-4 h-4 mr-2" />
                 Task
               </Button>
-              
+
               <Button 
                 variant="outline" 
                 className="w-full justify-start text-sm h-9"
@@ -492,7 +492,19 @@ export default function Layout({ children, currentPageName }) {
                 <Plus className="w-4 h-4 mr-2" />
                 Reminder
               </Button>
-              
+
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-sm h-9"
+                onClick={() => {
+                  navigate(createPageUrl("ReportMaker"));
+                  setIsSidebarOpen(false);
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Report
+              </Button>
+
               <Button 
                 variant="outline" 
                 className="w-full justify-start text-sm h-9"

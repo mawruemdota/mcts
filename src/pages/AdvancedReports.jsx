@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Download, FileText, Filter, TrendingUp, DollarSign, Clock, Package } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
+import DailyReportsList from '@/components/reports/DailyReportsList';
 
 export default function AdvancedReportsPage() {
   const [dateRange, setDateRange] = useState({
@@ -274,6 +275,7 @@ export default function AdvancedReportsPage() {
             <TabsTrigger value="financial">Financial Summary</TabsTrigger>
             <TabsTrigger value="operational">Operational Metrics</TabsTrigger>
             <TabsTrigger value="breakdown">Revenue Breakdown</TabsTrigger>
+            <TabsTrigger value="daily">Daily Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="financial" className="space-y-4">
@@ -483,6 +485,10 @@ export default function AdvancedReportsPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="daily" className="space-y-4">
+            <DailyReportsList />
           </TabsContent>
         </Tabs>
       )}
