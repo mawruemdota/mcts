@@ -31,7 +31,7 @@ export default function ReportMaker({ isOpen, onClose, onSaved }) {
     { value: "completed", label: "Completed" }
   ];
   
-  const [selectedStatuses, setSelectedStatuses] = useState(["pending_approval", "in_production", "quality_check", "ready_pickup"]);
+  const [selectedStatuses, setSelectedStatuses] = useState(["pending_approval", "in_production", "quality_check", "ready_pickup", "completed"]);
   const [taskData, setTaskData] = useState({});
 
   useEffect(() => {
@@ -289,20 +289,28 @@ export default function ReportMaker({ isOpen, onClose, onSaved }) {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Title</TableHead>
-                              <TableHead>Client</TableHead>
-                              <TableHead className="w-[100px]">Deadline</TableHead>
-                              <TableHead className="w-[100px]">Quantity</TableHead>
-                              <TableHead className="w-[250px]">Notes</TableHead>
+                              <TableHead className="w-[200px]">Title</TableHead>
+                              <TableHead className="w-[180px]">Client</TableHead>
+                              <TableHead className="w-[110px]">Deadline</TableHead>
+                              <TableHead className="w-[120px]">Quantity</TableHead>
+                              <TableHead>Notes</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {statusJobs.map(job => (
                               <TableRow key={job.id}>
-                                <TableCell className="font-medium">{job.title}</TableCell>
-                                <TableCell>{job.client_name}</TableCell>
-                                <TableCell>{job.deadline ? format(new Date(job.deadline), "MM/dd/yyyy") : "N/A"}</TableCell>
-                                <TableCell>
+                                <TableCell className="font-medium w-[200px]">
+                                  <div className="truncate" title={job.title}>
+                                    {job.title}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="w-[180px]">
+                                  <div className="truncate" title={job.client_name}>
+                                    {job.client_name}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="w-[110px]">{job.deadline ? format(new Date(job.deadline), "MM/dd/yyyy") : "N/A"}</TableCell>
+                                <TableCell className="w-[120px]">
                                   <div className="flex items-center gap-1">
                                     <Input
                                       type="number"
@@ -321,7 +329,7 @@ export default function ReportMaker({ isOpen, onClose, onSaved }) {
                                     value={taskData[job.id]?.notes || ""}
                                     onChange={(e) => handleTaskDataChange(job.id, "notes", e.target.value)}
                                     placeholder="Add notes..."
-                                    className="min-h-[60px] no-print"
+                                    className="min-h-[60px] no-print w-full"
                                   />
                                   <span className="hidden print:inline text-sm">{taskData[job.id]?.notes || ""}</span>
                                 </TableCell>
