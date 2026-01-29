@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/use-toast";
-import { Save, Printer, Download, Loader2, FileText } from "lucide-react";
+import { Save, Printer, Download, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
-export default function ReportMaker() {
-  const navigate = useNavigate();
+export default function ReportMaker({ isOpen, onClose, onSaved }) {
   const [user, setUser] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,14 +25,13 @@ export default function ReportMaker() {
   
   const statusOptions = [
     { value: "pending_approval", label: "Pending Approval" },
-    { value: "finalized", label: "Finalized" },
     { value: "in_production", label: "In Production" },
     { value: "quality_check", label: "Quality Check" },
     { value: "ready_pickup", label: "Ready for Pickup" },
     { value: "completed", label: "Completed" }
   ];
   
-  const [selectedStatuses, setSelectedStatuses] = useState(["in_production", "quality_check", "ready_pickup"]);
+  const [selectedStatuses, setSelectedStatuses] = useState(["pending_approval", "in_production", "quality_check", "ready_pickup"]);
   const [taskData, setTaskData] = useState({});
 
   useEffect(() => {
@@ -122,7 +119,8 @@ export default function ReportMaker() {
       });
 
       toast({ title: "Success", description: "Report saved successfully" });
-      navigate(createPageUrl("AdvancedReports"));
+      if (onSaved) onSaved();
+      if (onClose) onClose();
     } catch (error) {
       console.error("Error saving report:", error);
       toast({ title: "Error", description: "Failed to save report", variant: "destructive" });
@@ -161,7 +159,6 @@ export default function ReportMaker() {
       doc.setFont(undefined, 'normal');
 
       const tableData = statusJobs.map(job => [
-        job.job_id,
         job.title,
         job.client_name,
         job.deadline ? format(new Date(job.deadline), "MM/dd/yyyy") : "N/A",
@@ -171,7 +168,7 @@ export default function ReportMaker() {
 
       doc.autoTable({
         startY: yPos,
-        head: [["Job ID", "Title", "Client", "Deadline", "Quantity", "Notes"]],
+        head: [["Title", "Client", "Deadline", "Quantity", "Notes"]],
         body: tableData,
         theme: 'striped',
         styles: { fontSize: 8 },
@@ -186,47 +183,40 @@ export default function ReportMaker() {
     toast({ title: "Success", description: "PDF downloaded successfully" });
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <style>{`
-        @media print {
-          .no-print { display: none !important; }
-          body { background: white; }
-        }
-      `}</style>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Daily Report Maker</DialogTitle>
+        </DialogHeader>
+        
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <style>{`
+              @media print {
+                .no-print { display: none !important; }
+                body { background: white; }
+              }
+            `}</style>
 
-      <div className="flex justify-between items-center mb-6 no-print">
-        <div>
-          <h1 className="text-3xl font-bold">Daily Report Maker</h1>
-          <p className="text-muted-foreground">Create operational status reports</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate(createPageUrl("AdvancedReports"))}>
-            <FileText className="w-4 h-4 mr-2" />
-            View Reports
-          </Button>
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="w-4 h-4 mr-2" />
-            Print
-          </Button>
-          <Button variant="outline" onClick={handleDownloadPDF}>
-            <Download className="w-4 h-4 mr-2" />
-            Download PDF
-          </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            Save Report
-          </Button>
-        </div>
-      </div>
+            <div className="flex justify-end gap-2 no-print">
+              <Button variant="outline" onClick={handlePrint} size="sm">
+                <Printer className="w-4 h-4 mr-2" />
+                Print
+              </Button>
+              <Button variant="outline" onClick={handleDownloadPDF} size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Download PDF
+              </Button>
+              <Button onClick={handleSave} disabled={saving} size="sm">
+                {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                Save Report
+              </Button>
+            </div>
 
       <Card className="mb-6 no-print">
         <CardHeader>
@@ -254,107 +244,108 @@ export default function ReportMaker() {
         </CardContent>
       </Card>
 
-      <Card className="mb-6 no-print">
-        <CardHeader>
-          <CardTitle>Select Task Statuses</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            {statusOptions.map(status => (
-              <div key={status.value} className="flex items-center space-x-2">
-                <Checkbox
-                  id={status.value}
-                  checked={selectedStatuses.includes(status.value)}
-                  onCheckedChange={() => handleStatusToggle(status.value)}
-                />
-                <Label htmlFor={status.value} className="cursor-pointer">
-                  {status.label}
-                </Label>
+            <Card className="no-print">
+              <CardHeader>
+                <CardTitle>Select Task Statuses</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4">
+                  {statusOptions.map(status => (
+                    <div key={status.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={status.value}
+                        checked={selectedStatuses.includes(status.value)}
+                        onCheckedChange={() => handleStatusToggle(status.value)}
+                      />
+                      <Label htmlFor={status.value} className="cursor-pointer">
+                        {status.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="print:block">
+              <div className="mb-4 print:block hidden">
+                <h1 className="text-2xl font-bold">{reportTitle}</h1>
+                <p className="text-sm text-muted-foreground">Date: {format(new Date(reportDate), "MMM dd, yyyy")}</p>
+                <p className="text-sm text-muted-foreground">Prepared by: {user?.full_name}</p>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
-      <div className="print:block">
-        <div className="mb-4 print:block hidden">
-          <h1 className="text-2xl font-bold">{reportTitle}</h1>
-          <p className="text-sm text-muted-foreground">Date: {format(new Date(reportDate), "MMM dd, yyyy")}</p>
-          <p className="text-sm text-muted-foreground">Prepared by: {user?.full_name}</p>
-        </div>
+              <div className="space-y-6">
+                {selectedStatuses.map(status => {
+                  const statusJobs = getFilteredJobs(status);
+                  if (statusJobs.length === 0) return null;
 
-        <div className="space-y-6">
-          {selectedStatuses.map(status => {
-            const statusJobs = getFilteredJobs(status);
-            if (statusJobs.length === 0) return null;
+                  const statusLabel = statusOptions.find(s => s.value === status)?.label || status;
 
-            const statusLabel = statusOptions.find(s => s.value === status)?.label || status;
+                  return (
+                    <Card key={status} className="break-inside-avoid">
+                      <CardHeader>
+                        <CardTitle className="text-xl">{statusLabel}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Title</TableHead>
+                              <TableHead>Client</TableHead>
+                              <TableHead className="w-[100px]">Deadline</TableHead>
+                              <TableHead className="w-[100px]">Quantity</TableHead>
+                              <TableHead className="w-[250px]">Notes</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {statusJobs.map(job => (
+                              <TableRow key={job.id}>
+                                <TableCell className="font-medium">{job.title}</TableCell>
+                                <TableCell>{job.client_name}</TableCell>
+                                <TableCell>{job.deadline ? format(new Date(job.deadline), "MM/dd/yyyy") : "N/A"}</TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-1">
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      max={job.quantity || 999}
+                                      value={taskData[job.id]?.completed_quantity || 0}
+                                      onChange={(e) => handleTaskDataChange(job.id, "completed_quantity", parseInt(e.target.value) || 0)}
+                                      className="w-16 h-8 no-print"
+                                    />
+                                    <span className="hidden print:inline">{taskData[job.id]?.completed_quantity || 0}</span>
+                                    <span>/ {job.quantity || 0}</span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Textarea
+                                    value={taskData[job.id]?.notes || ""}
+                                    onChange={(e) => handleTaskDataChange(job.id, "notes", e.target.value)}
+                                    placeholder="Add notes..."
+                                    className="min-h-[60px] no-print"
+                                  />
+                                  <span className="hidden print:inline text-sm">{taskData[job.id]?.notes || ""}</span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
 
-            return (
-              <Card key={status} className="break-inside-avoid">
-                <CardHeader>
-                  <CardTitle className="text-xl">{statusLabel}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[120px]">Job ID</TableHead>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead className="w-[100px]">Deadline</TableHead>
-                        <TableHead className="w-[100px]">Quantity</TableHead>
-                        <TableHead className="w-[250px]">Notes</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {statusJobs.map(job => (
-                        <TableRow key={job.id}>
-                          <TableCell className="font-mono text-xs">{job.job_id}</TableCell>
-                          <TableCell className="font-medium">{job.title}</TableCell>
-                          <TableCell>{job.client_name}</TableCell>
-                          <TableCell>{job.deadline ? format(new Date(job.deadline), "MM/dd/yyyy") : "N/A"}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Input
-                                type="number"
-                                min="0"
-                                max={job.quantity || 999}
-                                value={taskData[job.id]?.completed_quantity || 0}
-                                onChange={(e) => handleTaskDataChange(job.id, "completed_quantity", parseInt(e.target.value) || 0)}
-                                className="w-16 h-8 no-print"
-                              />
-                              <span className="hidden print:inline">{taskData[job.id]?.completed_quantity || 0}</span>
-                              <span>/ {job.quantity || 0}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Textarea
-                              value={taskData[job.id]?.notes || ""}
-                              onChange={(e) => handleTaskDataChange(job.id, "notes", e.target.value)}
-                              placeholder="Add notes..."
-                              className="min-h-[60px] no-print"
-                            />
-                            <span className="hidden print:inline text-sm">{taskData[job.id]?.notes || ""}</span>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+            {selectedStatuses.every(status => getFilteredJobs(status).length === 0) && (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <p className="text-muted-foreground">No tasks found for the selected statuses.</p>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {selectedStatuses.every(status => getFilteredJobs(status).length === 0) && (
-        <Card>
-          <CardContent className="text-center py-12">
-            <p className="text-muted-foreground">No tasks found for the selected statuses.</p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

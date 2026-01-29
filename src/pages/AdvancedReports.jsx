@@ -7,12 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Download, FileText, Filter, TrendingUp, DollarSign, Clock, Package } from 'lucide-react';
+import { Download, FileText, Filter, TrendingUp, DollarSign, Clock, Package, Eye, Trash2, Printer } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
-import DailyReportsList from '@/components/reports/DailyReportsList';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export default function AdvancedReportsPage() {
+  const [dailyReports, setDailyReports] = useState([]);
   const [dateRange, setDateRange] = useState({
     start: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
     end: format(endOfMonth(new Date()), 'yyyy-MM-dd')
@@ -26,6 +27,7 @@ export default function AdvancedReportsPage() {
 
   useEffect(() => {
     loadClients();
+    loadDailyReports();
   }, []);
 
   const loadClients = async () => {
@@ -34,6 +36,27 @@ export default function AdvancedReportsPage() {
       setClients(clientsData);
     } catch (error) {
       console.error('Error loading clients:', error);
+    }
+  };
+
+  const loadDailyReports = async () => {
+    try {
+      const reports = await base44.entities.DailyReport.list('-created_date');
+      setDailyReports(reports.slice(0, 5));
+    } catch (error) {
+      console.error('Error loading daily reports:', error);
+    }
+  };
+
+  const handleDeleteReport = async (reportId) => {
+    if (!confirm('Are you sure you want to delete this report?')) return;
+    try {
+      await base44.entities.DailyReport.delete(reportId);
+      toast({ title: 'Report deleted successfully' });
+      loadDailyReports();
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      toast({ variant: 'destructive', title: 'Failed to delete report' });
     }
   };
 
@@ -269,14 +292,15 @@ export default function AdvancedReportsPage() {
         </CardContent>
       </Card>
 
-      {reportData && (
-        <Tabs defaultValue="financial" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="financial">Financial Summary</TabsTrigger>
-            <TabsTrigger value="operational">Operational Metrics</TabsTrigger>
-            <TabsTrigger value="breakdown">Revenue Breakdown</TabsTrigger>
-            <TabsTrigger value="daily">Daily Reports</TabsTrigger>
-          </TabsList>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          {reportData && (
+            <Tabs defaultValue="financial" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="financial">Financial Summary</TabsTrigger>
+                <TabsTrigger value="operational">Operational Metrics</TabsTrigger>
+                <TabsTrigger value="breakdown">Revenue Breakdown</TabsTrigger>
+              </TabsList>
 
           <TabsContent value="financial" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -467,31 +491,68 @@ export default function AdvancedReportsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="breakdown" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Revenue by Client</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {Object.entries(reportData.clientRevenue)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([client, revenue]) => (
-                      <div key={client} className="flex items-center justify-between p-3 border rounded-lg">
-                        <span className="font-medium">{client}</span>
-                        <span className="text-lg font-bold">₱{revenue.toLocaleString()}</span>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              <TabsContent value="breakdown" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Revenue by Client</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {Object.entries(reportData.clientRevenue)
+                        .sort(([, a], [, b]) => b - a)
+                        .map(([client, revenue]) => (
+                          <div key={client} className="flex items-center justify-between p-3 border rounded-lg">
+                            <span className="font-medium">{client}</span>
+                            <span className="text-lg font-bold">₱{revenue.toLocaleString()}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          )}
+        </div>
 
-          <TabsContent value="daily" className="space-y-4">
-            <DailyReportsList />
-          </TabsContent>
-        </Tabs>
-      )}
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Daily Reports</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {dailyReports.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">No daily reports yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {dailyReports.map(report => (
+                    <div key={report.id} className="p-3 border rounded-lg hover:bg-accent transition-colors">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{report.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(report.report_date), 'MMM dd, yyyy')}
+                          </p>
+                          <p className="text-xs text-muted-foreground">by {report.prepared_by_name}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleDeleteReport(report.id)}
+                          >
+                            <Trash2 className="w-3 h-3 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

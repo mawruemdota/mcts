@@ -50,6 +50,7 @@ import QueueStatsHeader from "@/components/dashboard/QueueStatsHeader";
 import QuickReminderModal from "@/components/reminders/QuickReminderModal";
 import NewTaskModal from "@/components/jobs/NewTaskModal";
 import GlobalSearch from "@/components/ui/GlobalSearch";
+import ReportMaker from "@/pages/ReportMaker";
 import { cn } from "@/lib/utils";
 
 export default function Layout({ children, currentPageName }) {
@@ -63,6 +64,7 @@ export default function Layout({ children, currentPageName }) {
   const [showQuickReminder, setShowQuickReminder] = useState(false);
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const [showReportMaker, setShowReportMaker] = useState(false);
   const [isInactiveUser, setIsInactiveUser] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -497,7 +499,7 @@ export default function Layout({ children, currentPageName }) {
                 variant="outline" 
                 className="w-full justify-start text-sm h-9"
                 onClick={() => {
-                  navigate(createPageUrl("ReportMaker"));
+                  setShowReportMaker(true);
                   setIsSidebarOpen(false);
                 }}
               >
@@ -604,6 +606,7 @@ export default function Layout({ children, currentPageName }) {
       {showQuickReminder && <QuickReminderModal isOpen={showQuickReminder} onClose={() => setShowQuickReminder(false)} user={user} />}
       {showNewTaskModal && <NewTaskModal isOpen={showNewTaskModal} onClose={() => setShowNewTaskModal(false)} onTaskCreated={handleTaskCreated} user={user} />}
       {showGlobalSearch && <GlobalSearch isOpen={showGlobalSearch} onClose={() => setShowGlobalSearch(false)} user={user} />}
+      {showReportMaker && <ReportMaker isOpen={showReportMaker} onClose={() => setShowReportMaker(false)} onSaved={() => setShowReportMaker(false)} />}
     </>
   );
 }

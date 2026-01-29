@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,13 +9,14 @@ import { Eye, Trash2, FileText, Plus, Loader2, Download, Printer } from "lucide-
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import ReportMaker from "@/pages/ReportMaker";
 
 export default function DailyReportsList() {
-  const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showReportMaker, setShowReportMaker] = useState(false);
 
   useEffect(() => {
     loadReports();
@@ -82,7 +81,6 @@ export default function DailyReportsList() {
       doc.setFont(undefined, 'normal');
 
       const tableData = group.tasks.map(task => [
-        task.job_id,
         task.job_title,
         task.client_name,
         task.deadline ? format(new Date(task.deadline), "MM/dd/yyyy") : "N/A",
@@ -92,7 +90,7 @@ export default function DailyReportsList() {
 
       doc.autoTable({
         startY: yPos,
-        head: [["Job ID", "Title", "Client", "Deadline", "Quantity", "Notes"]],
+        head: [["Title", "Client", "Deadline", "Quantity", "Notes"]],
         body: tableData,
         theme: 'striped',
         styles: { fontSize: 8 },
@@ -129,7 +127,7 @@ export default function DailyReportsList() {
           <h2 className="text-2xl font-bold">Daily Reports</h2>
           <p className="text-muted-foreground">View and manage operational reports</p>
         </div>
-        <Button onClick={() => navigate(createPageUrl("ReportMaker"))}>
+        <Button onClick={() => setShowReportMaker(true)}>
           <Plus className="w-4 h-4 mr-2" />
           New Report
         </Button>
@@ -140,7 +138,7 @@ export default function DailyReportsList() {
           <CardContent className="text-center py-12">
             <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-muted-foreground mb-4">No daily reports yet.</p>
-            <Button onClick={() => navigate(createPageUrl("ReportMaker"))}>
+            <Button onClick={() => setShowReportMaker(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Create First Report
             </Button>
@@ -208,7 +206,6 @@ export default function DailyReportsList() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Job ID</TableHead>
                         <TableHead>Title</TableHead>
                         <TableHead>Client</TableHead>
                         <TableHead>Deadline</TableHead>
@@ -219,7 +216,6 @@ export default function DailyReportsList() {
                     <TableBody>
                       {group.tasks.map((task, taskIdx) => (
                         <TableRow key={taskIdx}>
-                          <TableCell className="font-mono text-xs">{task.job_id}</TableCell>
                           <TableCell>{task.job_title}</TableCell>
                           <TableCell>{task.client_name}</TableCell>
                           <TableCell>{task.deadline ? format(new Date(task.deadline), "MM/dd/yyyy") : "N/A"}</TableCell>
@@ -235,6 +231,15 @@ export default function DailyReportsList() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ReportMaker 
+        isOpen={showReportMaker} 
+        onClose={() => setShowReportMaker(false)}
+        onSaved={() => {
+          setShowReportMaker(false);
+          loadReports();
+        }}
+      />
     </div>
   );
 }
