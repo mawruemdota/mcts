@@ -515,7 +515,7 @@ export default function AdvancedReportsPage() {
         </div>
 
         <div>
-          <Card>
+          <Card className="h-fit sticky top-6">
             <CardHeader>
               <CardTitle>Recent Daily Reports</CardTitle>
             </CardHeader>
@@ -523,22 +523,31 @@ export default function AdvancedReportsPage() {
               {dailyReports.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">No daily reports yet</p>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {dailyReports.map(report => (
                     <div key={report.id} className="p-3 border rounded-lg hover:bg-accent transition-colors">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{report.title}</p>
+                      <div className="space-y-2">
+                        <div>
+                          <p className="font-medium text-sm truncate" title={report.title}>{report.title}</p>
                           <p className="text-xs text-muted-foreground">
                             {format(new Date(report.report_date), 'MMM dd, yyyy')}
                           </p>
                           <p className="text-xs text-muted-foreground">by {report.prepared_by_name}</p>
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1 h-8"
+                            onClick={() => window.open(`#preview-${report.id}`, '_self')}
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Preview
+                          </Button>
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="h-7 w-7 p-0"
+                            className="h-8 px-2"
                             onClick={() => handleDeleteReport(report.id)}
                           >
                             <Trash2 className="w-3 h-3 text-red-500" />
