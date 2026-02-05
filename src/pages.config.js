@@ -73,6 +73,8 @@ import Inventory from './pages/Inventory';
 import InvoicePrintView from './pages/InvoicePrintView';
 import ItemsAndServices from './pages/ItemsAndServices';
 import Jobs from './pages/Jobs';
+import KeychainOrders from './pages/KeychainOrders';
+import KeychainPhotoForm from './pages/KeychainPhotoForm';
 import MCTSToolbox from './pages/MCTSToolbox';
 import NotFound from './pages/NotFound';
 import OrderTracking from './pages/OrderTracking';
@@ -95,8 +97,6 @@ import Suppliers from './pages/Suppliers';
 import TaskTemplates from './pages/TaskTemplates';
 import Team from './pages/Team';
 import UnauthorizedAccess from './pages/UnauthorizedAccess';
-import KeychainPhotoForm from './pages/KeychainPhotoForm';
-import KeychainOrders from './pages/KeychainOrders';
 import __Layout from './Layout.jsx';
 
 
@@ -127,6 +127,8 @@ export const PAGES = {
     "InvoicePrintView": InvoicePrintView,
     "ItemsAndServices": ItemsAndServices,
     "Jobs": Jobs,
+    "KeychainOrders": KeychainOrders,
+    "KeychainPhotoForm": KeychainPhotoForm,
     "MCTSToolbox": MCTSToolbox,
     "NotFound": NotFound,
     "OrderTracking": OrderTracking,
@@ -149,8 +151,6 @@ export const PAGES = {
     "TaskTemplates": TaskTemplates,
     "Team": Team,
     "UnauthorizedAccess": UnauthorizedAccess,
-    "KeychainPhotoForm": KeychainPhotoForm,
-    "KeychainOrders": KeychainOrders,
 }
 
 export const pagesConfig = {

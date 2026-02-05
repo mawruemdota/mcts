@@ -9,15 +9,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Upload, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import OptimizedImage from "@/components/ui/OptimizedImage";
+import KeychainVisualEditor from "@/components/keychain/KeychainVisualEditor";
 
 export default function KeychainPhotoForm() {
   const [clientName, setClientName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [orders, setOrders] = useState([{
     keychain_type: "1_photo_same_b2b",
+    keychain_size: "",
+    num_photos: 1,
     photo_urls: [],
+    background_color: "#FFFFFF",
     notes: "",
-    uploading: false
+    uploadingIndex: null
   }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -32,9 +36,12 @@ export default function KeychainPhotoForm() {
   const addOrder = () => {
     setOrders([...orders, {
       keychain_type: "1_photo_same_b2b",
+      keychain_size: "",
+      num_photos: 1,
       photo_urls: [],
+      background_color: "#FFFFFF",
       notes: "",
-      uploading: false
+      uploadingIndex: null
     }]);
   };
 
@@ -46,47 +53,34 @@ export default function KeychainPhotoForm() {
     const newOrders = [...orders];
     newOrders[index][field] = value;
     if (field === "keychain_type") {
+      const selectedType = keychainTypes.find(t => t.value === value);
       newOrders[index].photo_urls = [];
+      newOrders[index].num_photos = selectedType?.numPhotos || 1;
     }
     setOrders(newOrders);
   };
 
-  const handleFileUpload = async (index, files) => {
-    const selectedType = keychainTypes.find(t => t.value === orders[index].keychain_type);
-    const requiredPhotos = selectedType?.numPhotos || 1;
-
-    if (files.length > requiredPhotos) {
-      toast({
-        title: "Too many photos",
-        description: `This keychain type requires exactly ${requiredPhotos} photo(s)`,
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleFileUpload = async (index, photoSlotIndex, file) => {
+    if (!file) return;
 
     const newOrders = [...orders];
-    newOrders[index].uploading = true;
+    newOrders[index].uploadingIndex = photoSlotIndex;
     setOrders(newOrders);
 
     try {
-      const uploadPromises = Array.from(files).map(file => 
-        base44.integrations.Core.UploadFile({ file })
-      );
+      const result = await base44.integrations.Core.UploadFile({ file });
       
-      const results = await Promise.all(uploadPromises);
-      const urls = results.map(r => r.file_url);
-      
-      newOrders[index].photo_urls = [...newOrders[index].photo_urls, ...urls];
-      newOrders[index].uploading = false;
+      newOrders[index].photo_urls[photoSlotIndex] = result.file_url;
+      newOrders[index].uploadingIndex = null;
       setOrders(newOrders);
 
       toast({
-        title: "Photos uploaded",
-        description: `${files.length} photo(s) uploaded successfully`
+        title: "Photo uploaded",
+        description: `Photo ${photoSlotIndex + 1} uploaded successfully`
       });
     } catch (error) {
       console.error("Upload error:", error);
-      newOrders[index].uploading = false;
+      newOrders[index].uploadingIndex = null;
       setOrders(newOrders);
       toast({
         title: "Upload failed",
@@ -98,7 +92,7 @@ export default function KeychainPhotoForm() {
 
   const removePhoto = (orderIndex, photoIndex) => {
     const newOrders = [...orders];
-    newOrders[orderIndex].photo_urls = newOrders[orderIndex].photo_urls.filter((_, i) => i !== photoIndex);
+    newOrders[orderIndex].photo_urls[photoIndex] = null;
     setOrders(newOrders);
   };
 
@@ -116,13 +110,22 @@ export default function KeychainPhotoForm() {
 
     for (let i = 0; i < orders.length; i++) {
       const order = orders[i];
-      const selectedType = keychainTypes.find(t => t.value === order.keychain_type);
-      const requiredPhotos = selectedType?.numPhotos || 1;
+      const requiredPhotos = order.num_photos || 1;
 
-      if (order.photo_urls.length !== requiredPhotos) {
+      const uploadedPhotos = order.photo_urls.filter(url => url).length;
+      if (uploadedPhotos !== requiredPhotos) {
         toast({
           title: "Incomplete order",
-          description: `Order ${i + 1} requires exactly ${requiredPhotos} photo(s)`,
+          description: `Order ${i + 1} requires ${requiredPhotos} photo(s), but only ${uploadedPhotos} uploaded`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!order.keychain_size) {
+        toast({
+          title: "Missing information",
+          description: `Please specify the size for Order ${i + 1}`,
           variant: "destructive"
         });
         return;
@@ -135,7 +138,10 @@ export default function KeychainPhotoForm() {
       await base44.entities.KeychainOrder.create({
         client_name: clientName,
         contact_number: contactNumber,
-        orders: orders.map(({ uploading, ...rest }) => rest),
+        orders: orders.map(({ uploadingIndex, ...rest }) => ({
+          ...rest,
+          photo_urls: rest.photo_urls.filter(url => url)
+        })),
         status: "new"
       });
 
@@ -172,7 +178,15 @@ export default function KeychainPhotoForm() {
               setSubmitted(false);
               setClientName("");
               setContactNumber("");
-              setOrders([{ keychain_type: "1_photo_same_b2b", photo_urls: [], notes: "", uploading: false }]);
+              setOrders([{ 
+                keychain_type: "1_photo_same_b2b", 
+                keychain_size: "",
+                num_photos: 1,
+                photo_urls: [], 
+                background_color: "#FFFFFF",
+                notes: "", 
+                uploadingIndex: null 
+              }]);
             }}>
               Submit Another Order
             </Button>
@@ -222,9 +236,7 @@ export default function KeychainPhotoForm() {
           </Card>
 
           {orders.map((order, index) => {
-            const selectedType = keychainTypes.find(t => t.value === order.keychain_type);
-            const requiredPhotos = selectedType?.numPhotos || 1;
-            const canUploadMore = order.photo_urls.length < requiredPhotos;
+            const requiredPhotos = order.num_photos || 1;
 
             return (
               <Card key={index}>
@@ -242,77 +254,87 @@ export default function KeychainPhotoForm() {
                   )}
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label>Keychain Type *</Label>
-                    <Select
-                      value={order.keychain_type}
-                      onValueChange={(value) => updateOrder(index, "keychain_type", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {keychainTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Required: {requiredPhotos} photo{requiredPhotos > 1 ? 's' : ''}
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Keychain Type *</Label>
+                      <Select
+                        value={order.keychain_type}
+                        onValueChange={(value) => updateOrder(index, "keychain_type", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {keychainTypes.map(type => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Keychain Size *</Label>
+                      <Input
+                        value={order.keychain_size}
+                        onChange={(e) => updateOrder(index, "keychain_size", e.target.value)}
+                        placeholder="e.g., 1x3 inches"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <Label>Upload Photos ({order.photo_urls.length}/{requiredPhotos})</Label>
-                    {canUploadMore && (
-                      <div className="mt-2">
-                        <label className="cursor-pointer">
-                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
-                            {order.uploading ? (
-                              <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-blue-500" />
-                            ) : (
-                              <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                            )}
-                            <p className="text-sm text-gray-600">
-                              Click to upload {requiredPhotos - order.photo_urls.length} more photo{requiredPhotos - order.photo_urls.length > 1 ? 's' : ''}
-                            </p>
-                          </div>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple={requiredPhotos > 1}
-                            className="hidden"
-                            onChange={(e) => handleFileUpload(index, e.target.files)}
-                            disabled={order.uploading}
-                          />
-                        </label>
-                      </div>
-                    )}
-
-                    {order.photo_urls.length > 0 && (
-                      <div className="grid grid-cols-3 gap-4 mt-4">
-                        {order.photo_urls.map((url, photoIndex) => (
-                          <div key={photoIndex} className="relative group">
-                            <OptimizedImage
-                              src={url}
-                              alt={`Photo ${photoIndex + 1}`}
-                              className="w-full h-32 rounded-lg border"
-                              objectFit="cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removePhoto(index, photoIndex)}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <Label>Upload Photos ({requiredPhotos} needed)</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                      {Array.from({ length: requiredPhotos }).map((_, photoIndex) => (
+                        <div key={photoIndex} className="relative">
+                          {order.photo_urls[photoIndex] ? (
+                            <div className="relative group">
+                              <OptimizedImage
+                                src={order.photo_urls[photoIndex]}
+                                alt={`Photo ${photoIndex + 1}`}
+                                className="w-full h-32 rounded-lg border"
+                                objectFit="cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removePhoto(index, photoIndex)}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <label className="cursor-pointer block">
+                              <div className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex flex-col items-center justify-center hover:border-blue-500 transition-colors">
+                                {order.uploadingIndex === photoIndex ? (
+                                  <Loader2 className="w-6 h-6 mb-1 animate-spin text-blue-500" />
+                                ) : (
+                                  <Upload className="w-6 h-6 mb-1 text-gray-400" />
+                                )}
+                                <p className="text-xs text-gray-600">Photo {photoIndex + 1}</p>
+                              </div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handleFileUpload(index, photoIndex, e.target.files[0])}
+                                disabled={order.uploadingIndex !== null}
+                              />
+                            </label>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
+
+                  <KeychainVisualEditor
+                    numPhotos={requiredPhotos}
+                    photoUrls={order.photo_urls}
+                    backgroundColor={order.background_color}
+                    onBackgroundColorChange={(color) => updateOrder(index, "background_color", color)}
+                  />
 
                   <div>
                     <Label>Notes (Optional)</Label>

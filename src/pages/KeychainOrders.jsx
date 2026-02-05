@@ -8,11 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Package, Phone, User, Calendar, Image as ImageIcon, FileText, ExternalLink, Search, Filter } from "lucide-react";
+import { Package, Phone, User, Calendar, Image as ImageIcon, FileText, ExternalLink, Search, Filter, Ruler } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/components/ui/use-toast";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 import { createPageUrl } from "@/utils";
+import KeychainVisualEditor from "@/components/keychain/KeychainVisualEditor";
 
 export default function KeychainOrders() {
   const [orders, setOrders] = useState([]);
@@ -23,6 +24,7 @@ export default function KeychainOrders() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingStatus, setEditingStatus] = useState(null);
   const [adminNotes, setAdminNotes] = useState("");
+  const [editingItem, setEditingItem] = useState(null);
 
   const statusColors = {
     new: "bg-blue-100 text-blue-800",
@@ -120,6 +122,35 @@ export default function KeychainOrders() {
       toast({
         title: "Error",
         description: "Failed to save notes",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateItem = async (itemIndex) => {
+    if (!selectedOrder || !editingItem) return;
+
+    try {
+      const updatedOrders = [...selectedOrder.orders];
+      updatedOrders[itemIndex] = editingItem;
+
+      await base44.entities.KeychainOrder.update(selectedOrder.id, {
+        orders: updatedOrders
+      });
+
+      toast({
+        title: "Item updated",
+        description: "Keychain item updated successfully"
+      });
+      
+      loadOrders();
+      setSelectedOrder({ ...selectedOrder, orders: updatedOrders });
+      setEditingItem(null);
+    } catch (error) {
+      console.error("Error updating item:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update item",
         variant: "destructive"
       });
     }
@@ -254,9 +285,15 @@ export default function KeychainOrders() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {order.orders?.slice(0, 3).map((item, idx) => (
                     <div key={idx} className="border rounded-lg p-3">
-                      <p className="text-sm font-medium mb-2">
+                      <p className="text-sm font-medium mb-1">
                         {keychainTypeLabels[item.keychain_type]}
                       </p>
+                      {item.keychain_size && (
+                        <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                          <Ruler className="w-3 h-3" />
+                          {item.keychain_size}
+                        </p>
+                      )}
                       <div className="flex gap-2">
                         {item.photo_urls?.slice(0, 3).map((url, pIdx) => (
                           <OptimizedImage
@@ -344,12 +381,34 @@ export default function KeychainOrders() {
                 <div className="space-y-4">
                   {selectedOrder.orders?.map((item, idx) => (
                     <Card key={idx}>
-                      <CardHeader>
-                        <CardTitle className="text-base">
-                          Keychain {idx + 1}: {keychainTypeLabels[item.keychain_type]}
-                        </CardTitle>
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                          <CardTitle className="text-base">
+                            Keychain {idx + 1}: {keychainTypeLabels[item.keychain_type]}
+                          </CardTitle>
+                          {item.keychain_size && (
+                            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                              <Ruler className="w-3 h-3" />
+                              {item.keychain_size}
+                            </p>
+                          )}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingItem(item)}
+                        >
+                          Edit
+                        </Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
+                        <KeychainVisualEditor
+                          numPhotos={item.num_photos || item.photo_urls?.length || 0}
+                          photoUrls={item.photo_urls || []}
+                          backgroundColor={item.background_color || "#FFFFFF"}
+                          onBackgroundColorChange={() => {}}
+                        />
+                        
                         <div>
                           <Label className="mb-2 block">Photos ({item.photo_urls?.length || 0})</Label>
                           <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
@@ -387,6 +446,52 @@ export default function KeychainOrders() {
                     </Card>
                   ))}
                 </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {editingItem && (
+        <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Keychain Item</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Keychain Size</Label>
+                <Input
+                  value={editingItem.keychain_size || ""}
+                  onChange={(e) => setEditingItem({ ...editingItem, keychain_size: e.target.value })}
+                  placeholder="e.g., 1x3 inches"
+                />
+              </div>
+              <div>
+                <Label>Number of Photos</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={editingItem.num_photos || editingItem.photo_urls?.length || 0}
+                  onChange={(e) => setEditingItem({ ...editingItem, num_photos: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+              <KeychainVisualEditor
+                numPhotos={editingItem.num_photos || editingItem.photo_urls?.length || 0}
+                photoUrls={editingItem.photo_urls || []}
+                backgroundColor={editingItem.background_color || "#FFFFFF"}
+                onBackgroundColorChange={(color) => setEditingItem({ ...editingItem, background_color: color })}
+              />
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setEditingItem(null)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  const itemIndex = selectedOrder.orders.findIndex(o => o === selectedOrder.orders.find((_, i) => selectedOrder.orders[i] === editingItem));
+                  handleUpdateItem(itemIndex);
+                }}>
+                  Save Changes
+                </Button>
               </div>
             </div>
           </DialogContent>
