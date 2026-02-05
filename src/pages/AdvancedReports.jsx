@@ -7,10 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Download, FileText, Filter, TrendingUp, DollarSign, Clock, Package, Eye, Trash2, Printer } from 'lucide-react';
+import { Download, FileText, Filter, TrendingUp, DollarSign, Clock, Package, Eye, Trash2, Printer, Edit } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import ReportMaker from '@/pages/ReportMaker';
 
 export default function AdvancedReportsPage() {
   const [dailyReports, setDailyReports] = useState([]);
@@ -23,6 +25,9 @@ export default function AdvancedReportsPage() {
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [editingReport, setEditingReport] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -58,6 +63,15 @@ export default function AdvancedReportsPage() {
       console.error('Error deleting report:', error);
       toast({ variant: 'destructive', title: 'Failed to delete report' });
     }
+  };
+
+  const handlePreview = (report) => {
+    setSelectedReport(report);
+    setShowPreview(true);
+  };
+
+  const handleEdit = (report) => {
+    setEditingReport(report);
   };
 
   const generateReport = async () => {
@@ -530,15 +544,23 @@ export default function AdvancedReportsPage() {
                       </p>
                       <p className="text-xs text-muted-foreground">by {report.prepared_by_name}</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <Button 
                         variant="outline" 
                         size="sm" 
                         className="flex-1 h-8"
-                        onClick={() => window.open(`#preview-${report.id}`, '_self')}
+                        onClick={() => handlePreview(report)}
                       >
                         <Eye className="w-3 h-3 mr-1" />
                         Preview
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 px-2"
+                        onClick={() => handleEdit(report)}
+                      >
+                        <Edit className="w-3 h-3" />
                       </Button>
                       <Button 
                         variant="ghost" 
@@ -556,6 +578,60 @@ export default function AdvancedReportsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selectedReport?.title}</DialogTitle>
+          </DialogHeader>
+          {selectedReport && (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                <p>Date: {format(new Date(selectedReport.report_date), 'MMM dd, yyyy')}</p>
+                <p>Prepared by: {selectedReport.prepared_by_name}</p>
+              </div>
+
+              {selectedReport.report_content.map((group, idx) => (
+                <div key={idx} className="space-y-2">
+                  <h3 className="font-semibold text-lg">{group.status_group}</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Deadline</TableHead>
+                        <TableHead>Quantity</TableHead>
+                        <TableHead>Notes</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {group.tasks.map((task, taskIdx) => (
+                        <TableRow key={taskIdx}>
+                          <TableCell>{task.job_title}</TableCell>
+                          <TableCell>{task.client_name}</TableCell>
+                          <TableCell>{task.deadline ? format(new Date(task.deadline), 'MM/dd/yyyy') : 'N/A'}</TableCell>
+                          <TableCell>{task.completed_quantity}/{task.total_quantity}</TableCell>
+                          <TableCell className="text-sm">{task.notes || '-'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <ReportMaker 
+        isOpen={!!editingReport} 
+        onClose={() => setEditingReport(null)}
+        editingReport={editingReport}
+        onSaved={() => {
+          setEditingReport(null);
+          loadDailyReports();
+        }}
+      />
     </div>
   );
 }
