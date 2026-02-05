@@ -84,6 +84,7 @@ import QuotationForm from './pages/QuotationForm';
 import QuotationPrintView from './pages/QuotationPrintView';
 import ReimbursementPrintView from './pages/ReimbursementPrintView';
 import Reminders from './pages/Reminders';
+import ReportMaker from './pages/ReportMaker';
 import Reports from './pages/Reports';
 import Requests from './pages/Requests';
 import SalesReport from './pages/SalesReport';
@@ -94,7 +95,8 @@ import Suppliers from './pages/Suppliers';
 import TaskTemplates from './pages/TaskTemplates';
 import Team from './pages/Team';
 import UnauthorizedAccess from './pages/UnauthorizedAccess';
-import ReportMaker from './pages/ReportMaker';
+import KeychainPhotoForm from './pages/KeychainPhotoForm';
+import KeychainOrders from './pages/KeychainOrders';
 import __Layout from './Layout.jsx';
 
 
@@ -136,6 +138,7 @@ export const PAGES = {
     "QuotationPrintView": QuotationPrintView,
     "ReimbursementPrintView": ReimbursementPrintView,
     "Reminders": Reminders,
+    "ReportMaker": ReportMaker,
     "Reports": Reports,
     "Requests": Requests,
     "SalesReport": SalesReport,
@@ -146,7 +149,8 @@ export const PAGES = {
     "TaskTemplates": TaskTemplates,
     "Team": Team,
     "UnauthorizedAccess": UnauthorizedAccess,
-    "ReportMaker": ReportMaker,
+    "KeychainPhotoForm": KeychainPhotoForm,
+    "KeychainOrders": KeychainOrders,
 }
 
 export const pagesConfig = {
