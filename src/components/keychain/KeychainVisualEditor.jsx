@@ -86,47 +86,6 @@ export default function KeychainVisualEditor({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <Label>Template Size</Label>
-          <Select value={templateSize || "medium"} onValueChange={onTemplateSizeChange}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="small">Small (2x3 in)</SelectItem>
-              <SelectItem value="medium">Medium (3x4 in)</SelectItem>
-              <SelectItem value="large">Large (4x6 in)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Photo Layout</Label>
-          <Select value={numPhotos?.toString()} disabled>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1">1 Photo</SelectItem>
-              <SelectItem value="2">2 Photos</SelectItem>
-              <SelectItem value="3">3 Photos</SelectItem>
-              <SelectItem value="4">4 Photos</SelectItem>
-              <SelectItem value="6">6 Photos</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>Photo Margin: {photoMargin || 4}px</Label>
-          <Slider
-            value={[photoMargin || 4]}
-            onValueChange={([value]) => onPhotoMarginChange?.(value)}
-            min={0}
-            max={20}
-            step={1}
-            className="mt-2"
-          />
-        </div>
-      </div>
 
       <div>
         <Label>Preview</Label>
@@ -211,31 +170,39 @@ export default function KeychainVisualEditor({
         </TabsContent>
       </Tabs>
 
-      <div className="space-y-2">
-        <Label>Photo Frame Border</Label>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label className="text-xs">Border Width: {photoBorderWidth || 0}px</Label>
-            <Slider
-              value={[photoBorderWidth || 0]}
-              onValueChange={([value]) => onPhotoBorderWidthChange?.(value)}
-              min={0}
-              max={10}
-              step={1}
-              className="mt-2"
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <Label>Photo Margin: {photoMargin || 4}px</Label>
+          <Slider
+            value={[photoMargin || 4]}
+            onValueChange={(values) => onPhotoMarginChange?.(values[0])}
+            min={0}
+            max={20}
+            step={1}
+            className="mt-2"
+          />
+        </div>
+        <div>
+          <Label>Border Width: {photoBorderWidth || 0}px</Label>
+          <Slider
+            value={[photoBorderWidth || 0]}
+            onValueChange={(values) => onPhotoBorderWidthChange?.(values[0])}
+            min={0}
+            max={10}
+            step={1}
+            className="mt-2"
+          />
+        </div>
+        <div>
+          <Label>Border Color</Label>
+          <div className="flex items-center gap-2 mt-2">
+            <input
+              type="color"
+              value={photoBorderColor || "#000000"}
+              onChange={(e) => onPhotoBorderColorChange?.(e.target.value)}
+              className="w-12 h-12 rounded border cursor-pointer"
             />
-          </div>
-          <div>
-            <Label className="text-xs">Border Color</Label>
-            <div className="flex items-center gap-2 mt-2">
-              <input
-                type="color"
-                value={photoBorderColor || "#000000"}
-                onChange={(e) => onPhotoBorderColorChange?.(e.target.value)}
-                className="w-10 h-10 rounded border cursor-pointer"
-              />
-              <span className="text-xs text-muted-foreground">{photoBorderColor || "#000000"}</span>
-            </div>
+            <span className="text-sm text-muted-foreground">{photoBorderColor || "#000000"}</span>
           </div>
         </div>
       </div>

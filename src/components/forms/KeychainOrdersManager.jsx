@@ -234,6 +234,7 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
       height_inches: 3,
       orientation: "portrait",
       back_to_back: "same",
+      photo_margin: 4,
       photo_border_width: 0,
       photo_border_color: "#000000",
       background_color: "#FFFFFF",
@@ -785,10 +786,8 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                 onPhotoBorderWidthChange={(width) => setEditingTemplate({ ...editingTemplate, photo_border_width: width })}
                 photoBorderColor={editingTemplate.photo_border_color}
                 onPhotoBorderColorChange={(color) => setEditingTemplate({ ...editingTemplate, photo_border_color: color })}
-                templateSize="medium"
-                onTemplateSizeChange={() => {}}
-                photoMargin={4}
-                onPhotoMarginChange={() => {}}
+                photoMargin={editingTemplate.photo_margin || 4}
+                onPhotoMarginChange={(margin) => setEditingTemplate({ ...editingTemplate, photo_margin: margin })}
               />
 
               <div className="flex items-center gap-2">
