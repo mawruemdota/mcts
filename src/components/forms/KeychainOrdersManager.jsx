@@ -232,6 +232,8 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
       num_photos: 3,
       width_inches: 1,
       height_inches: 3,
+      orientation: "portrait",
+      back_to_back: "same",
       photo_border_width: 0,
       photo_border_color: "#000000",
       background_color: "#FFFFFF",
@@ -610,8 +612,9 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="text-sm space-y-1">
-                    <p><span className="text-muted-foreground">Photos:</span> {template.num_photos}</p>
+                    <p><span className="text-muted-foreground">Photos:</span> {template.num_photos} ({template.orientation})</p>
                     <p><span className="text-muted-foreground">Size:</span> {template.width_inches}" × {template.height_inches}"</p>
+                    <p><span className="text-muted-foreground">Back to Back:</span> {template.back_to_back}</p>
                     {template.photo_border_width > 0 && (
                       <p><span className="text-muted-foreground">Border:</span> {template.photo_border_width}px</p>
                     )}
@@ -728,6 +731,48 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                   />
                 </div>
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Orientation *</Label>
+                  <Select
+                    value={editingTemplate.orientation}
+                    onValueChange={(value) => setEditingTemplate({ ...editingTemplate, orientation: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="portrait">Portrait</SelectItem>
+                      <SelectItem value="landscape">Landscape</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Back to Back *</Label>
+                  <Select
+                    value={editingTemplate.back_to_back}
+                    onValueChange={(value) => setEditingTemplate({ ...editingTemplate, back_to_back: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="same">Same (both sides same photos)</SelectItem>
+                      <SelectItem value="different">Different (2x photos needed)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {editingTemplate.back_to_back === "different" && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-sm text-blue-900 dark:text-blue-100">
+                    <strong>Note:</strong> This template requires {editingTemplate.num_photos * 2} photos total 
+                    ({editingTemplate.num_photos} for front, {editingTemplate.num_photos} for back)
+                  </p>
+                </div>
+              )}
 
               <KeychainVisualEditor
                 numPhotos={editingTemplate.num_photos}
