@@ -56,6 +56,11 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
     "6_photos_different_b2b": "6 Photos (Different B2B)"
   };
 
+  const getNumPhotosFromType = (type) => {
+    const match = type?.match(/^(\d+)_photo/);
+    return match ? parseInt(match[1]) : 1;
+  };
+
   useEffect(() => {
     filterOrders();
   }, [orders, statusFilter, searchQuery]);
@@ -224,9 +229,9 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
     setEditingTemplate({
       template_name: "",
       description: "",
-      keychain_type: "3_photos_same_b2b",
-      template_size: "medium",
-      photo_margin: 4,
+      num_photos: 3,
+      width_inches: 1,
+      height_inches: 3,
       photo_border_width: 0,
       photo_border_color: "#000000",
       background_color: "#FFFFFF",
@@ -605,9 +610,8 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="text-sm space-y-1">
-                    <p><span className="text-muted-foreground">Type:</span> {keychainTypeLabels[template.keychain_type]}</p>
-                    <p><span className="text-muted-foreground">Size:</span> {template.template_size}</p>
-                    <p><span className="text-muted-foreground">Margin:</span> {template.photo_margin}px</p>
+                    <p><span className="text-muted-foreground">Photos:</span> {template.num_photos}</p>
+                    <p><span className="text-muted-foreground">Size:</span> {template.width_inches}" × {template.height_inches}"</p>
                     {template.photo_border_width > 0 && (
                       <p><span className="text-muted-foreground">Border:</span> {template.photo_border_width}px</p>
                     )}
@@ -674,32 +678,13 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
               <DialogTitle>{editingTemplate.id ? "Edit" : "New"} Template</DialogTitle>
             </DialogHeader>
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Template Name *</Label>
-                  <Input
-                    value={editingTemplate.template_name}
-                    onChange={(e) => setEditingTemplate({ ...editingTemplate, template_name: e.target.value })}
-                    placeholder="e.g., Classic 3-Photo"
-                  />
-                </div>
-                <div>
-                  <Label>Keychain Type *</Label>
-                  <Select
-                    value={editingTemplate.keychain_type}
-                    onValueChange={(value) => setEditingTemplate({ ...editingTemplate, keychain_type: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1_photo_same_b2b">1 Photo (Same B2B)</SelectItem>
-                      <SelectItem value="2_photos_different_b2b">2 Photos (Different B2B)</SelectItem>
-                      <SelectItem value="3_photos_same_b2b">3 Photos (Same B2B)</SelectItem>
-                      <SelectItem value="6_photos_different_b2b">6 Photos (Different B2B)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label>Template Name *</Label>
+                <Input
+                  value={editingTemplate.template_name}
+                  onChange={(e) => setEditingTemplate({ ...editingTemplate, template_name: e.target.value })}
+                  placeholder="e.g., Classic 3-Photo"
+                />
               </div>
 
               <div>
@@ -712,8 +697,40 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                 />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label>Number of Photos *</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={editingTemplate.num_photos}
+                    onChange={(e) => setEditingTemplate({ ...editingTemplate, num_photos: parseInt(e.target.value) || 1 })}
+                  />
+                </div>
+                <div>
+                  <Label>Width (inches) *</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    value={editingTemplate.width_inches}
+                    onChange={(e) => setEditingTemplate({ ...editingTemplate, width_inches: parseFloat(e.target.value) || 1 })}
+                  />
+                </div>
+                <div>
+                  <Label>Height (inches) *</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    value={editingTemplate.height_inches}
+                    onChange={(e) => setEditingTemplate({ ...editingTemplate, height_inches: parseFloat(e.target.value) || 1 })}
+                  />
+                </div>
+              </div>
+
               <KeychainVisualEditor
-                numPhotos={parseInt(editingTemplate.keychain_type?.charAt(0)) || 3}
+                numPhotos={editingTemplate.num_photos}
                 photoUrls={[]}
                 backgroundColor={editingTemplate.background_color}
                 onBackgroundColorChange={(color) => setEditingTemplate({ ...editingTemplate, background_color: color })}
@@ -723,10 +740,10 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                 onPhotoBorderWidthChange={(width) => setEditingTemplate({ ...editingTemplate, photo_border_width: width })}
                 photoBorderColor={editingTemplate.photo_border_color}
                 onPhotoBorderColorChange={(color) => setEditingTemplate({ ...editingTemplate, photo_border_color: color })}
-                templateSize={editingTemplate.template_size}
-                onTemplateSizeChange={(size) => setEditingTemplate({ ...editingTemplate, template_size: size })}
-                photoMargin={editingTemplate.photo_margin}
-                onPhotoMarginChange={(margin) => setEditingTemplate({ ...editingTemplate, photo_margin: margin })}
+                templateSize="medium"
+                onTemplateSizeChange={() => {}}
+                photoMargin={4}
+                onPhotoMarginChange={() => {}}
               />
 
               <div className="flex items-center gap-2">
