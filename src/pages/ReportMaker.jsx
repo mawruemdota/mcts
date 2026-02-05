@@ -14,14 +14,18 @@ import { format } from "date-fns";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
-export default function ReportMaker({ isOpen, onClose, onSaved }) {
+export default function ReportMaker({ isOpen, onClose, onSaved, editingReport = null }) {
   const [user, setUser] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  const [reportTitle, setReportTitle] = useState(`Daily Report - ${format(new Date(), "MMM dd, yyyy")}`);
-  const [reportDate, setReportDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [reportTitle, setReportTitle] = useState(
+    editingReport?.title || `Daily Report - ${format(new Date(), "MMM dd, yyyy")}`
+  );
+  const [reportDate, setReportDate] = useState(
+    editingReport?.report_date || format(new Date(), "yyyy-MM-dd")
+  );
   
   const statusOptions = [
     { value: "pending_approval", label: "Pending Approval" },
@@ -31,12 +35,16 @@ export default function ReportMaker({ isOpen, onClose, onSaved }) {
     { value: "completed", label: "Completed" }
   ];
   
-  const [selectedStatuses, setSelectedStatuses] = useState(["pending_approval", "in_production", "quality_check", "ready_pickup", "completed"]);
+  const [selectedStatuses, setSelectedStatuses] = useState(
+    editingReport?.report_content?.map(group => 
+      statusOptions.find(s => s.label === group.status_group)?.value
+    ).filter(Boolean) || ["pending_approval", "in_production", "quality_check", "ready_pickup", "completed"]
+  );
   const [taskData, setTaskData] = useState({});
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [editingReport]);
 
   const loadData = async () => {
     try {
@@ -51,11 +59,28 @@ export default function ReportMaker({ isOpen, onClose, onSaved }) {
       setJobs(activeJobs);
       
       const initialTaskData = {};
+      
+      if (editingReport) {
+        editingReport.report_content?.forEach(group => {
+          group.tasks?.forEach(task => {
+            const job = activeJobs.find(j => j.job_id === task.job_id);
+            if (job) {
+              initialTaskData[job.id] = {
+                completed_quantity: task.completed_quantity || 0,
+                notes: task.notes || ""
+              };
+            }
+          });
+        });
+      }
+      
       activeJobs.forEach(job => {
-        initialTaskData[job.id] = {
-          completed_quantity: 0,
-          notes: ""
-        };
+        if (!initialTaskData[job.id]) {
+          initialTaskData[job.id] = {
+            completed_quantity: 0,
+            notes: ""
+          };
+        }
       });
       setTaskData(initialTaskData);
       
@@ -110,15 +135,23 @@ export default function ReportMaker({ isOpen, onClose, onSaved }) {
         }))
       })).filter(group => group.tasks.length > 0);
 
-      await base44.entities.DailyReport.create({
-        title: reportTitle,
-        report_date: reportDate,
-        prepared_by_email: user.email,
-        prepared_by_name: user.full_name,
-        report_content: reportContent
-      });
-
-      toast({ title: "Success", description: "Report saved successfully" });
+      if (editingReport) {
+        await base44.entities.DailyReport.update(editingReport.id, {
+          title: reportTitle,
+          report_date: reportDate,
+          report_content: reportContent
+        });
+        toast({ title: "Success", description: "Report updated successfully" });
+      } else {
+        await base44.entities.DailyReport.create({
+          title: reportTitle,
+          report_date: reportDate,
+          prepared_by_email: user.email,
+          prepared_by_name: user.full_name,
+          report_content: reportContent
+        });
+        toast({ title: "Success", description: "Report saved successfully" });
+      }
       if (onSaved) onSaved();
       if (onClose) onClose();
     } catch (error) {
@@ -187,7 +220,7 @@ export default function ReportMaker({ isOpen, onClose, onSaved }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Daily Report Maker</DialogTitle>
+          <DialogTitle>{editingReport ? "Edit" : "Create"} Daily Report</DialogTitle>
         </DialogHeader>
         
         {loading ? (
@@ -214,7 +247,7 @@ export default function ReportMaker({ isOpen, onClose, onSaved }) {
               </Button>
               <Button onClick={handleSave} disabled={saving} size="sm">
                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                Save Report
+                {editingReport ? "Update" : "Save"} Report
               </Button>
             </div>
 
@@ -245,8 +278,16 @@ export default function ReportMaker({ isOpen, onClose, onSaved }) {
       </Card>
 
             <Card className="no-print">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Select Task Statuses</CardTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setSelectedStatuses([])}
+                  disabled={selectedStatuses.length === 0}
+                >
+                  Uncheck All
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-4">

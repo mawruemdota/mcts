@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import { Eye, Trash2, FileText, Plus, Loader2, Download, Printer } from "lucide-react";
+import { Eye, Trash2, FileText, Plus, Loader2, Download, Printer, Edit } from "lucide-react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -17,6 +17,7 @@ export default function DailyReportsList() {
   const [selectedReport, setSelectedReport] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showReportMaker, setShowReportMaker] = useState(false);
+  const [editingReport, setEditingReport] = useState(null);
 
   useEffect(() => {
     loadReports();
@@ -133,20 +134,18 @@ export default function DailyReportsList() {
         </Button>
       </div>
 
-      {reports.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground mb-4">No daily reports yet.</p>
-            <Button onClick={() => setShowReportMaker(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create First Report
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
+      <Card className="w-full">
+        <CardContent className="p-0">
+          {reports.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground mb-4">No daily reports yet.</p>
+              <Button onClick={() => setShowReportMaker(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create First Report
+              </Button>
+            </div>
+          ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -165,12 +164,12 @@ export default function DailyReportsList() {
                     <TableCell>{report.prepared_by_name}</TableCell>
                     <TableCell>{format(new Date(report.created_date), "MMM dd, yyyy hh:mm a")}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="sm" onClick={() => handlePreview(report)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handlePrintReport(report)}>
-                          <Printer className="w-4 h-4" />
+                        <Button variant="ghost" size="sm" onClick={() => setEditingReport(report)}>
+                          <Edit className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => handleDownloadPDF(report)}>
                           <Download className="w-4 h-4" />
@@ -184,9 +183,9 @@ export default function DailyReportsList() {
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -237,6 +236,16 @@ export default function DailyReportsList() {
         onClose={() => setShowReportMaker(false)}
         onSaved={() => {
           setShowReportMaker(false);
+          loadReports();
+        }}
+      />
+
+      <ReportMaker 
+        isOpen={!!editingReport} 
+        onClose={() => setEditingReport(null)}
+        editingReport={editingReport}
+        onSaved={() => {
+          setEditingReport(null);
           loadReports();
         }}
       />
