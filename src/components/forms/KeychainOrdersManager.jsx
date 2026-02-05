@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Package, Phone, User, Calendar, FileText, ExternalLink, 
-  Search, Filter, Ruler, Eye, RefreshCw, Copy, Link2 
+  Search, Filter, Ruler, Eye, RefreshCw, Copy, Link2, Plus, Trash2, Edit, Save
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/components/ui/use-toast";
@@ -34,6 +35,9 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
   const [editingStatus, setEditingStatus] = useState(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [editingItem, setEditingItem] = useState(null);
+  const [templates, setTemplates] = useState([]);
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null);
 
   const publicFormUrl = `${window.location.origin}${createPageUrl('KeychainPhotoForm')}`;
 
@@ -52,9 +56,23 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
     "6_photos_different_b2b": "6 Photos (Different B2B)"
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     filterOrders();
   }, [orders, statusFilter, searchQuery]);
+
+  useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  const loadTemplates = async () => {
+    try {
+      const { KeychainTemplate } = await import('@/entities/all');
+      const templatesData = await KeychainTemplate.list('-created_date');
+      setTemplates(templatesData);
+    } catch (error) {
+      console.error("Error loading templates:", error);
+    }
+  };
 
   const filterOrders = () => {
     let filtered = orders;
@@ -164,8 +182,69 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
     return orders.filter(order => order.status === status).length;
   };
 
+  const handleSaveTemplate = async () => {
+    if (!editingTemplate?.template_name) {
+      toast({ title: "Error", description: "Please enter a template name", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const { KeychainTemplate } = await import('@/entities/all');
+      if (editingTemplate.id) {
+        await KeychainTemplate.update(editingTemplate.id, editingTemplate);
+        toast({ title: "Success", description: "Template updated successfully" });
+      } else {
+        await KeychainTemplate.create(editingTemplate);
+        toast({ title: "Success", description: "Template saved successfully" });
+      }
+      setShowTemplateDialog(false);
+      setEditingTemplate(null);
+      loadTemplates();
+    } catch (error) {
+      console.error("Error saving template:", error);
+      toast({ title: "Error", description: "Failed to save template", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteTemplate = async (templateId) => {
+    if (!confirm("Are you sure you want to delete this template?")) return;
+
+    try {
+      const { KeychainTemplate } = await import('@/entities/all');
+      await KeychainTemplate.delete(templateId);
+      toast({ title: "Success", description: "Template deleted" });
+      loadTemplates();
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      toast({ title: "Error", description: "Failed to delete template", variant: "destructive" });
+    }
+  };
+
+  const openNewTemplate = () => {
+    setEditingTemplate({
+      template_name: "",
+      description: "",
+      keychain_type: "3_photos_same_b2b",
+      template_size: "medium",
+      photo_margin: 4,
+      photo_border_width: 0,
+      photo_border_color: "#000000",
+      background_color: "#FFFFFF",
+      background_image: "",
+      is_active: true
+    });
+    setShowTemplateDialog(true);
+  };
+
   return (
     <div className="space-y-6">
+      <Tabs defaultValue="orders" className="w-full">
+        <TabsList>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="orders" className="space-y-6 mt-6">
       {/* Public Form Link Card */}
       <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800">
         <CardHeader>
@@ -488,6 +567,189 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                   handleUpdateItem(itemIndex);
                 }}>
                   Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+        </TabsContent>
+
+        <TabsContent value="templates" className="space-y-6 mt-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-semibold">Keychain Templates</h3>
+              <p className="text-sm text-muted-foreground">Save and reuse keychain design configurations</p>
+            </div>
+            <Button onClick={openNewTemplate}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Template
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {templates.map(template => (
+              <Card key={template.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-base">{template.template_name}</CardTitle>
+                      {template.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
+                      )}
+                    </div>
+                    {!template.is_active && (
+                      <Badge variant="secondary">Inactive</Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-sm space-y-1">
+                    <p><span className="text-muted-foreground">Type:</span> {keychainTypeLabels[template.keychain_type]}</p>
+                    <p><span className="text-muted-foreground">Size:</span> {template.template_size}</p>
+                    <p><span className="text-muted-foreground">Margin:</span> {template.photo_margin}px</p>
+                    {template.photo_border_width > 0 && (
+                      <p><span className="text-muted-foreground">Border:</span> {template.photo_border_width}px</p>
+                    )}
+                  </div>
+
+                  <div className="border rounded-lg p-2 bg-gray-50 dark:bg-gray-900">
+                    <div 
+                      className="h-32 rounded flex items-center justify-center"
+                      style={{ 
+                        backgroundColor: template.background_image ? 'transparent' : template.background_color,
+                        backgroundImage: template.background_image ? `url(${template.background_image})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    >
+                      <span className="text-xs text-gray-500">Preview</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => {
+                        setEditingTemplate(template);
+                        setShowTemplateDialog(true);
+                      }}
+                    >
+                      <Edit className="w-3 h-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDeleteTemplate(template.id)}
+                    >
+                      <Trash2 className="w-3 h-3 text-red-500" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {templates.length === 0 && (
+              <div className="col-span-full text-center py-12 border-2 border-dashed rounded-lg">
+                <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-4">No templates yet</p>
+                <Button onClick={openNewTemplate} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create First Template
+                </Button>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Template Editor Dialog */}
+      {editingTemplate && (
+        <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingTemplate.id ? "Edit" : "New"} Template</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Template Name *</Label>
+                  <Input
+                    value={editingTemplate.template_name}
+                    onChange={(e) => setEditingTemplate({ ...editingTemplate, template_name: e.target.value })}
+                    placeholder="e.g., Classic 3-Photo"
+                  />
+                </div>
+                <div>
+                  <Label>Keychain Type *</Label>
+                  <Select
+                    value={editingTemplate.keychain_type}
+                    onValueChange={(value) => setEditingTemplate({ ...editingTemplate, keychain_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1_photo_same_b2b">1 Photo (Same B2B)</SelectItem>
+                      <SelectItem value="2_photos_different_b2b">2 Photos (Different B2B)</SelectItem>
+                      <SelectItem value="3_photos_same_b2b">3 Photos (Same B2B)</SelectItem>
+                      <SelectItem value="6_photos_different_b2b">6 Photos (Different B2B)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={editingTemplate.description || ""}
+                  onChange={(e) => setEditingTemplate({ ...editingTemplate, description: e.target.value })}
+                  placeholder="Describe this template..."
+                  rows={2}
+                />
+              </div>
+
+              <KeychainVisualEditor
+                numPhotos={parseInt(editingTemplate.keychain_type?.charAt(0)) || 3}
+                photoUrls={[]}
+                backgroundColor={editingTemplate.background_color}
+                onBackgroundColorChange={(color) => setEditingTemplate({ ...editingTemplate, background_color: color })}
+                backgroundImage={editingTemplate.background_image}
+                onBackgroundImageChange={(url) => setEditingTemplate({ ...editingTemplate, background_image: url })}
+                photoBorderWidth={editingTemplate.photo_border_width}
+                onPhotoBorderWidthChange={(width) => setEditingTemplate({ ...editingTemplate, photo_border_width: width })}
+                photoBorderColor={editingTemplate.photo_border_color}
+                onPhotoBorderColorChange={(color) => setEditingTemplate({ ...editingTemplate, photo_border_color: color })}
+                templateSize={editingTemplate.template_size}
+                onTemplateSizeChange={(size) => setEditingTemplate({ ...editingTemplate, template_size: size })}
+                photoMargin={editingTemplate.photo_margin}
+                onPhotoMarginChange={(margin) => setEditingTemplate({ ...editingTemplate, photo_margin: margin })}
+              />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={editingTemplate.is_active}
+                  onChange={(e) => setEditingTemplate({ ...editingTemplate, is_active: e.target.checked })}
+                  className="rounded"
+                />
+                <Label htmlFor="is_active" className="cursor-pointer">Active (available for use)</Label>
+              </div>
+
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => {
+                  setShowTemplateDialog(false);
+                  setEditingTemplate(null);
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveTemplate}>
+                  <Save className="w-4 h-4 mr-2" />
+                  {editingTemplate.id ? "Update" : "Save"} Template
                 </Button>
               </div>
             </div>
