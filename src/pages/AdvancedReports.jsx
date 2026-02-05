@@ -292,15 +292,13 @@ export default function AdvancedReportsPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          {reportData && (
-            <Tabs defaultValue="financial" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="financial">Financial Summary</TabsTrigger>
-                <TabsTrigger value="operational">Operational Metrics</TabsTrigger>
-                <TabsTrigger value="breakdown">Revenue Breakdown</TabsTrigger>
-              </TabsList>
+      {reportData && (
+        <Tabs defaultValue="financial" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="financial">Financial Summary</TabsTrigger>
+            <TabsTrigger value="operational">Operational Metrics</TabsTrigger>
+            <TabsTrigger value="breakdown">Revenue Breakdown</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="financial" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -512,56 +510,52 @@ export default function AdvancedReportsPage() {
               </TabsContent>
             </Tabs>
           )}
-        </div>
 
-        <div>
-          <Card className="h-fit sticky top-6">
-            <CardHeader>
-              <CardTitle>Recent Daily Reports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {dailyReports.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">No daily reports yet</p>
-              ) : (
-                <div className="space-y-3">
-                  {dailyReports.map(report => (
-                    <div key={report.id} className="p-3 border rounded-lg hover:bg-accent transition-colors">
-                      <div className="space-y-2">
-                        <div>
-                          <p className="font-medium text-sm truncate" title={report.title}>{report.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(report.report_date), 'MMM dd, yyyy')}
-                          </p>
-                          <p className="text-xs text-muted-foreground">by {report.prepared_by_name}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1 h-8"
-                            onClick={() => window.open(`#preview-${report.id}`, '_self')}
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            Preview
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 px-2"
-                            onClick={() => handleDeleteReport(report.id)}
-                          >
-                            <Trash2 className="w-3 h-3 text-red-500" />
-                          </Button>
-                        </div>
-                      </div>
+      <Card className="h-fit w-full mt-6">
+        <CardHeader>
+          <CardTitle>Recent Daily Reports</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {dailyReports.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">No daily reports yet</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {dailyReports.map(report => (
+                <div key={report.id} className="p-4 border rounded-lg hover:bg-accent transition-colors">
+                  <div className="space-y-2">
+                    <div>
+                      <p className="font-medium text-sm truncate" title={report.title}>{report.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(report.report_date), 'MMM dd, yyyy')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">by {report.prepared_by_name}</p>
                     </div>
-                  ))}
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 h-8"
+                        onClick={() => window.open(`#preview-${report.id}`, '_self')}
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Preview
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 px-2"
+                        onClick={() => handleDeleteReport(report.id)}
+                      >
+                        <Trash2 className="w-3 h-3 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
