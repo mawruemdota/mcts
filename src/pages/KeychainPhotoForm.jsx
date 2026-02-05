@@ -17,9 +17,14 @@ export default function KeychainPhotoForm() {
   const [orders, setOrders] = useState([{
     keychain_type: "1_photo_same_b2b",
     keychain_size: "",
+    template_size: "medium",
     num_photos: 1,
     photo_urls: [],
+    photo_margin: 4,
+    photo_border_width: 0,
+    photo_border_color: "#000000",
     background_color: "#FFFFFF",
+    background_image: null,
     notes: "",
     uploadingIndex: null
   }]);
@@ -37,9 +42,14 @@ export default function KeychainPhotoForm() {
     setOrders([...orders, {
       keychain_type: "1_photo_same_b2b",
       keychain_size: "",
+      template_size: "medium",
       num_photos: 1,
       photo_urls: [],
+      photo_margin: 4,
+      photo_border_width: 0,
+      photo_border_color: "#000000",
       background_color: "#FFFFFF",
+      background_image: null,
       notes: "",
       uploadingIndex: null
     }]);
@@ -181,9 +191,14 @@ export default function KeychainPhotoForm() {
               setOrders([{ 
                 keychain_type: "1_photo_same_b2b", 
                 keychain_size: "",
+                template_size: "medium",
                 num_photos: 1,
-                photo_urls: [], 
+                photo_urls: [],
+                photo_margin: 4,
+                photo_border_width: 0,
+                photo_border_color: "#000000",
                 background_color: "#FFFFFF",
+                background_image: null,
                 notes: "", 
                 uploadingIndex: null 
               }]);
@@ -334,6 +349,16 @@ export default function KeychainPhotoForm() {
                     photoUrls={order.photo_urls}
                     backgroundColor={order.background_color}
                     onBackgroundColorChange={(color) => updateOrder(index, "background_color", color)}
+                    backgroundImage={order.background_image}
+                    onBackgroundImageChange={(url) => updateOrder(index, "background_image", url)}
+                    photoBorderWidth={order.photo_border_width}
+                    onPhotoBorderWidthChange={(width) => updateOrder(index, "photo_border_width", width)}
+                    photoBorderColor={order.photo_border_color}
+                    onPhotoBorderColorChange={(color) => updateOrder(index, "photo_border_color", color)}
+                    templateSize={order.template_size}
+                    onTemplateSizeChange={(size) => updateOrder(index, "template_size", size)}
+                    photoMargin={order.photo_margin}
+                    onPhotoMarginChange={(margin) => updateOrder(index, "photo_margin", margin)}
                   />
 
                   <div>

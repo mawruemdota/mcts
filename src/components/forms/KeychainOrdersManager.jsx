@@ -407,6 +407,16 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                           photoUrls={item.photo_urls || []}
                           backgroundColor={item.background_color || "#FFFFFF"}
                           onBackgroundColorChange={() => {}}
+                          backgroundImage={item.background_image}
+                          onBackgroundImageChange={() => {}}
+                          photoBorderWidth={item.photo_border_width || 0}
+                          onPhotoBorderWidthChange={() => {}}
+                          photoBorderColor={item.photo_border_color || "#000000"}
+                          onPhotoBorderColorChange={() => {}}
+                          templateSize={item.template_size || "medium"}
+                          onTemplateSizeChange={() => {}}
+                          photoMargin={item.photo_margin || 4}
+                          onPhotoMarginChange={() => {}}
                         />
                         
                         {item.notes && (
@@ -458,6 +468,16 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                 photoUrls={editingItem.photo_urls || []}
                 backgroundColor={editingItem.background_color || "#FFFFFF"}
                 onBackgroundColorChange={(color) => setEditingItem({ ...editingItem, background_color: color })}
+                backgroundImage={editingItem.background_image}
+                onBackgroundImageChange={(url) => setEditingItem({ ...editingItem, background_image: url })}
+                photoBorderWidth={editingItem.photo_border_width || 0}
+                onPhotoBorderWidthChange={(width) => setEditingItem({ ...editingItem, photo_border_width: width })}
+                photoBorderColor={editingItem.photo_border_color || "#000000"}
+                onPhotoBorderColorChange={(color) => setEditingItem({ ...editingItem, photo_border_color: color })}
+                templateSize={editingItem.template_size || "medium"}
+                onTemplateSizeChange={(size) => setEditingItem({ ...editingItem, template_size: size })}
+                photoMargin={editingItem.photo_margin || 4}
+                onPhotoMarginChange={(margin) => setEditingItem({ ...editingItem, photo_margin: margin })}
               />
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setEditingItem(null)}>
