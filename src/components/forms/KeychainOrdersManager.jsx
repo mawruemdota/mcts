@@ -788,6 +788,9 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                 onPhotoBorderColorChange={(color) => setEditingTemplate({ ...editingTemplate, photo_border_color: color })}
                 photoMargin={editingTemplate.photo_margin || 4}
                 onPhotoMarginChange={(margin) => setEditingTemplate({ ...editingTemplate, photo_margin: margin })}
+                orientation={editingTemplate.orientation}
+                widthInches={editingTemplate.width_inches}
+                heightInches={editingTemplate.height_inches}
               />
 
               <div className="flex items-center gap-2">

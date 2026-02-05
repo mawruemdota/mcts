@@ -20,10 +20,11 @@ export default function KeychainVisualEditor({
   onPhotoBorderWidthChange,
   photoBorderColor,
   onPhotoBorderColorChange,
-  templateSize,
-  onTemplateSizeChange,
   photoMargin,
-  onPhotoMarginChange
+  onPhotoMarginChange,
+  orientation,
+  widthInches,
+  heightInches
 }) {
   const [uploadingBg, setUploadingBg] = useState(false);
   const [backgroundType, setBackgroundType] = useState(backgroundImage ? "image" : "color");
@@ -50,13 +51,29 @@ export default function KeychainVisualEditor({
     return "grid-cols-2";
   };
 
+  const getPhotoAspectRatio = () => {
+    if (orientation === "landscape") {
+      return "aspect-[4/3]";
+    }
+    return "aspect-[3/4]";
+  };
+
+  const getPreviewDimensions = () => {
+    const baseScale = 80;
+    const width = (widthInches || 1) * baseScale;
+    const height = (heightInches || 3) * baseScale;
+    return { width: `${width}px`, height: `${height}px` };
+  };
+
   const renderPhotoSlots = () => {
     const slots = [];
+    const aspectRatio = getPhotoAspectRatio();
+    
     for (let i = 0; i < numPhotos; i++) {
       slots.push(
         <div
           key={i}
-          className="aspect-[4/3] bg-gray-400 rounded-lg overflow-hidden flex items-center justify-center"
+          className={`${aspectRatio} bg-gray-400 rounded-lg overflow-hidden flex items-center justify-center`}
           style={{
             border: photoBorderWidth > 0 ? `${photoBorderWidth}px solid ${photoBorderColor || "#000000"}` : "none"
           }}
@@ -89,15 +106,20 @@ export default function KeychainVisualEditor({
 
       <div>
         <Label>Preview</Label>
-        <div
-          className="border-4 border-black rounded-lg p-4"
-          style={previewStyle}
-        >
-          <div 
-            className={`grid ${getGridLayout()}`}
-            style={{ gap: `${photoMargin || 4}px` }}
+        <div className="flex justify-center">
+          <div
+            className="border-4 border-black rounded-lg p-4"
+            style={{
+              ...previewStyle,
+              ...getPreviewDimensions()
+            }}
           >
-            {renderPhotoSlots()}
+            <div 
+              className={`grid ${getGridLayout()} h-full`}
+              style={{ gap: `${photoMargin || 4}px` }}
+            >
+              {renderPhotoSlots()}
+            </div>
           </div>
         </div>
       </div>
