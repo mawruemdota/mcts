@@ -14,10 +14,10 @@ import KeychainVisualEditor from "@/components/keychain/KeychainVisualEditor";
 export default function KeychainPhotoForm() {
   const [clientName, setClientName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [templates, setTemplates] = useState([]);
   const [orders, setOrders] = useState([{
-    keychain_type: "1_photo_same_b2b",
-    keychain_size: "",
-    template_size: "medium",
+    template_id: "",
+    template_name: "",
     num_photos: 1,
     photo_urls: [],
     photo_margin: 4,
@@ -25,24 +25,34 @@ export default function KeychainPhotoForm() {
     photo_border_color: "#000000",
     background_color: "#FFFFFF",
     background_image: null,
+    width_inches: 1,
+    height_inches: 3,
+    orientation: "portrait",
+    photo_layout: "horizontal",
     notes: "",
     uploadingIndex: null
   }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [generatedImages, setGeneratedImages] = useState([]);
 
-  const keychainTypes = [
-    { value: "1_photo_same_b2b", label: "1 Photo (Same on both sides)", numPhotos: 1 },
-    { value: "2_photos_different_b2b", label: "2 Photos (Different back-to-back)", numPhotos: 2 },
-    { value: "3_photos_same_b2b", label: "3 Photos (Same set on both sides)", numPhotos: 3 },
-    { value: "6_photos_different_b2b", label: "6 Photos (3 front, 3 back)", numPhotos: 6 }
-  ];
+  React.useEffect(() => {
+    loadTemplates();
+  }, []);
+
+  const loadTemplates = async () => {
+    try {
+      const templatesData = await base44.entities.KeychainTemplate.filter({ is_active: true });
+      setTemplates(templatesData);
+    } catch (error) {
+      console.error("Error loading templates:", error);
+    }
+  };
 
   const addOrder = () => {
     setOrders([...orders, {
-      keychain_type: "1_photo_same_b2b",
-      keychain_size: "",
-      template_size: "medium",
+      template_id: "",
+      template_name: "",
       num_photos: 1,
       photo_urls: [],
       photo_margin: 4,
@@ -50,6 +60,10 @@ export default function KeychainPhotoForm() {
       photo_border_color: "#000000",
       background_color: "#FFFFFF",
       background_image: null,
+      width_inches: 1,
+      height_inches: 3,
+      orientation: "portrait",
+      photo_layout: "horizontal",
       notes: "",
       uploadingIndex: null
     }]);
@@ -62,10 +76,26 @@ export default function KeychainPhotoForm() {
   const updateOrder = (index, field, value) => {
     const newOrders = [...orders];
     newOrders[index][field] = value;
-    if (field === "keychain_type") {
-      const selectedType = keychainTypes.find(t => t.value === value);
-      newOrders[index].photo_urls = [];
-      newOrders[index].num_photos = selectedType?.numPhotos || 1;
+    if (field === "template_id") {
+      const selectedTemplate = templates.find(t => t.id === value);
+      if (selectedTemplate) {
+        newOrders[index] = {
+          ...newOrders[index],
+          template_id: value,
+          template_name: selectedTemplate.template_name,
+          num_photos: selectedTemplate.num_photos,
+          photo_urls: [],
+          photo_margin: selectedTemplate.photo_margin,
+          photo_border_width: selectedTemplate.photo_border_width,
+          photo_border_color: selectedTemplate.photo_border_color,
+          background_color: selectedTemplate.background_color,
+          background_image: selectedTemplate.background_image,
+          width_inches: selectedTemplate.width_inches,
+          height_inches: selectedTemplate.height_inches,
+          orientation: selectedTemplate.orientation,
+          photo_layout: selectedTemplate.photo_layout || "horizontal"
+        };
+      }
     }
     setOrders(newOrders);
   };
@@ -132,10 +162,10 @@ export default function KeychainPhotoForm() {
         return;
       }
 
-      if (!order.keychain_size) {
+      if (!order.template_id) {
         toast({
           title: "Missing information",
-          description: `Please specify the size for Order ${i + 1}`,
+          description: `Please select a template for Order ${i + 1}`,
           variant: "destructive"
         });
         return;
@@ -145,20 +175,114 @@ export default function KeychainPhotoForm() {
     setIsSubmitting(true);
 
     try {
+      const cleanOrders = orders.map(({ uploadingIndex, ...rest }) => ({
+        ...rest,
+        photo_urls: rest.photo_urls.filter(url => url)
+      }));
+
       await base44.entities.KeychainOrder.create({
         client_name: clientName,
         contact_number: contactNumber,
-        orders: orders.map(({ uploadingIndex, ...rest }) => ({
-          ...rest,
-          photo_urls: rest.photo_urls.filter(url => url)
-        })),
+        orders: cleanOrders,
         status: "new"
       });
 
+      // Generate images for each order
+      const images = [];
+      for (const order of cleanOrders) {
+        try {
+          const canvas = document.createElement('canvas');
+          const dpi = 300;
+          const width = order.width_inches * dpi;
+          const height = order.height_inches * dpi;
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+
+          // Background
+          if (order.background_image) {
+            const bgImg = new Image();
+            bgImg.crossOrigin = "anonymous";
+            await new Promise((resolve) => {
+              bgImg.onload = () => {
+                ctx.drawImage(bgImg, 0, 0, width, height);
+                resolve();
+              };
+              bgImg.src = order.background_image;
+            });
+          } else {
+            ctx.fillStyle = order.background_color || '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+          }
+
+          // Calculate photo layout
+          const margin = order.photo_margin * (dpi / 96);
+          const numPhotos = order.num_photos;
+          const isVertical = order.photo_layout === "vertical";
+          
+          let photoWidth, photoHeight, cols, rows;
+          
+          if (isVertical) {
+            cols = 1;
+            rows = numPhotos;
+            photoWidth = width - (margin * 2);
+            photoHeight = (height - (margin * (rows + 1))) / rows;
+          } else {
+            if (numPhotos === 1) { cols = 1; rows = 1; }
+            else if (numPhotos === 2) { cols = 2; rows = 1; }
+            else if (numPhotos === 3) { cols = 3; rows = 1; }
+            else if (numPhotos === 4) { cols = 2; rows = 2; }
+            else if (numPhotos === 6) { cols = 3; rows = 2; }
+            else { cols = 2; rows = Math.ceil(numPhotos / 2); }
+            
+            photoWidth = (width - (margin * (cols + 1))) / cols;
+            photoHeight = (height - (margin * (rows + 1))) / rows;
+          }
+
+          // Draw photos
+          for (let i = 0; i < order.photo_urls.length; i++) {
+            const photoUrl = order.photo_urls[i];
+            if (!photoUrl) continue;
+
+            const col = isVertical ? 0 : i % cols;
+            const row = isVertical ? i : Math.floor(i / cols);
+            
+            const x = margin + (col * (photoWidth + margin));
+            const y = margin + (row * (photoHeight + margin));
+
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            await new Promise((resolve) => {
+              img.onload = () => {
+                if (order.photo_border_width > 0) {
+                  ctx.fillStyle = order.photo_border_color || '#000000';
+                  const borderPx = order.photo_border_width * (dpi / 96);
+                  ctx.fillRect(x - borderPx, y - borderPx, photoWidth + borderPx * 2, photoHeight + borderPx * 2);
+                }
+                
+                ctx.drawImage(img, x, y, photoWidth, photoHeight);
+                resolve();
+              };
+              img.src = photoUrl;
+            });
+          }
+
+          const dataUrl = canvas.toDataURL('image/png');
+          images.push({ 
+            template: order.template_name,
+            dataUrl 
+          });
+        } catch (imgError) {
+          console.error("Error generating image:", imgError);
+        }
+      }
+
+      setGeneratedImages(images);
       setSubmitted(true);
       toast({
         title: "Order submitted!",
-        description: "We'll contact you soon to confirm your order"
+        description: "Your keychain designs are ready for download"
       });
     } catch (error) {
       console.error("Submit error:", error);
@@ -172,39 +296,81 @@ export default function KeychainPhotoForm() {
     }
   };
 
+  const downloadImage = (dataUrl, filename) => {
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    link.click();
+  };
+
   if (submitted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-6">
-        <Card className="max-w-md w-full">
-          <CardContent className="pt-6 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+        <Card className="max-w-2xl w-full">
+          <CardContent className="pt-6">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-10 h-10 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Order Submitted!</h2>
+              <p className="text-gray-600 mb-4">
+                Thank you, {clientName}! We've received your keychain order and will contact you soon at {contactNumber}.
+              </p>
             </div>
-            <h2 className="text-2xl font-bold mb-2">Order Submitted!</h2>
-            <p className="text-gray-600 mb-6">
-              Thank you, {clientName}! We've received your keychain order and will contact you soon at {contactNumber}.
-            </p>
-            <Button onClick={() => {
-              setSubmitted(false);
-              setClientName("");
-              setContactNumber("");
-              setOrders([{ 
-                keychain_type: "1_photo_same_b2b", 
-                keychain_size: "",
-                template_size: "medium",
-                num_photos: 1,
-                photo_urls: [],
-                photo_margin: 4,
-                photo_border_width: 0,
-                photo_border_color: "#000000",
-                background_color: "#FFFFFF",
-                background_image: null,
-                notes: "", 
-                uploadingIndex: null 
-              }]);
-            }}>
-              Submit Another Order
-            </Button>
+
+            {generatedImages.length > 0 && (
+              <div className="space-y-4 mb-6">
+                <h3 className="font-semibold text-lg">Your Keychain Designs:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {generatedImages.map((img, idx) => (
+                    <Card key={idx}>
+                      <CardHeader>
+                        <CardTitle className="text-sm">{img.template}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <img src={img.dataUrl} alt={`Keychain ${idx + 1}`} className="w-full border rounded mb-3" />
+                        <Button 
+                          onClick={() => downloadImage(img.dataUrl, `keychain-${idx + 1}-${img.template}.png`)}
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                        >
+                          Download Design
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="text-center">
+              <Button onClick={() => {
+                setSubmitted(false);
+                setClientName("");
+                setContactNumber("");
+                setGeneratedImages([]);
+                setOrders([{ 
+                  template_id: "",
+                  template_name: "",
+                  num_photos: 1,
+                  photo_urls: [],
+                  photo_margin: 4,
+                  photo_border_width: 0,
+                  photo_border_color: "#000000",
+                  background_color: "#FFFFFF",
+                  background_image: null,
+                  width_inches: 1,
+                  height_inches: 3,
+                  orientation: "portrait",
+                  photo_layout: "horizontal",
+                  notes: "", 
+                  uploadingIndex: null 
+                }]);
+              }}>
+                Submit Another Order
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -269,34 +435,28 @@ export default function KeychainPhotoForm() {
                   )}
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Keychain Type *</Label>
-                      <Select
-                        value={order.keychain_type}
-                        onValueChange={(value) => updateOrder(index, "keychain_type", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {keychainTypes.map(type => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Keychain Size *</Label>
-                      <Input
-                        value={order.keychain_size}
-                        onChange={(e) => updateOrder(index, "keychain_size", e.target.value)}
-                        placeholder="e.g., 1x3 inches"
-                        required
-                      />
-                    </div>
+                  <div>
+                    <Label>Select Template *</Label>
+                    <Select
+                      value={order.template_id}
+                      onValueChange={(value) => updateOrder(index, "template_id", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a keychain template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {templates.map(template => (
+                          <SelectItem key={template.id} value={template.id}>
+                            {template.template_name} ({template.num_photos} photos, {template.width_inches}" × {template.height_inches}")
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {order.template_id && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {templates.find(t => t.id === order.template_id)?.description}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -344,22 +504,27 @@ export default function KeychainPhotoForm() {
                     </div>
                   </div>
 
-                  <KeychainVisualEditor
-                    numPhotos={requiredPhotos}
-                    photoUrls={order.photo_urls}
-                    backgroundColor={order.background_color}
-                    onBackgroundColorChange={(color) => updateOrder(index, "background_color", color)}
-                    backgroundImage={order.background_image}
-                    onBackgroundImageChange={(url) => updateOrder(index, "background_image", url)}
-                    photoBorderWidth={order.photo_border_width}
-                    onPhotoBorderWidthChange={(width) => updateOrder(index, "photo_border_width", width)}
-                    photoBorderColor={order.photo_border_color}
-                    onPhotoBorderColorChange={(color) => updateOrder(index, "photo_border_color", color)}
-                    templateSize={order.template_size}
-                    onTemplateSizeChange={(size) => updateOrder(index, "template_size", size)}
-                    photoMargin={order.photo_margin}
-                    onPhotoMarginChange={(margin) => updateOrder(index, "photo_margin", margin)}
-                  />
+                  {order.template_id && (
+                    <KeychainVisualEditor
+                      numPhotos={requiredPhotos}
+                      photoUrls={order.photo_urls}
+                      backgroundColor={order.background_color}
+                      onBackgroundColorChange={(color) => updateOrder(index, "background_color", color)}
+                      backgroundImage={order.background_image}
+                      onBackgroundImageChange={(url) => updateOrder(index, "background_image", url)}
+                      photoBorderWidth={order.photo_border_width}
+                      onPhotoBorderWidthChange={() => {}}
+                      photoBorderColor={order.photo_border_color}
+                      onPhotoBorderColorChange={() => {}}
+                      photoMargin={order.photo_margin}
+                      onPhotoMarginChange={() => {}}
+                      orientation={order.orientation}
+                      widthInches={order.width_inches}
+                      heightInches={order.height_inches}
+                      photoLayout={order.photo_layout}
+                      onPhotoLayoutChange={() => {}}
+                    />
+                  )}
 
                   <div>
                     <Label>Notes (Optional)</Label>
