@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Package, Phone, User, Calendar, FileText, ExternalLink, 
-  Search, Filter, Ruler, Eye, RefreshCw, Copy, Link2, Plus, Trash2, Edit, Save, Download
+  Search, Filter, Ruler, Eye, RefreshCw, Copy, Link2, Plus, Trash2, Edit, Save, Download, MoreVertical
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/components/ui/use-toast";
@@ -38,6 +38,8 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
   const [templates, setTemplates] = useState([]);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [showImagePreview, setShowImagePreview] = useState(false);
 
   const publicFormUrl = `${window.location.origin}${createPageUrl('KeychainPhotoForm')}`;
 
@@ -176,6 +178,33 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
     setSelectedOrder(order);
     setEditingStatus(order.status);
     setAdminNotes(order.admin_notes || "");
+  };
+
+  const openImagePreview = (order) => {
+    const images = order.orders?.filter(item => item.generated_image_url).map(item => item.generated_image_url) || [];
+    setImagePreview({ clientName: order.client_name, images });
+    setShowImagePreview(true);
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+    
+    try {
+      const { KeychainOrder } = await import('@/entities/all');
+      await KeychainOrder.delete(orderId);
+      toast({
+        title: "Order deleted",
+        description: "The order has been removed"
+      });
+      onRefresh();
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast({
+        title: "Delete failed",
+        description: "Could not delete the order",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCopyLink = () => {
@@ -423,19 +452,19 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => openOrderDetails(order)}>
-                                <Pencil className="w-4 h-4 mr-2" />
+                                <Edit className="w-4 h-4 mr-2" />
                                 Edit Details
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "for_approval")}>
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, "for_approval")}>
                                 Change to For Approval
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "for_payment")}>
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, "for_payment")}>
                                 Change to For Payment
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "ongoing")}>
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, "ongoing")}>
                                 Change to Ongoing
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "done")}>
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, "done")}>
                                 Change to Done
                               </DropdownMenuItem>
                               <DropdownMenuItem 
@@ -457,6 +486,22 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Image Preview Dialog */}
+      <Dialog open={showImagePreview} onOpenChange={setShowImagePreview}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>{imagePreview?.clientName} - Keychain Designs</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {imagePreview?.images.map((url, idx) => (
+              <div key={idx} className="border rounded-lg p-4">
+                <img src={url} alt={`Keychain ${idx + 1}`} className="w-full h-auto" />
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Order Details Dialog */}
       {selectedOrder && (
