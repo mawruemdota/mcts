@@ -175,21 +175,17 @@ export default function KeychainPhotoForm() {
     setIsSubmitting(true);
 
     try {
-      const cleanOrders = orders.map(({ uploadingIndex, ...rest }) => ({
-        ...rest,
-        photo_urls: rest.photo_urls.filter(url => url)
-      }));
-
-      await base44.entities.KeychainOrder.create({
-        client_name: clientName,
-        contact_number: contactNumber,
-        orders: cleanOrders,
-        status: "new"
-      });
-
-      // Generate images for each order
+      // Generate images for each order first
       const images = [];
-      for (const order of cleanOrders) {
+      const ordersWithImages = [];
+      
+      for (let orderIndex = 0; orderIndex < orders.length; orderIndex++) {
+        const order = orders[orderIndex];
+        const cleanOrder = {
+          ...order,
+          photo_urls: order.photo_urls.filter(url => url)
+        };
+        delete cleanOrder.uploadingIndex;
         try {
           const canvas = document.createElement('canvas');
           const dpi = 300;
@@ -269,14 +265,34 @@ export default function KeychainPhotoForm() {
           }
 
           const dataUrl = canvas.toDataURL('image/png');
+          
+          // Convert data URL to blob and upload
+          const blob = await fetch(dataUrl).then(res => res.blob());
+          const file = new File([blob], `keychain-${orderIndex + 1}.png`, { type: 'image/png' });
+          const uploadResult = await base44.integrations.Core.UploadFile({ file });
+          
           images.push({ 
-            template: order.template_name,
-            dataUrl 
+            template: cleanOrder.template_name,
+            dataUrl,
+            fileUrl: uploadResult.file_url
+          });
+          
+          ordersWithImages.push({
+            ...cleanOrder,
+            generated_image_url: uploadResult.file_url
           });
         } catch (imgError) {
           console.error("Error generating image:", imgError);
+          ordersWithImages.push(cleanOrder);
         }
       }
+
+      await base44.entities.KeychainOrder.create({
+        client_name: clientName,
+        contact_number: contactNumber,
+        orders: ordersWithImages,
+        status: "new"
+      });
 
       setGeneratedImages(images);
       setSubmitted(true);
