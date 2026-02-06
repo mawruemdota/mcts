@@ -26,10 +26,17 @@ export default function KeychainVisualEditor({
   widthInches,
   heightInches,
   photoLayout,
-  onPhotoLayoutChange
+  onPhotoLayoutChange,
+  backToBack,
+  backgroundColor2,
+  onBackgroundColor2Change,
+  backgroundImage2,
+  onBackgroundImage2Change
 }) {
   const [uploadingBg, setUploadingBg] = useState(false);
   const [backgroundType, setBackgroundType] = useState(backgroundImage ? "image" : "color");
+  const [uploadingBg2, setUploadingBg2] = useState(false);
+  const [backgroundType2, setBackgroundType2] = useState(backgroundImage2 ? "image" : "color");
 
   const handleBgUpload = async (file) => {
     if (!file) return;
@@ -42,6 +49,19 @@ export default function KeychainVisualEditor({
       console.error("Background upload error:", error);
     }
     setUploadingBg(false);
+  };
+
+  const handleBg2Upload = async (file) => {
+    if (!file) return;
+    setUploadingBg2(true);
+    try {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      onBackgroundImage2Change?.(result.file_url);
+      setBackgroundType2("image");
+    } catch (error) {
+      console.error("Background upload error:", error);
+    }
+    setUploadingBg2(false);
   };
 
   const getGridLayout = () => {
@@ -83,10 +103,10 @@ export default function KeychainVisualEditor({
     return { width: `${width}px`, height: `${height}px` };
   };
 
-  const renderPhotoSlots = () => {
+  const renderPhotoSlots = (startIndex, count) => {
     const slots = [];
     
-    for (let i = 0; i < numPhotos; i++) {
+    for (let i = startIndex; i < startIndex + count; i++) {
       slots.push(
         <div
           key={i}
@@ -118,100 +138,217 @@ export default function KeychainVisualEditor({
     )
   };
 
+  const previewStyle2 = {
+    ...(backgroundType2 === "image" && backgroundImage2 
+      ? { backgroundImage: `url(${backgroundImage2})`, backgroundSize: "cover", backgroundPosition: "center" }
+      : { backgroundColor: backgroundColor2 || backgroundColor }
+    )
+  };
+
+  const isDifferentB2B = backToBack === "different";
+  const photosPerSide = isDifferentB2B ? numPhotos / 2 : numPhotos;
+
   return (
     <div className="space-y-4">
 
       <div>
         <Label>Preview</Label>
-        <div className="flex justify-center">
-          <div
-            className="border-4 border-black rounded-lg overflow-hidden flex items-center justify-center"
-            style={{
-              ...previewStyle,
-              ...getPreviewDimensions()
-            }}
-          >
-            <div 
-              className={`grid ${getGridLayout()} w-full h-full`}
-              style={{ 
-                gap: `${photoMargin || 4}px`, 
-                padding: `${photoMargin || 4}px`,
-                gridAutoRows: '1fr'
+        <div className={`flex justify-center gap-6 ${isDifferentB2B ? 'flex-col sm:flex-row' : ''}`}>
+          {/* Side 1 */}
+          <div className="flex flex-col items-center gap-2">
+            {isDifferentB2B && <span className="text-sm font-medium text-muted-foreground">Side 1</span>}
+            <div
+              className="border-4 border-black rounded-lg overflow-hidden flex items-center justify-center"
+              style={{
+                ...previewStyle,
+                ...getPreviewDimensions()
               }}
             >
-              {renderPhotoSlots()}
+              <div 
+                className={`grid ${getGridLayout()} w-full h-full`}
+                style={{ 
+                  gap: `${photoMargin || 4}px`, 
+                  padding: `${photoMargin || 4}px`,
+                  gridAutoRows: '1fr'
+                }}
+              >
+                {renderPhotoSlots(0, photosPerSide)}
+              </div>
             </div>
           </div>
+
+          {/* Side 2 (only for different b2b) */}
+          {isDifferentB2B && (
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Side 2</span>
+              <div
+                className="border-4 border-black rounded-lg overflow-hidden flex items-center justify-center"
+                style={{
+                  ...previewStyle2,
+                  ...getPreviewDimensions()
+                }}
+              >
+                <div 
+                  className={`grid ${getGridLayout()} w-full h-full`}
+                  style={{ 
+                    gap: `${photoMargin || 4}px`, 
+                    padding: `${photoMargin || 4}px`,
+                    gridAutoRows: '1fr'
+                  }}
+                >
+                  {renderPhotoSlots(photosPerSide, photosPerSide)}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <Tabs value={backgroundType} onValueChange={setBackgroundType}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="color">Background Color</TabsTrigger>
-          <TabsTrigger value="image">Background Image</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="color" className="space-y-2">
-          <Label>Pick a Color</Label>
-          <div className="flex items-center gap-3">
-            <input
-              type="color"
-              value={backgroundColor || "#FFFFFF"}
-              onChange={(e) => {
-                onBackgroundColorChange?.(e.target.value);
-                setBackgroundType("color");
-                onBackgroundImageChange?.(null);
-              }}
-              className="w-12 h-12 rounded border cursor-pointer"
-            />
-            <span className="text-sm text-muted-foreground">{backgroundColor || "#FFFFFF"}</span>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="image" className="space-y-2">
-          <Label>Upload Background Image</Label>
-          {backgroundImage ? (
-            <div className="space-y-2">
-              <OptimizedImage
-                src={backgroundImage}
-                alt="Background"
-                className="w-full h-32 rounded border"
-                objectFit="cover"
-              />
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  onBackgroundImageChange?.(null);
-                  setBackgroundType("color");
-                }}
-              >
-                Remove Image
-              </Button>
-            </div>
-          ) : (
-            <label className="cursor-pointer">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
-                {uploadingBg ? (
-                  <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-blue-500" />
-                ) : (
-                  <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                )}
-                <p className="text-sm text-gray-600">
-                  {uploadingBg ? "Uploading..." : "Click to upload background"}
-                </p>
-              </div>
+      {/* Side 1 Background */}
+      <div>
+        <Label className="text-base font-semibold">{isDifferentB2B ? "Side 1 Background" : "Background"}</Label>
+        <Tabs value={backgroundType} onValueChange={setBackgroundType}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="color">Background Color</TabsTrigger>
+            <TabsTrigger value="image">Background Image</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="color" className="space-y-2">
+            <Label>Pick a Color</Label>
+            <div className="flex items-center gap-3">
               <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleBgUpload(e.target.files[0])}
-                disabled={uploadingBg}
+                type="color"
+                value={backgroundColor || "#FFFFFF"}
+                onChange={(e) => {
+                  onBackgroundColorChange?.(e.target.value);
+                  setBackgroundType("color");
+                  onBackgroundImageChange?.(null);
+                }}
+                className="w-12 h-12 rounded border cursor-pointer"
               />
-            </label>
-          )}
-        </TabsContent>
-      </Tabs>
+              <span className="text-sm text-muted-foreground">{backgroundColor || "#FFFFFF"}</span>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="image" className="space-y-2">
+            <Label>Upload Background Image</Label>
+            {backgroundImage ? (
+              <div className="space-y-2">
+                <OptimizedImage
+                  src={backgroundImage}
+                  alt="Background"
+                  className="w-full h-32 rounded border"
+                  objectFit="cover"
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    onBackgroundImageChange?.(null);
+                    setBackgroundType("color");
+                  }}
+                >
+                  Remove Image
+                </Button>
+              </div>
+            ) : (
+              <label className="cursor-pointer">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                  {uploadingBg ? (
+                    <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-blue-500" />
+                  ) : (
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                  )}
+                  <p className="text-sm text-gray-600">
+                    {uploadingBg ? "Uploading..." : "Click to upload background"}
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleBgUpload(e.target.files[0])}
+                  disabled={uploadingBg}
+                />
+              </label>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Side 2 Background (only for different b2b) */}
+      {isDifferentB2B && (
+        <div>
+          <Label className="text-base font-semibold">Side 2 Background</Label>
+          <Tabs value={backgroundType2} onValueChange={setBackgroundType2}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="color">Background Color</TabsTrigger>
+              <TabsTrigger value="image">Background Image</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="color" className="space-y-2">
+              <Label>Pick a Color</Label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={backgroundColor2 || backgroundColor || "#FFFFFF"}
+                  onChange={(e) => {
+                    onBackgroundColor2Change?.(e.target.value);
+                    setBackgroundType2("color");
+                    onBackgroundImage2Change?.(null);
+                  }}
+                  className="w-12 h-12 rounded border cursor-pointer"
+                />
+                <span className="text-sm text-muted-foreground">{backgroundColor2 || backgroundColor || "#FFFFFF"}</span>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="image" className="space-y-2">
+              <Label>Upload Background Image</Label>
+              {backgroundImage2 ? (
+                <div className="space-y-2">
+                  <OptimizedImage
+                    src={backgroundImage2}
+                    alt="Background Side 2"
+                    className="w-full h-32 rounded border"
+                    objectFit="cover"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      onBackgroundImage2Change?.(null);
+                      setBackgroundType2("color");
+                    }}
+                  >
+                    Remove Image
+                  </Button>
+                </div>
+              ) : (
+                <label className="cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                    {uploadingBg2 ? (
+                      <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-blue-500" />
+                    ) : (
+                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                    )}
+                    <p className="text-sm text-gray-600">
+                      {uploadingBg2 ? "Uploading..." : "Click to upload background"}
+                    </p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleBg2Upload(e.target.files[0])}
+                    disabled={uploadingBg2}
+                  />
+                </label>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
 
       <div className="space-y-4">
         <div>
