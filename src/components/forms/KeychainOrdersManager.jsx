@@ -382,14 +382,35 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          onClick={() => openOrderDetails(order)} 
-                          variant="ghost" 
-                          size="sm"
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          View
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button 
+                            onClick={() => openOrderDetails(order)} 
+                            variant="ghost" 
+                            size="sm"
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            View
+                          </Button>
+                          {order.orders?.some(item => item.generated_image_url) && (
+                            <Button
+                              onClick={() => {
+                                order.orders.forEach((item, idx) => {
+                                  if (item.generated_image_url) {
+                                    const link = document.createElement('a');
+                                    link.href = item.generated_image_url;
+                                    link.download = `keychain_${order.client_name}_${idx + 1}.png`;
+                                    link.click();
+                                  }
+                                });
+                              }}
+                              variant="ghost"
+                              size="sm"
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              Download
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
