@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Package, Phone, User, Calendar, FileText, ExternalLink, 
-  Search, Filter, Ruler, Eye, RefreshCw, Copy, Link2, Plus, Trash2, Edit, Save
+  Search, Filter, Ruler, Eye, RefreshCw, Copy, Link2, Plus, Trash2, Edit, Save, Download
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/components/ui/use-toast";
@@ -489,18 +489,29 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                         </Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                         {item.photo_urls?.map((url, photoIdx) => (
+                       {item.generated_image_url ? (
+                         <div className="space-y-2">
                            <OptimizedImage
-                             key={photoIdx}
-                             src={url}
-                             alt={`Photo ${photoIdx + 1}`}
-                             className="w-full aspect-square rounded border"
-                             objectFit="cover"
+                             src={item.generated_image_url}
+                             alt="Generated Keychain"
+                             className="w-full h-48 object-contain rounded border"
                            />
-                         ))}
-                       </div>
-                        
+                           <a 
+                             href={item.generated_image_url} 
+                             download={`keychain_order_${selectedOrder.id}_item_${idx + 1}.png`}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                           >
+                             <Button variant="outline" size="sm">
+                               <Download className="w-4 h-4 mr-2" />
+                               Download Generated Image
+                             </Button>
+                           </a>
+                         </div>
+                       ) : (
+                         <p className="text-sm text-muted-foreground">No generated image available.</p>
+                       )}
+
                         {item.notes && (
                           <div>
                             <Label className="mb-1 block flex items-center gap-2">
@@ -568,20 +579,28 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                 )}
               </div>
 
-              <div>
-                <Label>Client's Photos</Label>
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  {editingItem.photo_urls?.map((url, idx) => (
-                    <OptimizedImage
-                      key={idx}
-                      src={url}
-                      alt={`Photo ${idx + 1}`}
-                      className="w-full aspect-square rounded border"
-                      objectFit="cover"
-                    />
-                  ))}
+              {/* Individual photos are no longer stored/displayed here */}
+              {editingItem.generated_image_url && (
+                <div>
+                  <Label>Generated Keychain Preview</Label>
+                  <OptimizedImage
+                    src={editingItem.generated_image_url}
+                    alt="Generated Keychain"
+                    className="w-full h-48 object-contain rounded border mt-2"
+                  />
+                  <a 
+                    href={editingItem.generated_image_url} 
+                    download={`keychain_item_preview.png`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" size="sm" className="mt-2">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download Preview
+                    </Button>
+                  </a>
                 </div>
-              </div>
+              )}
 
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setEditingItem(null)}>

@@ -100,34 +100,17 @@ export default function KeychainPhotoForm() {
     setOrders(newOrders);
   };
 
-  const handleFileUpload = async (index, photoSlotIndex, file) => {
+  const handleFileUpload = (index, photoSlotIndex, file) => {
     if (!file) return;
 
-    const newOrders = [...orders];
-    newOrders[index].uploadingIndex = photoSlotIndex;
-    setOrders(newOrders);
-
-    try {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      
-      newOrders[index].photo_urls[photoSlotIndex] = result.file_url;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newOrders = [...orders];
+      newOrders[index].photo_urls[photoSlotIndex] = reader.result; // Store as Data URL for local display only
       newOrders[index].uploadingIndex = null;
       setOrders(newOrders);
-
-      toast({
-        title: "Photo uploaded",
-        description: `Photo ${photoSlotIndex + 1} uploaded successfully`
-      });
-    } catch (error) {
-      console.error("Upload error:", error);
-      newOrders[index].uploadingIndex = null;
-      setOrders(newOrders);
-      toast({
-        title: "Upload failed",
-        description: "Please try again",
-        variant: "destructive"
-      });
-    }
+    };
+    reader.readAsDataURL(file);
   };
 
   const removePhoto = (orderIndex, photoIndex) => {
@@ -279,11 +262,16 @@ export default function KeychainPhotoForm() {
           
           ordersWithImages.push({
             ...cleanOrder,
+            photo_urls: [], // Individual photos are not stored in the database
             generated_image_url: uploadResult.file_url
           });
         } catch (imgError) {
           console.error("Error generating image:", imgError);
-          ordersWithImages.push(cleanOrder);
+          ordersWithImages.push({
+            ...cleanOrder,
+            photo_urls: [], // Individual photos are not stored in the database
+            generated_image_url: null // No generated image on error
+          });
         }
       }
 
