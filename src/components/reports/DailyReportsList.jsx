@@ -208,7 +208,8 @@ export default function DailyReportsList() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Title</TableHead>
+                          <TableHead className="w-[200px]">Title</TableHead>
+                          <TableHead>Client / Deadline</TableHead>
                           {isPendingOrProduction && <TableHead className="w-[120px]">Quantity</TableHead>}
                           {isPendingOrProduction && <TableHead>Notes</TableHead>}
                         </TableRow>
@@ -216,12 +217,12 @@ export default function DailyReportsList() {
                       <TableBody>
                         {group.tasks.map((task, taskIdx) => (
                           <TableRow key={taskIdx}>
+                            <TableCell className="font-medium w-[200px]">{task.job_title}</TableCell>
                             <TableCell>
-                              <div className="space-y-1">
-                                <div className="font-medium">{task.job_title}</div>
+                              <div className="text-sm">
+                                <div>{task.client_name}</div>
                                 <div className="text-xs text-muted-foreground">
-                                  <div>{task.client_name}</div>
-                                  {isPendingOrProduction && <div>{task.deadline ? format(new Date(task.deadline), "MM/dd/yyyy") : "N/A"}</div>}
+                                  {task.deadline ? format(new Date(task.deadline), "MM/dd/yyyy") : "N/A"}
                                 </div>
                               </div>
                             </TableCell>
