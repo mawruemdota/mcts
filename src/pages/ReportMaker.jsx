@@ -35,11 +35,7 @@ export default function ReportMaker({ isOpen, onClose, onSaved, editingReport = 
     { value: "completed", label: "Completed", editable: false }
   ];
   
-  const [selectedStatuses, setSelectedStatuses] = useState(
-    editingReport?.report_content?.map(group => 
-      statusOptions.find(s => s.label === group.status_group)?.value
-    ).filter(Boolean) || ["pending_approval", "in_production", "quality_check", "ready_pickup", "completed"]
-  );
+  const [selectedStatuses] = useState(["pending_approval", "in_production", "quality_check", "ready_pickup", "completed"]);
   const [taskData, setTaskData] = useState({});
 
   useEffect(() => {
@@ -277,35 +273,7 @@ export default function ReportMaker({ isOpen, onClose, onSaved, editingReport = 
         </CardContent>
       </Card>
 
-            <Card className="no-print">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Select Task Statuses</CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setSelectedStatuses([])}
-                  disabled={selectedStatuses.length === 0}
-                >
-                  Uncheck All
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4">
-                  {statusOptions.map(status => (
-                    <div key={status.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={status.value}
-                        checked={selectedStatuses.includes(status.value)}
-                        onCheckedChange={() => handleStatusToggle(status.value)}
-                      />
-                      <Label htmlFor={status.value} className="cursor-pointer">
-                        {status.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+
 
             <div className="print:block">
               <div className="mb-4 print:block hidden">

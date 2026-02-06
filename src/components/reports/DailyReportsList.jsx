@@ -199,33 +199,47 @@ export default function DailyReportsList() {
                 <p>Prepared by: {selectedReport.prepared_by_name}</p>
               </div>
 
-              {selectedReport.report_content.map((group, idx) => (
-                <div key={idx} className="space-y-2">
-                  <h3 className="font-semibold text-lg">{group.status_group}</h3>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Deadline</TableHead>
-                        <TableHead>Quantity</TableHead>
-                        <TableHead>Notes</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {group.tasks.map((task, taskIdx) => (
-                        <TableRow key={taskIdx}>
-                          <TableCell>{task.job_title}</TableCell>
-                          <TableCell>{task.client_name}</TableCell>
-                          <TableCell>{task.deadline ? format(new Date(task.deadline), "MM/dd/yyyy") : "N/A"}</TableCell>
-                          <TableCell>{task.completed_quantity}/{task.total_quantity}</TableCell>
-                          <TableCell className="text-sm">{task.notes || "-"}</TableCell>
+              {selectedReport.report_content.map((group, idx) => {
+                const isPendingOrProduction = group.status_group === "Pending Approval" || group.status_group === "In Production";
+                
+                return (
+                  <div key={idx} className="space-y-2">
+                    <h3 className="font-semibold text-lg">{group.status_group}</h3>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Title</TableHead>
+                          {isPendingOrProduction && <TableHead className="w-[120px]">Quantity</TableHead>}
+                          {isPendingOrProduction && <TableHead>Notes</TableHead>}
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ))}
+                      </TableHeader>
+                      <TableBody>
+                        {group.tasks.map((task, taskIdx) => (
+                          <TableRow key={taskIdx}>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="font-medium">{task.job_title}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  <div>{task.client_name}</div>
+                                  {isPendingOrProduction && <div>{task.deadline ? format(new Date(task.deadline), "MM/dd/yyyy") : "N/A"}</div>}
+                                </div>
+                              </div>
+                            </TableCell>
+                            {isPendingOrProduction && (
+                              <TableCell className="w-[120px]">
+                                {task.completed_quantity}/{task.total_quantity}
+                              </TableCell>
+                            )}
+                            {isPendingOrProduction && (
+                              <TableCell className="text-sm">{task.notes || "-"}</TableCell>
+                            )}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                );
+              })}
             </div>
           )}
         </DialogContent>
