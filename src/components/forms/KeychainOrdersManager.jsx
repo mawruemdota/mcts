@@ -791,6 +791,8 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                 orientation={editingTemplate.orientation}
                 widthInches={editingTemplate.width_inches}
                 heightInches={editingTemplate.height_inches}
+                photoLayout={editingTemplate.photo_layout}
+                onPhotoLayoutChange={(layout) => setEditingTemplate({ ...editingTemplate, photo_layout: layout })}
               />
 
               <div className="flex items-center gap-2">

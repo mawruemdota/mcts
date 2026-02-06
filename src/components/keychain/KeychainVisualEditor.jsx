@@ -24,7 +24,9 @@ export default function KeychainVisualEditor({
   onPhotoMarginChange,
   orientation,
   widthInches,
-  heightInches
+  heightInches,
+  photoLayout,
+  onPhotoLayoutChange
 }) {
   const [uploadingBg, setUploadingBg] = useState(false);
   const [backgroundType, setBackgroundType] = useState(backgroundImage ? "image" : "color");
@@ -43,6 +45,12 @@ export default function KeychainVisualEditor({
   };
 
   const getGridLayout = () => {
+    if (photoLayout === "vertical") {
+      // Top to bottom (single column)
+      return "grid-cols-1";
+    }
+    
+    // Left to right (horizontal)
     if (numPhotos === 1) return "grid-cols-1";
     if (numPhotos === 2) return "grid-cols-2";
     if (numPhotos === 3) return "grid-cols-3";
@@ -60,8 +68,18 @@ export default function KeychainVisualEditor({
 
   const getPreviewDimensions = () => {
     const baseScale = 80;
-    const width = (widthInches || 1) * baseScale;
-    const height = (heightInches || 3) * baseScale;
+    let width = (widthInches || 1) * baseScale;
+    let height = (heightInches || 3) * baseScale;
+    
+    // If landscape, rotate the display
+    if (orientation === "landscape") {
+      return { 
+        width: `${height}px`, 
+        height: `${width}px`,
+        transform: "rotate(90deg)"
+      };
+    }
+    
     return { width: `${width}px`, height: `${height}px` };
   };
 
@@ -192,39 +210,54 @@ export default function KeychainVisualEditor({
         </TabsContent>
       </Tabs>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="space-y-4">
         <div>
-          <Label>Photo Margin: {photoMargin || 4}px</Label>
-          <Slider
-            value={[photoMargin || 4]}
-            onValueChange={(values) => onPhotoMarginChange?.(values[0])}
-            min={0}
-            max={20}
-            step={1}
-            className="mt-2"
-          />
+          <Label>Photo Layout</Label>
+          <Select value={photoLayout || "horizontal"} onValueChange={onPhotoLayoutChange}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="horizontal">Left to Right</SelectItem>
+              <SelectItem value="vertical">Top to Bottom</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <div>
-          <Label>Border Width: {photoBorderWidth || 0}px</Label>
-          <Slider
-            value={[photoBorderWidth || 0]}
-            onValueChange={(values) => onPhotoBorderWidthChange?.(values[0])}
-            min={0}
-            max={10}
-            step={1}
-            className="mt-2"
-          />
-        </div>
-        <div>
-          <Label>Border Color</Label>
-          <div className="flex items-center gap-2 mt-2">
-            <input
-              type="color"
-              value={photoBorderColor || "#000000"}
-              onChange={(e) => onPhotoBorderColorChange?.(e.target.value)}
-              className="w-12 h-12 rounded border cursor-pointer"
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label>Photo Margin: {photoMargin || 4}px</Label>
+            <Slider
+              value={[photoMargin || 4]}
+              onValueChange={(values) => onPhotoMarginChange?.(values[0])}
+              min={0}
+              max={20}
+              step={1}
+              className="mt-2"
             />
-            <span className="text-sm text-muted-foreground">{photoBorderColor || "#000000"}</span>
+          </div>
+          <div>
+            <Label>Border Width: {photoBorderWidth || 0}px</Label>
+            <Slider
+              value={[photoBorderWidth || 0]}
+              onValueChange={(values) => onPhotoBorderWidthChange?.(values[0])}
+              min={0}
+              max={10}
+              step={1}
+              className="mt-2"
+            />
+          </div>
+          <div>
+            <Label>Border Color</Label>
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="color"
+                value={photoBorderColor || "#000000"}
+                onChange={(e) => onPhotoBorderColorChange?.(e.target.value)}
+                className="w-12 h-12 rounded border cursor-pointer"
+              />
+              <span className="text-sm text-muted-foreground">{photoBorderColor || "#000000"}</span>
+            </div>
           </div>
         </div>
       </div>
