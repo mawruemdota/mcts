@@ -19,6 +19,12 @@ import OptimizedImage from "@/components/ui/OptimizedImage";
 import { createPageUrl } from "@/utils";
 import KeychainVisualEditor from "@/components/keychain/KeychainVisualEditor";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Table,
   TableBody,
   TableCell,
