@@ -244,32 +244,33 @@ export default function KeychainPhotoForm() {
               );
             }
 
-            // Load and draw photo
+            // Load and draw photo - crop to fill frame
             const img = new Image();
             img.crossOrigin = "anonymous";
             await new Promise((resolve) => {
               img.onload = () => {
-                // Calculate aspect ratio fit
+                // Calculate aspect ratio to crop and fill
                 const imgAspect = img.width / img.height;
                 const frameAspect = photoWidth / photoHeight;
                 
-                let drawWidth, drawHeight, drawX, drawY;
+                let srcX = 0, srcY = 0, srcWidth = img.width, srcHeight = img.height;
                 
                 if (imgAspect > frameAspect) {
-                  // Image is wider - fit to width
-                  drawWidth = photoWidth;
-                  drawHeight = photoWidth / imgAspect;
-                  drawX = x;
-                  drawY = y + (photoHeight - drawHeight) / 2;
+                  // Image is wider - crop width
+                  srcWidth = img.height * frameAspect;
+                  srcX = (img.width - srcWidth) / 2;
                 } else {
-                  // Image is taller - fit to height
-                  drawHeight = photoHeight;
-                  drawWidth = photoHeight * imgAspect;
-                  drawX = x + (photoWidth - drawWidth) / 2;
-                  drawY = y;
+                  // Image is taller - crop height
+                  srcHeight = img.width / frameAspect;
+                  srcY = (img.height - srcHeight) / 2;
                 }
                 
-                ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                // Draw cropped image to fill frame exactly
+                ctx.drawImage(
+                  img, 
+                  srcX, srcY, srcWidth, srcHeight,  // Source crop
+                  x, y, photoWidth, photoHeight      // Destination fill
+                );
                 resolve();
               };
               img.onerror = () => {

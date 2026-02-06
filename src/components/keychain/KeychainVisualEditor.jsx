@@ -116,12 +116,14 @@ export default function KeychainVisualEditor({
           }}
         >
           {photoUrls[i] ? (
-            <OptimizedImage
-              src={photoUrls[i]}
-              alt={`Photo ${i + 1}`}
-              className="w-full h-full"
-              objectFit="cover"
-            />
+            <div className="w-full h-full overflow-hidden flex items-center justify-center">
+              <img
+                src={photoUrls[i]}
+                alt={`Photo ${i + 1}`}
+                className="w-full h-full object-cover"
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
           ) : (
             <span className="text-white text-sm">Photo {i + 1}</span>
           )}
