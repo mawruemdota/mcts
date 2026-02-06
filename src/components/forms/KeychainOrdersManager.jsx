@@ -409,12 +409,44 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                             <Download className="w-4 h-4" />
                           </Button>
                           <Button 
-                            onClick={() => openOrderDetails(order)} 
+                            onClick={() => openImagePreview(order)} 
                             variant="ghost" 
                             size="sm"
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openOrderDetails(order)}>
+                                <Pencil className="w-4 h-4 mr-2" />
+                                Edit Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "for_approval")}>
+                                Change to For Approval
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "for_payment")}>
+                                Change to For Payment
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "ongoing")}>
+                                Change to Ongoing
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "done")}>
+                                Change to Done
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleDeleteOrder(order.id)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Order
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
