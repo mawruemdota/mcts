@@ -294,17 +294,16 @@ export default function KeychainOrders() {
                           {item.keychain_size}
                         </p>
                       )}
-                      <div className="flex gap-2">
-                        {item.photo_urls?.slice(0, 3).map((url, pIdx) => (
-                          <OptimizedImage
-                            key={pIdx}
-                            src={url}
-                            alt={`Photo ${pIdx + 1}`}
-                            className="w-16 h-16 rounded border"
-                            objectFit="cover"
-                          />
-                        ))}
-                      </div>
+                      {item.generated_image_url ? (
+                        <OptimizedImage
+                          src={item.generated_image_url}
+                          alt="Generated Keychain"
+                          className="w-full h-24 rounded border"
+                          objectFit="contain"
+                        />
+                      ) : (
+                        <div className="text-xs text-muted-foreground">No image</div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -402,37 +401,44 @@ export default function KeychainOrders() {
                         </Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <KeychainVisualEditor
-                          numPhotos={item.num_photos || item.photo_urls?.length || 0}
-                          photoUrls={item.photo_urls || []}
-                          backgroundColor={item.background_color || "#FFFFFF"}
-                          onBackgroundColorChange={() => {}}
-                        />
-                        
-                        <div>
-                          <Label className="mb-2 block">Photos ({item.photo_urls?.length || 0})</Label>
-                          <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-                            {item.photo_urls?.map((url, pIdx) => (
-                              <a
-                                key={pIdx}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group relative"
-                              >
-                                <OptimizedImage
-                                  src={url}
-                                  alt={`Photo ${pIdx + 1}`}
-                                  className="w-full h-32 rounded-lg border group-hover:opacity-75 transition-opacity"
-                                  objectFit="cover"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <ImageIcon className="w-8 h-8 text-white drop-shadow-lg" />
-                                </div>
-                              </a>
-                            ))}
+                        {item.generated_image_url ? (
+                          <div>
+                            <Label className="mb-2 block">Generated Keychain Image</Label>
+                            <a
+                              href={item.generated_image_url}
+                              download={`keychain_${selectedOrder.client_name}_${idx + 1}.png`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group relative block"
+                            >
+                              <OptimizedImage
+                                src={item.generated_image_url}
+                                alt="Generated Keychain"
+                                className="w-full h-64 rounded-lg border group-hover:opacity-75 transition-opacity"
+                                objectFit="contain"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
+                                <ImageIcon className="w-12 h-12 text-white drop-shadow-lg" />
+                              </div>
+                            </a>
+                            <Button
+                              className="mt-2 w-full"
+                              variant="outline"
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = item.generated_image_url;
+                                link.download = `keychain_${selectedOrder.client_name}_${idx + 1}.png`;
+                                link.click();
+                              }}
+                            >
+                              Download Image
+                            </Button>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground p-4 border rounded-lg text-center">
+                            No generated image available
+                          </div>
+                        )}
                         {item.notes && (
                           <div>
                             <Label className="mb-1 block flex items-center gap-2">
