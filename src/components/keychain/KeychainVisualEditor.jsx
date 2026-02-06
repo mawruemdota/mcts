@@ -126,15 +126,15 @@ export default function KeychainVisualEditor({
         <Label>Preview</Label>
         <div className="flex justify-center">
           <div
-            className="border-4 border-black rounded-lg p-4"
+            className="border-4 border-black rounded-lg overflow-hidden"
             style={{
               ...previewStyle,
               ...getPreviewDimensions()
             }}
           >
             <div 
-              className={`grid ${getGridLayout()} h-full`}
-              style={{ gap: `${photoMargin || 4}px` }}
+              className={`grid ${getGridLayout()} h-full w-full`}
+              style={{ gap: `${photoMargin || 4}px`, padding: `${photoMargin || 4}px` }}
             >
               {renderPhotoSlots()}
             </div>
