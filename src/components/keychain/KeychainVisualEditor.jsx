@@ -350,57 +350,7 @@ export default function KeychainVisualEditor({
         </div>
       )}
 
-      <div className="space-y-4">
-        <div>
-          <Label>Photo Layout</Label>
-          <Select value={photoLayout || "horizontal"} onValueChange={onPhotoLayoutChange}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="horizontal">Left to Right</SelectItem>
-              <SelectItem value="vertical">Top to Bottom</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label>Photo Margin: {photoMargin || 4}px</Label>
-            <Slider
-              value={[photoMargin || 4]}
-              onValueChange={(values) => onPhotoMarginChange?.(values[0])}
-              min={0}
-              max={20}
-              step={1}
-              className="mt-2"
-            />
-          </div>
-          <div>
-            <Label>Border Width: {photoBorderWidth || 0}px</Label>
-            <Slider
-              value={[photoBorderWidth || 0]}
-              onValueChange={(values) => onPhotoBorderWidthChange?.(values[0])}
-              min={0}
-              max={10}
-              step={1}
-              className="mt-2"
-            />
-          </div>
-          <div>
-            <Label>Border Color</Label>
-            <div className="flex items-center gap-2 mt-2">
-              <input
-                type="color"
-                value={photoBorderColor || "#000000"}
-                onChange={(e) => onPhotoBorderColorChange?.(e.target.value)}
-                className="w-12 h-12 rounded border cursor-pointer"
-              />
-              <span className="text-sm text-muted-foreground">{photoBorderColor || "#000000"}</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

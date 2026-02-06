@@ -28,11 +28,11 @@ export default function ReportMaker({ isOpen, onClose, onSaved, editingReport = 
   );
   
   const statusOptions = [
-    { value: "pending_approval", label: "Pending Approval" },
-    { value: "in_production", label: "In Production" },
-    { value: "quality_check", label: "Quality Check" },
-    { value: "ready_pickup", label: "Ready for Pickup" },
-    { value: "completed", label: "Completed" }
+    { value: "pending_approval", label: "Pending Approval", editable: true },
+    { value: "in_production", label: "In Production", editable: true },
+    { value: "quality_check", label: "Quality Check", editable: false },
+    { value: "ready_pickup", label: "Ready for Pickup", editable: false },
+    { value: "completed", label: "Completed", editable: false }
   ];
   
   const [selectedStatuses, setSelectedStatuses] = useState(
@@ -320,6 +320,7 @@ export default function ReportMaker({ isOpen, onClose, onSaved, editingReport = 
                   if (statusJobs.length === 0) return null;
 
                   const statusLabel = statusOptions.find(s => s.value === status)?.label || status;
+                  const isEditable = statusOptions.find(s => s.value === status)?.editable;
 
                   return (
                     <Card key={status} className="break-inside-avoid">
@@ -330,50 +331,50 @@ export default function ReportMaker({ isOpen, onClose, onSaved, editingReport = 
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="w-[200px]">Title</TableHead>
-                              <TableHead className="w-[180px]">Client</TableHead>
-                              <TableHead className="w-[110px]">Deadline</TableHead>
-                              <TableHead className="w-[120px]">Quantity</TableHead>
-                              <TableHead>Notes</TableHead>
+                              <TableHead>Title</TableHead>
+                              {isEditable && <TableHead className="w-[120px]">Quantity</TableHead>}
+                              {isEditable && <TableHead>Notes</TableHead>}
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {statusJobs.map(job => (
                               <TableRow key={job.id}>
-                                <TableCell className="font-medium w-[200px]">
-                                  <div className="truncate" title={job.title}>
-                                    {job.title}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="w-[180px]">
-                                  <div className="truncate" title={job.client_name}>
-                                    {job.client_name}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="w-[110px]">{job.deadline ? format(new Date(job.deadline), "MM/dd/yyyy") : "N/A"}</TableCell>
-                                <TableCell className="w-[120px]">
-                                  <div className="flex items-center gap-1">
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      max={job.quantity || 999}
-                                      value={taskData[job.id]?.completed_quantity || 0}
-                                      onChange={(e) => handleTaskDataChange(job.id, "completed_quantity", parseInt(e.target.value) || 0)}
-                                      className="w-16 h-8 no-print"
-                                    />
-                                    <span className="hidden print:inline">{taskData[job.id]?.completed_quantity || 0}</span>
-                                    <span>/ {job.quantity || 0}</span>
-                                  </div>
-                                </TableCell>
                                 <TableCell>
-                                  <Textarea
-                                    value={taskData[job.id]?.notes || ""}
-                                    onChange={(e) => handleTaskDataChange(job.id, "notes", e.target.value)}
-                                    placeholder="Add notes..."
-                                    className="min-h-[60px] no-print w-full"
-                                  />
-                                  <span className="hidden print:inline text-sm">{taskData[job.id]?.notes || ""}</span>
+                                  <div className="space-y-1">
+                                    <div className="font-medium">{job.title}</div>
+                                    <div className="text-xs text-muted-foreground">
+                                      <div>{job.client_name}</div>
+                                      <div>{job.deadline ? format(new Date(job.deadline), "MM/dd/yyyy") : "N/A"}</div>
+                                    </div>
+                                  </div>
                                 </TableCell>
+                                {isEditable && (
+                                  <TableCell className="w-[120px]">
+                                    <div className="flex items-center gap-1">
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        max={job.quantity || 999}
+                                        value={taskData[job.id]?.completed_quantity || 0}
+                                        onChange={(e) => handleTaskDataChange(job.id, "completed_quantity", parseInt(e.target.value) || 0)}
+                                        className="w-16 h-8 no-print"
+                                      />
+                                      <span className="hidden print:inline">{taskData[job.id]?.completed_quantity || 0}</span>
+                                      <span>/ {job.quantity || 0}</span>
+                                    </div>
+                                  </TableCell>
+                                )}
+                                {isEditable && (
+                                  <TableCell>
+                                    <Textarea
+                                      value={taskData[job.id]?.notes || ""}
+                                      onChange={(e) => handleTaskDataChange(job.id, "notes", e.target.value)}
+                                      placeholder="Add notes..."
+                                      className="min-h-[60px] no-print w-full"
+                                    />
+                                    <span className="hidden print:inline text-sm">{taskData[job.id]?.notes || ""}</span>
+                                  </TableCell>
+                                )}
                               </TableRow>
                             ))}
                           </TableBody>
