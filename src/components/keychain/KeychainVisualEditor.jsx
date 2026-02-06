@@ -85,13 +85,12 @@ export default function KeychainVisualEditor({
 
   const renderPhotoSlots = () => {
     const slots = [];
-    const aspectRatio = getPhotoAspectRatio();
     
     for (let i = 0; i < numPhotos; i++) {
       slots.push(
         <div
           key={i}
-          className={`${aspectRatio} bg-gray-400 rounded-lg overflow-hidden flex items-center justify-center`}
+          className="bg-gray-400 rounded-lg overflow-hidden flex items-center justify-center w-full h-full"
           style={{
             border: photoBorderWidth > 0 ? `${photoBorderWidth}px solid ${photoBorderColor || "#000000"}` : "none"
           }}
@@ -126,15 +125,19 @@ export default function KeychainVisualEditor({
         <Label>Preview</Label>
         <div className="flex justify-center">
           <div
-            className="border-4 border-black rounded-lg overflow-hidden"
+            className="border-4 border-black rounded-lg overflow-hidden flex items-center justify-center"
             style={{
               ...previewStyle,
               ...getPreviewDimensions()
             }}
           >
             <div 
-              className={`grid ${getGridLayout()} h-full w-full`}
-              style={{ gap: `${photoMargin || 4}px`, padding: `${photoMargin || 4}px` }}
+              className={`grid ${getGridLayout()} w-full h-full`}
+              style={{ 
+                gap: `${photoMargin || 4}px`, 
+                padding: `${photoMargin || 4}px`,
+                gridAutoRows: '1fr'
+              }}
             >
               {renderPhotoSlots()}
             </div>
