@@ -383,33 +383,38 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <Button
+                            onClick={() => {
+                              const hasImages = order.orders?.some(item => item.generated_image_url);
+                              if (!hasImages) {
+                                toast({
+                                  title: "No images available",
+                                  description: "This order doesn't have generated images yet",
+                                  variant: "destructive"
+                                });
+                                return;
+                              }
+                              order.orders.forEach((item, idx) => {
+                                if (item.generated_image_url) {
+                                  const link = document.createElement('a');
+                                  link.href = item.generated_image_url;
+                                  link.download = `keychain_${order.client_name}_${idx + 1}.png`;
+                                  link.click();
+                                }
+                              });
+                            }}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
                           <Button 
                             onClick={() => openOrderDetails(order)} 
                             variant="ghost" 
                             size="sm"
                           >
-                            <Eye className="w-4 h-4 mr-2" />
-                            View
+                            <Eye className="w-4 h-4" />
                           </Button>
-                          {order.orders?.some(item => item.generated_image_url) && (
-                            <Button
-                              onClick={() => {
-                                order.orders.forEach((item, idx) => {
-                                  if (item.generated_image_url) {
-                                    const link = document.createElement('a');
-                                    link.href = item.generated_image_url;
-                                    link.download = `keychain_${order.client_name}_${idx + 1}.png`;
-                                    link.click();
-                                  }
-                                });
-                              }}
-                              variant="ghost"
-                              size="sm"
-                            >
-                              <Download className="w-4 h-4 mr-2" />
-                              Download
-                            </Button>
-                          )}
                         </div>
                       </TableCell>
                     </TableRow>
