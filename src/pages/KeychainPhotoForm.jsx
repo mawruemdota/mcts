@@ -195,19 +195,22 @@ export default function KeychainPhotoForm() {
             ctx.fillRect(0, 0, width, height);
           }
 
-          // Calculate photo layout
-          const margin = order.photo_margin * (dpi / 96);
+          // Calculate photo layout based on template settings
+          const margin = (order.photo_margin || 4) * (dpi / 96);
+          const borderWidth = (order.photo_border_width || 0) * (dpi / 96);
           const numPhotos = order.num_photos;
           const isVertical = order.photo_layout === "vertical";
           
           let photoWidth, photoHeight, cols, rows;
           
           if (isVertical) {
+            // Vertical layout: photos stacked top to bottom
             cols = 1;
             rows = numPhotos;
             photoWidth = width - (margin * 2);
             photoHeight = (height - (margin * (rows + 1))) / rows;
           } else {
+            // Horizontal layout: photos left to right
             if (numPhotos === 1) { cols = 1; rows = 1; }
             else if (numPhotos === 2) { cols = 2; rows = 1; }
             else if (numPhotos === 3) { cols = 3; rows = 1; }
@@ -219,7 +222,7 @@ export default function KeychainPhotoForm() {
             photoHeight = (height - (margin * (rows + 1))) / rows;
           }
 
-          // Draw photos
+          // Draw photos with borders
           for (let i = 0; i < order.photo_urls.length; i++) {
             const photoUrl = order.photo_urls[i];
             if (!photoUrl) continue;
@@ -230,17 +233,49 @@ export default function KeychainPhotoForm() {
             const x = margin + (col * (photoWidth + margin));
             const y = margin + (row * (photoHeight + margin));
 
+            // Draw border if specified
+            if (borderWidth > 0) {
+              ctx.fillStyle = order.photo_border_color || '#000000';
+              ctx.fillRect(
+                x - borderWidth, 
+                y - borderWidth, 
+                photoWidth + (borderWidth * 2), 
+                photoHeight + (borderWidth * 2)
+              );
+            }
+
+            // Load and draw photo
             const img = new Image();
             img.crossOrigin = "anonymous";
             await new Promise((resolve) => {
               img.onload = () => {
-                if (order.photo_border_width > 0) {
-                  ctx.fillStyle = order.photo_border_color || '#000000';
-                  const borderPx = order.photo_border_width * (dpi / 96);
-                  ctx.fillRect(x - borderPx, y - borderPx, photoWidth + borderPx * 2, photoHeight + borderPx * 2);
+                // Calculate aspect ratio fit
+                const imgAspect = img.width / img.height;
+                const frameAspect = photoWidth / photoHeight;
+                
+                let drawWidth, drawHeight, drawX, drawY;
+                
+                if (imgAspect > frameAspect) {
+                  // Image is wider - fit to width
+                  drawWidth = photoWidth;
+                  drawHeight = photoWidth / imgAspect;
+                  drawX = x;
+                  drawY = y + (photoHeight - drawHeight) / 2;
+                } else {
+                  // Image is taller - fit to height
+                  drawHeight = photoHeight;
+                  drawWidth = photoHeight * imgAspect;
+                  drawX = x + (photoWidth - drawWidth) / 2;
+                  drawY = y;
                 }
                 
-                ctx.drawImage(img, x, y, photoWidth, photoHeight);
+                ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+                resolve();
+              };
+              img.onerror = () => {
+                // If image fails to load, fill with gray
+                ctx.fillStyle = '#CCCCCC';
+                ctx.fillRect(x, y, photoWidth, photoHeight);
                 resolve();
               };
               img.src = photoUrl;
