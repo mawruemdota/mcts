@@ -489,22 +489,17 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
                         </Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <KeychainVisualEditor
-                          numPhotos={item.num_photos || item.photo_urls?.length || 0}
-                          photoUrls={item.photo_urls || []}
-                          backgroundColor={item.background_color || "#FFFFFF"}
-                          onBackgroundColorChange={() => {}}
-                          backgroundImage={item.background_image}
-                          onBackgroundImageChange={() => {}}
-                          photoBorderWidth={item.photo_border_width || 0}
-                          onPhotoBorderWidthChange={() => {}}
-                          photoBorderColor={item.photo_border_color || "#000000"}
-                          onPhotoBorderColorChange={() => {}}
-                          templateSize={item.template_size || "medium"}
-                          onTemplateSizeChange={() => {}}
-                          photoMargin={item.photo_margin || 4}
-                          onPhotoMarginChange={() => {}}
-                        />
+                       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                         {item.photo_urls?.map((url, photoIdx) => (
+                           <OptimizedImage
+                             key={photoIdx}
+                             src={url}
+                             alt={`Photo ${photoIdx + 1}`}
+                             className="w-full aspect-square rounded border"
+                             objectFit="cover"
+                           />
+                         ))}
+                       </div>
                         
                         {item.notes && (
                           <div>
@@ -528,44 +523,66 @@ const KeychainOrdersManager = ({ orders, isLoading, onRefresh }) => {
       {/* Edit Item Dialog */}
       {editingItem && (
         <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Keychain Item</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Keychain Size</Label>
-                <Input
-                  value={editingItem.keychain_size || ""}
-                  onChange={(e) => setEditingItem({ ...editingItem, keychain_size: e.target.value })}
-                  placeholder="e.g., 1x3 inches"
-                />
+                <Label>Background & Photos</Label>
+                <p className="text-sm text-muted-foreground mb-4">Customize background color or image. Photos are set by the client.</p>
               </div>
+              
+              <div className="border rounded-lg p-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={editingItem.background_color || "#FFFFFF"}
+                    onChange={(e) => setEditingItem({ ...editingItem, background_color: e.target.value, background_image: null })}
+                    className="w-12 h-12 rounded border cursor-pointer"
+                  />
+                  <div className="flex-1">
+                    <Label>Background Color</Label>
+                    <p className="text-xs text-muted-foreground">{editingItem.background_color || "#FFFFFF"}</p>
+                  </div>
+                </div>
+
+                <div className="text-center text-sm text-muted-foreground">or</div>
+
+                <div>
+                  <Label>Background Image URL</Label>
+                  <Input
+                    value={editingItem.background_image || ""}
+                    onChange={(e) => setEditingItem({ ...editingItem, background_image: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+
+                {editingItem.background_image && (
+                  <OptimizedImage
+                    src={editingItem.background_image}
+                    alt="Background"
+                    className="w-full h-32 rounded border"
+                    objectFit="cover"
+                  />
+                )}
+              </div>
+
               <div>
-                <Label>Number of Photos</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={editingItem.num_photos || editingItem.photo_urls?.length || 0}
-                  onChange={(e) => setEditingItem({ ...editingItem, num_photos: parseInt(e.target.value) || 1 })}
-                />
+                <Label>Client's Photos</Label>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {editingItem.photo_urls?.map((url, idx) => (
+                    <OptimizedImage
+                      key={idx}
+                      src={url}
+                      alt={`Photo ${idx + 1}`}
+                      className="w-full aspect-square rounded border"
+                      objectFit="cover"
+                    />
+                  ))}
+                </div>
               </div>
-              <KeychainVisualEditor
-                numPhotos={editingItem.num_photos || editingItem.photo_urls?.length || 0}
-                photoUrls={editingItem.photo_urls || []}
-                backgroundColor={editingItem.background_color || "#FFFFFF"}
-                onBackgroundColorChange={(color) => setEditingItem({ ...editingItem, background_color: color })}
-                backgroundImage={editingItem.background_image}
-                onBackgroundImageChange={(url) => setEditingItem({ ...editingItem, background_image: url })}
-                photoBorderWidth={editingItem.photo_border_width || 0}
-                onPhotoBorderWidthChange={(width) => setEditingItem({ ...editingItem, photo_border_width: width })}
-                photoBorderColor={editingItem.photo_border_color || "#000000"}
-                onPhotoBorderColorChange={(color) => setEditingItem({ ...editingItem, photo_border_color: color })}
-                templateSize={editingItem.template_size || "medium"}
-                onTemplateSizeChange={(size) => setEditingItem({ ...editingItem, template_size: size })}
-                photoMargin={editingItem.photo_margin || 4}
-                onPhotoMarginChange={(margin) => setEditingItem({ ...editingItem, photo_margin: margin })}
-              />
+
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setEditingItem(null)}>
                   Cancel
