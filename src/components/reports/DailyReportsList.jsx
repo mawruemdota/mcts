@@ -4,8 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { toast } from "@/components/ui/use-toast";
-import { Eye, Trash2, FileText, Plus, Loader2, Download, Printer, Edit, MessageCircle, User, Calendar, Package, CheckCircle2, Sparkles, TrendingUp } from "lucide-react";
+import { Eye, Trash2, FileText, Plus, Loader2, Download, Printer, Edit, MessageCircle, User, Calendar, Package, CheckCircle2, Sparkles, TrendingUp, Search, Filter, X } from "lucide-react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -27,6 +31,11 @@ export default function DailyReportsList() {
   const [generatingWeekly, setGeneratingWeekly] = useState(false);
   const [showWeeklyReport, setShowWeeklyReport] = useState(false);
   const [weeklyReportData, setWeeklyReportData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFrom, setDateFrom] = useState(null);
+  const [dateTo, setDateTo] = useState(null);
+  const [sortBy, setSortBy] = useState("date-desc");
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     loadReports();
@@ -43,6 +52,73 @@ export default function DailyReportsList() {
       setLoading(false);
     }
   };
+
+  const filteredAndSortedReports = () => {
+    let filtered = [...reports];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(report => {
+        // Search in report title
+        if (report.title.toLowerCase().includes(query)) return true;
+        
+        // Search in prepared by name
+        if (report.prepared_by_name?.toLowerCase().includes(query)) return true;
+        
+        // Search in report content (client names, job titles)
+        return report.report_content.some(group => 
+          group.tasks.some(task => 
+            task.client_name?.toLowerCase().includes(query) ||
+            task.job_title?.toLowerCase().includes(query)
+          )
+        );
+      });
+    }
+
+    // Date range filter
+    if (dateFrom) {
+      filtered = filtered.filter(report => 
+        new Date(report.report_date) >= dateFrom
+      );
+    }
+    if (dateTo) {
+      filtered = filtered.filter(report => 
+        new Date(report.report_date) <= dateTo
+      );
+    }
+
+    // Sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "date-desc":
+          return new Date(b.report_date) - new Date(a.report_date);
+        case "date-asc":
+          return new Date(a.report_date) - new Date(b.report_date);
+        case "title-asc":
+          return a.title.localeCompare(b.title);
+        case "title-desc":
+          return b.title.localeCompare(a.title);
+        case "created-desc":
+          return new Date(b.created_date) - new Date(a.created_date);
+        case "created-asc":
+          return new Date(a.created_date) - new Date(b.created_date);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setDateFrom(null);
+    setDateTo(null);
+    setSortBy("date-desc");
+  };
+
+  const hasActiveFilters = searchQuery || dateFrom || dateTo || sortBy !== "date-desc";
 
   const handleDelete = async (reportId) => {
     if (!confirm("Are you sure you want to delete this report?")) return;
@@ -285,29 +361,127 @@ Keep it concise but comprehensive, focusing on trends and patterns across the we
         }
       `}</style>
 
-      <div className="flex justify-between items-center no-print">
-        <div>
-          <h2 className="text-2xl font-bold">Daily Reports</h2>
-          <p className="text-muted-foreground">View and manage operational reports</p>
+      <div className="space-y-4 no-print">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Daily Reports</h2>
+            <p className="text-muted-foreground">View and manage operational reports</p>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleGenerateWeeklyReport}
+              disabled={generatingWeekly || reports.length === 0}
+            >
+              {generatingWeekly ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <TrendingUp className="w-4 h-4 mr-2" />
+              )}
+              Weekly Report
+            </Button>
+            <Button onClick={() => setShowReportMaker(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Report
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleGenerateWeeklyReport}
-            disabled={generatingWeekly || reports.length === 0}
-          >
-            {generatingWeekly ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <TrendingUp className="w-4 h-4 mr-2" />
+
+        <Card className="p-4">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by title, client, job, or author..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Button
+                variant={showFilters ? "default" : "outline"}
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+              </Button>
+              {hasActiveFilters && (
+                <Button variant="ghost" onClick={clearFilters}>
+                  <X className="w-4 h-4 mr-2" />
+                  Clear
+                </Button>
+              )}
+            </div>
+
+            {showFilters && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-muted/50 rounded-lg">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">From Date</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {dateFrom ? format(dateFrom, "MMM dd, yyyy") : "Select date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={dateFrom}
+                        onSelect={setDateFrom}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">To Date</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {dateTo ? format(dateTo, "MMM dd, yyyy") : "Select date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={dateTo}
+                        onSelect={setDateTo}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Sort By</label>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="date-desc">Report Date (Newest)</SelectItem>
+                      <SelectItem value="date-asc">Report Date (Oldest)</SelectItem>
+                      <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+                      <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+                      <SelectItem value="created-desc">Created (Newest)</SelectItem>
+                      <SelectItem value="created-asc">Created (Oldest)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             )}
-            Weekly Report
-          </Button>
-          <Button onClick={() => setShowReportMaker(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            New Report
-          </Button>
-        </div>
+
+            {hasActiveFilters && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Showing {filteredAndSortedReports().length} of {reports.length} reports</span>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
 
       <Card className="w-full">
@@ -333,7 +507,7 @@ Keep it concise but comprehensive, focusing on trends and patterns across the we
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reports.map(report => (
+                {filteredAndSortedReports().map(report => (
                   <TableRow key={report.id}>
                     <TableCell className="font-medium">{report.title}</TableCell>
                     <TableCell>{format(new Date(report.report_date), "MMM dd, yyyy")}</TableCell>
