@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import { Eye, Trash2, FileText, Plus, Loader2, Download, Printer, Edit, MessageCircle, User, Calendar, Package, CheckCircle2 } from "lucide-react";
+import { Eye, Trash2, FileText, Plus, Loader2, Download, Printer, Edit, MessageCircle, User, Calendar, Package, CheckCircle2, Sparkles, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -20,6 +20,13 @@ export default function DailyReportsList() {
   const [showReportMaker, setShowReportMaker] = useState(false);
   const [editingReport, setEditingReport] = useState(null);
   const [sharingReport, setSharingReport] = useState(false);
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [summaryReport, setSummaryReport] = useState(null);
+  const [showSummary, setShowSummary] = useState(false);
+  const [generatedSummary, setGeneratedSummary] = useState("");
+  const [generatingWeekly, setGeneratingWeekly] = useState(false);
+  const [showWeeklyReport, setShowWeeklyReport] = useState(false);
+  const [weeklyReportData, setWeeklyReportData] = useState(null);
 
   useEffect(() => {
     loadReports();
@@ -141,6 +148,126 @@ export default function DailyReportsList() {
     }
   };
 
+  const handleGenerateSummary = async (report) => {
+    setGeneratingSummary(true);
+    setSummaryReport(report);
+    setShowSummary(true);
+    
+    try {
+      const reportText = report.report_content.map(group => {
+        const tasks = group.tasks.map(task => 
+          `- ${task.job_title} (Client: ${task.client_name}, Deadline: ${task.deadline ? format(new Date(task.deadline), "MMM dd") : "N/A"}, Progress: ${task.completed_quantity}/${task.total_quantity}${task.notes ? `, Notes: ${task.notes}` : ''})`
+        ).join('\n');
+        return `${group.status_group}:\n${tasks}`;
+      }).join('\n\n');
+
+      const prompt = `You are analyzing a daily operations report for a printing business. Generate a concise executive summary (3-4 paragraphs max) that highlights:
+
+1. Key Achievements: What was completed or made significant progress
+2. Current Focus: What's actively in production or pending
+3. Potential Roadblocks: Any delays, issues, or concerns based on notes and progress
+4. Overall Status: Brief assessment of operational health
+
+Report Date: ${format(new Date(report.report_date), "MMMM dd, yyyy")}
+Prepared by: ${report.prepared_by_name}
+
+Report Details:
+${reportText}
+
+Keep it professional, concise, and actionable for busy stakeholders.`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: prompt
+      });
+
+      setGeneratedSummary(result);
+      toast({ title: "Success", description: "Summary generated successfully" });
+    } catch (error) {
+      console.error("Error generating summary:", error);
+      toast({ title: "Error", description: "Failed to generate summary", variant: "destructive" });
+      setShowSummary(false);
+    } finally {
+      setGeneratingSummary(false);
+    }
+  };
+
+  const handleGenerateWeeklyReport = async () => {
+    setGeneratingWeekly(true);
+    
+    try {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      
+      const weeklyReports = reports.filter(r => 
+        new Date(r.report_date) >= oneWeekAgo
+      ).sort((a, b) => new Date(a.report_date) - new Date(b.report_date));
+
+      if (weeklyReports.length === 0) {
+        toast({ title: "No Data", description: "No reports found in the last 7 days", variant: "destructive" });
+        setGeneratingWeekly(false);
+        return;
+      }
+
+      const allTasks = [];
+      const tasksByStatus = {};
+      
+      weeklyReports.forEach(report => {
+        report.report_content.forEach(group => {
+          if (!tasksByStatus[group.status_group]) {
+            tasksByStatus[group.status_group] = [];
+          }
+          group.tasks.forEach(task => {
+            allTasks.push({
+              ...task,
+              reportDate: report.report_date,
+              status: group.status_group
+            });
+          });
+        });
+      });
+
+      const reportText = weeklyReports.map(r => 
+        `${format(new Date(r.report_date), "MMM dd, yyyy")}: ${r.title}`
+      ).join('\n');
+
+      const tasksText = Object.entries(tasksByStatus).map(([status, tasks]) => 
+        `${status} (${tasks.length} tasks)`
+      ).join(', ');
+
+      const prompt = `Generate a comprehensive weekly operations summary for a printing business covering ${format(oneWeekAgo, "MMM dd")} to ${format(new Date(), "MMM dd, yyyy")}.
+
+Based on ${weeklyReports.length} daily reports with these tasks: ${tasksText}
+
+Provide:
+1. Executive Summary: Overall week performance and highlights
+2. Key Achievements: Major completions and milestones
+3. Production Metrics: Volume and progress trends
+4. Challenges & Issues: Any recurring problems or delays
+5. Action Items: Recommendations for next week
+
+Keep it concise but comprehensive, focusing on trends and patterns across the week.`;
+
+      const summary = await base44.integrations.Core.InvokeLLM({
+        prompt: prompt
+      });
+
+      setWeeklyReportData({
+        dateRange: `${format(oneWeekAgo, "MMM dd")} - ${format(new Date(), "MMM dd, yyyy")}`,
+        reportCount: weeklyReports.length,
+        summary: summary,
+        dailyReports: weeklyReports
+      });
+      
+      setShowWeeklyReport(true);
+      toast({ title: "Success", description: "Weekly report generated" });
+    } catch (error) {
+      console.error("Error generating weekly report:", error);
+      toast({ title: "Error", description: "Failed to generate weekly report", variant: "destructive" });
+    } finally {
+      setGeneratingWeekly(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -163,10 +290,24 @@ export default function DailyReportsList() {
           <h2 className="text-2xl font-bold">Daily Reports</h2>
           <p className="text-muted-foreground">View and manage operational reports</p>
         </div>
-        <Button onClick={() => setShowReportMaker(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Report
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleGenerateWeeklyReport}
+            disabled={generatingWeekly || reports.length === 0}
+          >
+            {generatingWeekly ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <TrendingUp className="w-4 h-4 mr-2" />
+            )}
+            Weekly Report
+          </Button>
+          <Button onClick={() => setShowReportMaker(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            New Report
+          </Button>
+        </div>
       </div>
 
       <Card className="w-full">
@@ -202,6 +343,9 @@ export default function DailyReportsList() {
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="sm" onClick={() => handlePreview(report)}>
                           <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleGenerateSummary(report)}>
+                          <Sparkles className="w-4 h-4 text-purple-500" />
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => setEditingReport(report)}>
                           <Edit className="w-4 h-4" />
@@ -342,6 +486,123 @@ export default function DailyReportsList() {
           loadReports();
         }}
       />
+
+      <Dialog open={showSummary} onOpenChange={setShowSummary}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-500" />
+              AI Summary: {summaryReport?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {generatingSummary ? (
+              <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                <Loader2 className="w-12 h-12 animate-spin text-purple-500" />
+                <p className="text-muted-foreground">Analyzing report and generating summary...</p>
+              </div>
+            ) : (
+              <>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="w-5 h-5 text-purple-600 mt-1 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-purple-900 mb-2">Executive Summary</h3>
+                      <div className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                        {generatedSummary}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button variant="outline" onClick={() => setShowSummary(false)}>
+                    Close
+                  </Button>
+                  <Button onClick={() => {
+                    navigator.clipboard.writeText(generatedSummary);
+                    toast({ title: "Copied", description: "Summary copied to clipboard" });
+                  }}>
+                    Copy Summary
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showWeeklyReport} onOpenChange={setShowWeeklyReport}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-blue-500" />
+              Weekly Operations Report
+            </DialogTitle>
+          </DialogHeader>
+          {weeklyReportData && (
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Period:</span>
+                    <p className="font-semibold text-gray-900">{weeklyReportData.dateRange}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Daily Reports:</span>
+                    <p className="font-semibold text-gray-900">{weeklyReportData.reportCount}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white border rounded-lg p-6">
+                <div className="prose prose-sm max-w-none">
+                  <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+                    {weeklyReportData.summary}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Included Daily Reports:</h3>
+                <div className="space-y-2">
+                  {weeklyReportData.dailyReports.map(report => (
+                    <div key={report.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="font-medium">{report.title}</p>
+                        <p className="text-sm text-gray-600">{format(new Date(report.report_date), "MMM dd, yyyy")}</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setShowWeeklyReport(false);
+                          handlePreview(report);
+                        }}
+                      >
+                        View
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowWeeklyReport(false)}>
+                  Close
+                </Button>
+                <Button onClick={() => {
+                  const fullReport = `Weekly Operations Report\n${weeklyReportData.dateRange}\n\n${weeklyReportData.summary}`;
+                  navigator.clipboard.writeText(fullReport);
+                  toast({ title: "Copied", description: "Weekly report copied to clipboard" });
+                }}>
+                  Copy Report
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
