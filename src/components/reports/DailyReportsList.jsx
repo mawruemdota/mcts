@@ -562,99 +562,109 @@ Keep it concise but comprehensive, focusing on trends and patterns across the we
           </DialogHeader>
           {selectedReport && (
             <div id="shareable-report-preview" className="bg-background rounded-lg space-y-3">
-              <Card className="border-2">
-                <CardContent className="p-4">
-                  <h1 className="text-xl font-bold">{selectedReport.title} <span className="text-sm font-normal text-muted-foreground">by {selectedReport.prepared_by_name}</span></h1>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                    <Calendar className="w-3 h-3" />
-                    <span>{format(new Date(selectedReport.report_date), "MMMM dd, yyyy")}</span>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="mb-3">
+                <h1 className="text-xl font-bold">{selectedReport.title} <span className="text-sm font-normal text-muted-foreground">by {selectedReport.prepared_by_name}</span></h1>
+              </div>
 
               <div className="space-y-3">
-                {selectedReport.report_content.map((group, idx) => {
-                  if (group.tasks.length === 0) return null;
-                  const status = group.status_group;
-                  const isPendingOrProduction = status === "Pending Approval" || status === "In Production";
-                  const isSimpleStatus = status === "Ready for Pickup" || status === "Completed" || status === "Quality Check";
-                  
-                  const statusColors = {
-                    "Pending Approval": "bg-yellow-500/10 border-yellow-500/20 text-yellow-700",
-                    "In Production": "bg-blue-500/10 border-blue-500/20 text-blue-700",
-                    "Quality Check": "bg-purple-500/10 border-purple-500/20 text-purple-700",
-                    "Ready for Pickup": "bg-green-500/10 border-green-500/20 text-green-700",
-                    "Completed": "bg-gray-500/10 border-gray-500/20 text-gray-700"
-                  };
-                  
-                  return (
-                    <div key={idx} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${statusColors[status] || "bg-primary/10 border-primary/20"}`}>
-                          <Package className="w-3.5 h-3.5" />
-                          <h2 className="text-sm font-bold">{status}</h2>
-                          <span className="text-xs font-semibold ml-1">({group.tasks.length})</span>
-                        </div>
-                      </div>
+                {(() => {
+                  const simpleStatuses = ["Ready for Pickup", "Completed", "Quality Check"];
+                  const simpleGroups = selectedReport.report_content.filter(g => simpleStatuses.includes(g.status_group) && g.tasks.length > 0);
+                  const otherGroups = selectedReport.report_content.filter(g => !simpleStatuses.includes(g.status_group) && g.tasks.length > 0);
 
-                      {isSimpleStatus ? (
+                  return (
+                    <>
+                      {simpleGroups.length > 0 && (
                         <Card>
                           <CardContent className="p-3">
-                            <div className="grid grid-cols-2 gap-2">
-                              {group.tasks.map((task, taskIdx) => (
-                                <div key={taskIdx} className="text-xs space-y-0.5">
-                                  <p className="font-semibold">{task.job_title}</p>
-                                  <p className="text-muted-foreground flex items-center gap-1">
-                                    <User className="w-3 h-3" />
-                                    {task.client_name}
-                                  </p>
+                            <div className="grid grid-cols-3 gap-4">
+                              {simpleGroups.map((group) => (
+                                <div key={group.status_group} className="space-y-2">
+                                  <div className="flex items-center gap-1.5 pb-2 border-b">
+                                    <Package className="w-3 h-3" />
+                                    <h3 className="text-xs font-bold">{group.status_group}</h3>
+                                    <span className="text-xs text-muted-foreground">({group.tasks.length})</span>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {group.tasks.map((task, idx) => (
+                                      <div key={idx} className="text-xs space-y-0.5">
+                                        <p className="font-semibold">{task.job_title}</p>
+                                        <p className="text-muted-foreground flex items-center gap-1">
+                                          <User className="w-3 h-3" />
+                                          {task.client_name}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               ))}
                             </div>
                           </CardContent>
                         </Card>
-                      ) : (
-                        <div className="grid gap-2">
-                          {group.tasks.map((task, taskIdx) => (
-                            <Card key={taskIdx}>
-                              <CardContent className="p-3">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-sm mb-1">{task.job_title}</h3>
-                                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                      <div className="flex items-center gap-1">
-                                        <User className="w-3 h-3" />
-                                        <span>{task.client_name}</span>
+                      )}
+
+                      {otherGroups.map((group, idx) => {
+                        const status = group.status_group;
+                        const isPendingOrProduction = status === "Pending Approval" || status === "In Production";
+                        
+                        const statusColors = {
+                          "Pending Approval": "bg-yellow-500/10 border-yellow-500/20 text-yellow-700",
+                          "In Production": "bg-blue-500/10 border-blue-500/20 text-blue-700"
+                        };
+                        
+                        return (
+                          <div key={idx} className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${statusColors[status] || "bg-primary/10 border-primary/20"}`}>
+                                <Package className="w-3.5 h-3.5" />
+                                <h2 className="text-sm font-bold">{status}</h2>
+                                <span className="text-xs font-semibold ml-1">({group.tasks.length})</span>
+                              </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                              {group.tasks.map((task, taskIdx) => (
+                                <Card key={taskIdx}>
+                                  <CardContent className="p-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="flex-1 min-w-0">
+                                        <h3 className="font-semibold text-sm mb-1">{task.job_title}</h3>
+                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                          <div className="flex items-center gap-1">
+                                            <User className="w-3 h-3" />
+                                            <span>{task.client_name}</span>
+                                          </div>
+                                          <div className="flex items-center gap-1">
+                                            <Calendar className="w-3 h-3" />
+                                            <span>{task.deadline ? format(new Date(task.deadline), "MMM dd") : "N/A"}</span>
+                                          </div>
+                                        </div>
                                       </div>
-                                      <div className="flex items-center gap-1">
-                                        <Calendar className="w-3 h-3" />
-                                        <span>{task.deadline ? format(new Date(task.deadline), "MMM dd") : "N/A"}</span>
+
+                                      <div className="flex items-start gap-3">
+                                        {isPendingOrProduction && (
+                                          <div className="inline-flex items-center gap-1.5 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">
+                                            <Package className="w-3 h-3 text-blue-600" />
+                                            <span className="font-bold text-blue-600 text-xs">
+                                              {task.completed_quantity}/{task.total_quantity}
+                                            </span>
+                                          </div>
+                                        )}
+                                        {isPendingOrProduction && task.notes && (
+                                          <p className="text-xs text-muted-foreground italic max-w-xs">{task.notes}</p>
+                                        )}
                                       </div>
                                     </div>
-                                  </div>
-
-                                  <div className="flex items-start gap-3">
-                                    {isPendingOrProduction && (
-                                      <div className="inline-flex items-center gap-1.5 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">
-                                        <Package className="w-3 h-3 text-blue-600" />
-                                        <span className="font-bold text-blue-600 text-xs">
-                                          {task.completed_quantity}/{task.total_quantity}
-                                        </span>
-                                      </div>
-                                    )}
-                                    {isPendingOrProduction && task.notes && (
-                                      <p className="text-xs text-muted-foreground italic max-w-xs">{task.notes}</p>
-                                    )}
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
                   );
-                })}
+                })()}
               </div>
             </div>
           )}
