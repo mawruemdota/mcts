@@ -561,88 +561,97 @@ Keep it concise but comprehensive, focusing on trends and patterns across the we
             </DialogTitle>
           </DialogHeader>
           {selectedReport && (
-            <div id="shareable-report-preview" className="bg-background rounded-lg space-y-6">
+            <div id="shareable-report-preview" className="bg-background rounded-lg space-y-3">
               <Card className="border-2">
-                <CardContent className="p-6">
-                  <div className="space-y-2">
-                    <h1 className="text-2xl font-bold">{selectedReport.title}</h1>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>{format(new Date(selectedReport.report_date), "MMMM dd, yyyy")}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        <span>by {selectedReport.prepared_by_name}</span>
-                      </div>
-                    </div>
+                <CardContent className="p-4">
+                  <h1 className="text-xl font-bold">{selectedReport.title} <span className="text-sm font-normal text-muted-foreground">by {selectedReport.prepared_by_name}</span></h1>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>{format(new Date(selectedReport.report_date), "MMMM dd, yyyy")}</span>
                   </div>
                 </CardContent>
               </Card>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {selectedReport.report_content.map((group, idx) => {
                   if (group.tasks.length === 0) return null;
-                  const isPendingOrProduction = group.status_group === "Pending Approval" || group.status_group === "In Production";
+                  const status = group.status_group;
+                  const isPendingOrProduction = status === "Pending Approval" || status === "In Production";
+                  const isSimpleStatus = status === "Ready for Pickup" || status === "Completed" || status === "Quality Check";
+                  
+                  const statusColors = {
+                    "Pending Approval": "bg-yellow-500/10 border-yellow-500/20 text-yellow-700",
+                    "In Production": "bg-blue-500/10 border-blue-500/20 text-blue-700",
+                    "Quality Check": "bg-purple-500/10 border-purple-500/20 text-purple-700",
+                    "Ready for Pickup": "bg-green-500/10 border-green-500/20 text-green-700",
+                    "Completed": "bg-gray-500/10 border-gray-500/20 text-gray-700"
+                  };
                   
                   return (
-                    <div key={idx} className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
-                          <Package className="w-4 h-4 text-primary" />
-                          <h2 className="text-lg font-bold">{group.status_group}</h2>
-                        </div>
-                        <div className="flex items-center justify-center bg-primary text-primary-foreground text-xs font-bold rounded-full h-6 w-6">
-                          {group.tasks.length}
+                    <div key={idx} className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${statusColors[status] || "bg-primary/10 border-primary/20"}`}>
+                          <Package className="w-3.5 h-3.5" />
+                          <h2 className="text-sm font-bold">{status}</h2>
+                          <span className="text-xs font-semibold ml-1">({group.tasks.length})</span>
                         </div>
                       </div>
 
-                      <div className="grid gap-3">
-                        {group.tasks.map((task, taskIdx) => (
-                          <Card key={taskIdx} className="hover:shadow-md transition-shadow">
-                            <CardContent className="p-4">
-                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                                <div className="flex-1 min-w-0 space-y-2">
-                                  <h3 className="font-bold text-base">{task.job_title}</h3>
-                                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                                    <div className="flex items-center gap-1.5">
-                                      <User className="w-3.5 h-3.5" />
-                                      <span>{task.client_name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                      <Calendar className="w-3.5 h-3.5" />
-                                      <span>{task.deadline ? format(new Date(task.deadline), "MMM dd, yyyy") : "No deadline"}</span>
+                      {isSimpleStatus ? (
+                        <Card>
+                          <CardContent className="p-3">
+                            <div className="grid grid-cols-2 gap-2">
+                              {group.tasks.map((task, taskIdx) => (
+                                <div key={taskIdx} className="text-xs space-y-0.5">
+                                  <p className="font-semibold">{task.job_title}</p>
+                                  <p className="text-muted-foreground flex items-center gap-1">
+                                    <User className="w-3 h-3" />
+                                    {task.client_name}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        <div className="grid gap-2">
+                          {group.tasks.map((task, taskIdx) => (
+                            <Card key={taskIdx}>
+                              <CardContent className="p-3">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-sm mb-1">{task.job_title}</h3>
+                                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                      <div className="flex items-center gap-1">
+                                        <User className="w-3 h-3" />
+                                        <span>{task.client_name}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <Calendar className="w-3 h-3" />
+                                        <span>{task.deadline ? format(new Date(task.deadline), "MMM dd") : "N/A"}</span>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
 
-                                {isPendingOrProduction && (
-                                  <div className="flex flex-col gap-2 sm:items-end">
-                                    <div className="inline-flex items-center gap-2 bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-500/20">
-                                      <Package className="w-4 h-4 text-blue-600" />
-                                      <span className="font-bold text-blue-600">
-                                        {task.completed_quantity}/{task.total_quantity}
-                                      </span>
-                                    </div>
-                                    {task.completed_quantity === task.total_quantity && task.total_quantity > 0 && (
-                                      <div className="inline-flex items-center gap-1 text-green-600 text-xs font-medium">
-                                        <CheckCircle2 className="w-3.5 h-3.5" />
-                                        <span>Complete</span>
+                                  <div className="flex items-start gap-3">
+                                    {isPendingOrProduction && (
+                                      <div className="inline-flex items-center gap-1.5 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">
+                                        <Package className="w-3 h-3 text-blue-600" />
+                                        <span className="font-bold text-blue-600 text-xs">
+                                          {task.completed_quantity}/{task.total_quantity}
+                                        </span>
                                       </div>
                                     )}
+                                    {isPendingOrProduction && task.notes && (
+                                      <p className="text-xs text-muted-foreground italic max-w-xs">{task.notes}</p>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-
-                              {isPendingOrProduction && task.notes && (
-                                <div className="mt-3 pt-3 border-t">
-                                  <p className="text-sm text-muted-foreground italic">{task.notes}</p>
                                 </div>
-                              )}
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
