@@ -13,9 +13,9 @@ import { useToast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ReportMaker from '@/pages/ReportMaker';
+import DailyReportsSection from '@/components/reports/DailyReportsSection';
 
 export default function AdvancedReportsPage() {
-  const [dailyReports, setDailyReports] = useState([]);
   const [dateRange, setDateRange] = useState({
     start: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
     end: format(endOfMonth(new Date()), 'yyyy-MM-dd')
@@ -25,14 +25,10 @@ export default function AdvancedReportsPage() {
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
-  const [selectedReport, setSelectedReport] = useState(null);
-  const [showPreview, setShowPreview] = useState(false);
-  const [editingReport, setEditingReport] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
     loadClients();
-    loadDailyReports();
   }, []);
 
   const loadClients = async () => {
@@ -42,36 +38,6 @@ export default function AdvancedReportsPage() {
     } catch (error) {
       console.error('Error loading clients:', error);
     }
-  };
-
-  const loadDailyReports = async () => {
-    try {
-      const reports = await base44.entities.DailyReport.list('-created_date');
-      setDailyReports(reports.slice(0, 5));
-    } catch (error) {
-      console.error('Error loading daily reports:', error);
-    }
-  };
-
-  const handleDeleteReport = async (reportId) => {
-    if (!confirm('Are you sure you want to delete this report?')) return;
-    try {
-      await base44.entities.DailyReport.delete(reportId);
-      toast({ title: 'Report deleted successfully' });
-      loadDailyReports();
-    } catch (error) {
-      console.error('Error deleting report:', error);
-      toast({ variant: 'destructive', title: 'Failed to delete report' });
-    }
-  };
-
-  const handlePreview = (report) => {
-    setSelectedReport(report);
-    setShowPreview(true);
-  };
-
-  const handleEdit = (report) => {
-    setEditingReport(report);
   };
 
   const generateReport = async () => {
@@ -525,113 +491,9 @@ export default function AdvancedReportsPage() {
             </Tabs>
           )}
 
-      <Card className="h-fit w-full mt-6">
-        <CardHeader>
-          <CardTitle>Recent Daily Reports</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {dailyReports.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No daily reports yet</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {dailyReports.map(report => (
-                <div key={report.id} className="p-4 border rounded-lg hover:bg-accent transition-colors">
-                  <div className="space-y-2">
-                    <div>
-                      <p className="font-medium text-sm truncate" title={report.title}>{report.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(report.report_date), 'MMM dd, yyyy')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">by {report.prepared_by_name}</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 h-8"
-                        onClick={() => handlePreview(report)}
-                      >
-                        <Eye className="w-3 h-3 mr-1" />
-                        Preview
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-8 px-2"
-                        onClick={() => handleEdit(report)}
-                      >
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 px-2"
-                        onClick={() => handleDeleteReport(report.id)}
-                      >
-                        <Trash2 className="w-3 h-3 text-red-500" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <DailyReportsSection />
 
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedReport?.title}</DialogTitle>
-          </DialogHeader>
-          {selectedReport && (
-            <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">
-                <p>Date: {format(new Date(selectedReport.report_date), 'MMM dd, yyyy')}</p>
-                <p>Prepared by: {selectedReport.prepared_by_name}</p>
-              </div>
 
-              {selectedReport.report_content.map((group, idx) => (
-                <div key={idx} className="space-y-2">
-                  <h3 className="font-semibold text-lg">{group.status_group}</h3>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Client</TableHead>
-                        <TableHead>Deadline</TableHead>
-                        <TableHead>Quantity</TableHead>
-                        <TableHead>Notes</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {group.tasks.map((task, taskIdx) => (
-                        <TableRow key={taskIdx}>
-                          <TableCell>{task.job_title}</TableCell>
-                          <TableCell>{task.client_name}</TableCell>
-                          <TableCell>{task.deadline ? format(new Date(task.deadline), 'MM/dd/yyyy') : 'N/A'}</TableCell>
-                          <TableCell>{task.completed_quantity}/{task.total_quantity}</TableCell>
-                          <TableCell className="text-sm">{task.notes || '-'}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <ReportMaker 
-        isOpen={!!editingReport} 
-        onClose={() => setEditingReport(null)}
-        editingReport={editingReport}
-        onSaved={() => {
-          setEditingReport(null);
-          loadDailyReports();
-        }}
-      />
     </div>
   );
 }
