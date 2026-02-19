@@ -13,7 +13,6 @@ import { Eye, Trash2, FileText, Plus, Loader2, Download, Printer, Edit, MessageC
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import html2canvas from "html2canvas";
 import ReportMaker from "@/pages/ReportMaker";
 
 export default function DailyReportsList() {
