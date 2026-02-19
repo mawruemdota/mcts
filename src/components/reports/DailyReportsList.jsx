@@ -211,12 +211,21 @@ export default function DailyReportsList() {
         await navigator.share(shareData);
         toast({ title: "Shared!", description: "Report shared successfully." });
       } else {
-        // Fallback: copy to clipboard
         await navigator.clipboard.writeText(shareData.text);
-        toast({ title: "Copied!", description: "Web Share not supported. Report text copied to clipboard instead." });
+        toast({ title: "Copied!", description: "Report text copied to clipboard." });
       }
     } catch (error) {
-      if (error.name !== "AbortError") {
+      if (error.name === "AbortError") {
+        // User cancelled, do nothing
+      } else if (error.name === "NotAllowedError") {
+        // Permission denied for Web Share, fall back to clipboard
+        try {
+          await navigator.clipboard.writeText(`📋 ${report.title}\nPrepared by: ${report.prepared_by_name}\nDate: ${format(new Date(report.report_date), "MMM dd, yyyy")}`);
+          toast({ title: "Copied!", description: "Sharing not allowed by browser. Report text copied to clipboard instead." });
+        } catch {
+          toast({ title: "Error", description: "Unable to share or copy report.", variant: "destructive" });
+        }
+      } else {
         console.error("Error sharing:", error);
         toast({ title: "Error", description: "Failed to share report", variant: "destructive" });
       }
