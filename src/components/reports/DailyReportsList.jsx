@@ -194,31 +194,33 @@ export default function DailyReportsList() {
   const handleShareToMessenger = async (report) => {
     setSharingReport(true);
     try {
-      const element = document.getElementById('shareable-report-preview');
-      if (!element) {
-        toast({ title: "Error", description: "Report preview not found", variant: "destructive" });
-        return;
+      const reportText = report.report_content
+        .filter(g => g.tasks.length > 0)
+        .map(group => {
+          const tasks = group.tasks.map(task =>
+            `• ${task.job_title} — ${task.client_name}${task.deadline ? ` (Due: ${format(new Date(task.deadline), "MMM dd")})` : ""}${task.notes ? ` | ${task.notes}` : ""}`
+          ).join("\n");
+          return `[${group.status_group}]\n${tasks}`;
+        }).join("\n\n");
+
+      const shareData = {
+        title: report.title,
+        text: `📋 ${report.title}\nPrepared by: ${report.prepared_by_name}\nDate: ${format(new Date(report.report_date), "MMM dd, yyyy")}\n\n${reportText}`,
+      };
+
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast({ title: "Shared!", description: "Report shared successfully." });
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareData.text);
+        toast({ title: "Copied!", description: "Web Share not supported. Report text copied to clipboard instead." });
       }
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        useCORS: true
-      });
-
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${report.title}.png`;
-        link.click();
-        URL.revokeObjectURL(url);
-        toast({ title: "Success", description: "Screenshot downloaded! You can now share it to Messenger." });
-      });
     } catch (error) {
-      console.error("Error generating screenshot:", error);
-      toast({ title: "Error", description: "Failed to generate screenshot", variant: "destructive" });
+      if (error.name !== "AbortError") {
+        console.error("Error sharing:", error);
+        toast({ title: "Error", description: "Failed to share report", variant: "destructive" });
+      }
     } finally {
       setSharingReport(false);
     }
