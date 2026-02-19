@@ -652,18 +652,18 @@ Keep it concise but comprehensive, focusing on trends and patterns across the we
                                       </div>
 
                                       <div className="flex items-start gap-3">
-                                        {isPendingOrProduction && (
-                                          <div className="inline-flex items-center gap-1.5 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">
-                                            <Package className="w-3 h-3 text-blue-600" />
-                                            <span className="font-bold text-blue-600 text-xs">
-                                              {task.completed_quantity}/{task.total_quantity}
-                                            </span>
-                                          </div>
-                                        )}
-                                        {isPendingOrProduction && task.notes && (
-                                          <p className="text-xs text-muted-foreground italic max-w-xs">{task.notes}</p>
-                                        )}
-                                      </div>
+                                          {isPendingOrProduction && task.notes && (
+                                            <p className="text-xs text-muted-foreground italic max-w-xs">{task.notes}</p>
+                                          )}
+                                          {isPendingOrProduction && (
+                                            <div className="inline-flex items-center gap-1.5 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">
+                                              <Package className="w-3 h-3 text-blue-600" />
+                                              <span className="font-bold text-blue-600 text-xs">
+                                                {task.completed_quantity}/{task.total_quantity}
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
                                     </div>
                                   </CardContent>
                                 </Card>
