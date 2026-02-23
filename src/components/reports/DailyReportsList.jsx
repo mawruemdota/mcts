@@ -193,15 +193,6 @@ export default function DailyReportsList() {
   const handleShareToMessenger = async (report) => {
     setSharingReport(true);
     try {
-      const reportText = report.report_content
-        .filter(g => g.tasks.length > 0)
-        .map(group => {
-          const tasks = group.tasks.map(task =>
-            `• ${task.job_title} — ${task.client_name}${task.deadline ? ` (Due: ${format(new Date(task.deadline), "MMM dd")})` : ""}${task.notes ? ` | ${task.notes}` : ""}`
-          ).join("\n");
-          return `[${group.status_group}]\n${tasks}`;
-        }).join("\n\n");
-
       // Generate image from the report preview element
       const element = document.getElementById("shareable-report-preview");
       if (!element) {
