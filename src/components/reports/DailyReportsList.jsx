@@ -202,30 +202,57 @@ export default function DailyReportsList() {
           return `[${group.status_group}]\n${tasks}`;
         }).join("\n\n");
 
-      const shareData = {
-        title: report.title,
-        text: `📋 ${report.title}\nPrepared by: ${report.prepared_by_name}\nDate: ${format(new Date(report.report_date), "MMM dd, yyyy")}\n\n${reportText}`,
-      };
-
-      if (navigator.share) {
-        await navigator.share(shareData);
-        toast({ title: "Shared!", description: "Report shared successfully." });
-      } else {
-        await navigator.clipboard.writeText(shareData.text);
-        toast({ title: "Copied!", description: "Report text copied to clipboard." });
+      // Generate image from the report preview element
+      const element = document.getElementById("shareable-report-preview");
+      if (!element) {
+        toast({ title: "Error", description: "Could not find report preview.", variant: "destructive" });
+        setSharingReport(false);
+        return;
       }
-    } catch (error) {
-      if (error.name === "AbortError") {
-        // User cancelled, do nothing
-      } else if (error.name === "NotAllowedError") {
-        // Permission denied for Web Share, fall back to clipboard
-        try {
-          await navigator.clipboard.writeText(`📋 ${report.title}\nPrepared by: ${report.prepared_by_name}\nDate: ${format(new Date(report.report_date), "MMM dd, yyyy")}`);
-          toast({ title: "Copied!", description: "Sharing not allowed by browser. Report text copied to clipboard instead." });
-        } catch {
-          toast({ title: "Error", description: "Unable to share or copy report.", variant: "destructive" });
+
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(element, { backgroundColor: "#ffffff", scale: 2 });
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          toast({ title: "Error", description: "Failed to generate image.", variant: "destructive" });
+          setSharingReport(false);
+          return;
         }
-      } else {
+
+        const file = new File([blob], `${report.title}.png`, { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: report.title });
+            toast({ title: "Shared!", description: "Report image shared successfully." });
+          } catch (shareErr) {
+            if (shareErr.name !== "AbortError") {
+              // Fall back to download
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `${report.title}.png`;
+              a.click();
+              URL.revokeObjectURL(url);
+              toast({ title: "Downloaded!", description: "Report image saved to your device." });
+            }
+          }
+        } else {
+          // Download as fallback
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${report.title}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+          toast({ title: "Downloaded!", description: "Report image saved to your device." });
+        }
+        setSharingReport(false);
+      }, "image/png");
+      return; // early return since blob callback handles setSharingReport
+      } catch (error) {
+      if (error.name !== "AbortError") {
         console.error("Error sharing:", error);
         toast({ title: "Error", description: "Failed to share report", variant: "destructive" });
       }

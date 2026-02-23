@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { ShopCashRecord, User } from "@/entities/all";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -282,9 +281,9 @@ export default function ShopCashPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* Main Balance Card */}
-          <Card className="md:col-span-2 bg-card border-border">
+          <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-lg font-medium text-foreground">Current Cash Balance</CardTitle>
               <Wallet className="w-6 h-6 text-blue-500" />
@@ -297,27 +296,7 @@ export default function ShopCashPage() {
             </CardContent>
           </Card>
 
-          {/* Cash In and Cash Out Cards */}
-          <div className="space-y-6">
-            <Card className="bg-card border-border">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-foreground">Total Cash In</CardTitle>
-                <ArrowUpCircle className="w-4 h-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-500">₱{cashIn.toFixed(2)}</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-foreground">Total Cash Out</CardTitle>
-                <ArrowDownCircle className="w-4 h-4 text-red-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-500">₱{cashOut.toFixed(2)}</div>
-              </CardContent>
-            </Card>
-          </div>
+
         </div>
 
         {/* Records List / Transactions Card */}
