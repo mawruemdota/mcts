@@ -1,0 +1,35 @@
+{
+  "name": "ARExperience",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the AR experience"
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief description"
+    },
+    "marker_image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the image marker"
+    },
+    "marker_pattern_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the marker pattern file (.patt)"
+    },
+    "model_3d_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the 3D model (.glb, .gltf)"
+    }
+  },
+  "required": [
+    "name",
+    "marker_image_url",
+    "marker_pattern_url",
+    "model_3d_url"
+  ]
+}

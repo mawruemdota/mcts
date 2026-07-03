@@ -1,0 +1,35 @@
+{
+  "name": "JobComment",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "parent_comment_id": {
+      "type": "string"
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails mentioned in this comment"
+    },
+    "edited_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the comment was last edited"
+    }
+  },
+  "required": [
+    "job_id",
+    "user_email",
+    "content"
+  ]
+}

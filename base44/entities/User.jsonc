@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "properties": {
+    "nickname": {
+      "type": "string",
+      "description": "Preferred display name"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "position": {
+      "type": "string",
+      "description": "Job title or position"
+    },
+    "team_name": {
+      "type": "string",
+      "description": "Name of the team this user belongs to"
+    },
+    "departments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of departments the user belongs to"
+    },
+    "profile_picture_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to user's profile picture"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the user account is active"
+    },
+    "is_authorized_access": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has been explicitly authorized by an administrator to access the application"
+    },
+    "has_creative_hub_access": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user is allowed to access the Creative Hub"
+    }
+  },
+  "name": "User",
+  "required": [
+    "nickname",
+    "phone",
+    "position",
+    "team_name",
+    "departments",
+    "profile_picture_url"
+  ]
+}

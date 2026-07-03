@@ -1,0 +1,72 @@
+{
+  "name": "FormDefinition",
+  "type": "object",
+  "properties": {
+    "form_name": {
+      "type": "string",
+      "description": "Name of the form"
+    },
+    "service_id": {
+      "type": "string",
+      "description": "Optional link to a specific service/item"
+    },
+    "service_name": {
+      "type": "string",
+      "description": "Name of the linked service for display"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of what this form is for"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "textarea",
+              "number",
+              "date",
+              "email",
+              "phone",
+              "select",
+              "checkbox"
+            ]
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Options for select fields"
+          },
+          "placeholder": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Custom fields for this form"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this form is active and can receive submissions"
+    }
+  },
+  "required": [
+    "form_name"
+  ]
+}

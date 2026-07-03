@@ -1,0 +1,62 @@
+{
+  "name": "ExecutionTask",
+  "type": "object",
+  "properties": {
+    "execution_id": {
+      "type": "string",
+      "description": "Reference to the parent execution"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the task"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Due date for the task"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Post",
+        "Story",
+        "Reel",
+        "Video",
+        "Other"
+      ],
+      "default": "Post",
+      "description": "Type of content task"
+    },
+    "content_brief": {
+      "type": "string",
+      "description": "Brief description of content requirements"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pending Approval",
+        "Waiting for Client",
+        "In Progress",
+        "For Posting",
+        "Posted",
+        "Cancelled"
+      ],
+      "default": "In Progress",
+      "description": "Current status of the task"
+    },
+    "is_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the task is completed"
+    },
+    "related_reminder_id": {
+      "type": "string",
+      "description": "ID of the reminder associated with this task's deadline"
+    }
+  },
+  "required": [
+    "execution_id",
+    "name",
+    "due_date"
+  ]
+}

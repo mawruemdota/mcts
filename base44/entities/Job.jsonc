@@ -1,0 +1,202 @@
+{
+  "name": "Job",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the task"
+    },
+    "job_id": {
+      "type": "string",
+      "description": "Unique job identifier (auto-generated)"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Reference to the Client entity"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Client's full name"
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "Client's phone number"
+    },
+    "client_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Client's email address"
+    },
+    "order_id": {
+      "type": "string",
+      "description": "Reference to Order entity if task was created from an order"
+    },
+    "order_number": {
+      "type": "string",
+      "description": "Order number for tracking if created from order"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "completed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this item is completed"
+          }
+        }
+      }
+    },
+    "job_type": {
+      "type": "string",
+      "enum": [
+        "tarpaulin",
+        "sticker",
+        "invitation_card",
+        "calling_card",
+        "photocopy",
+        "other"
+      ],
+      "default": "other",
+      "description": "The type of job or service"
+    },
+    "size_specs": {
+      "type": "string",
+      "description": "Size and specifications"
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of items to print"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "Required completion date"
+    },
+    "file_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Uploaded design files"
+    },
+    "file_links": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "Links to external files (e.g., Google Drive)"
+    },
+    "checklist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "type": "string"
+          },
+          "completed": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "A list of sub-tasks for the job"
+    },
+    "special_instructions": {
+      "type": "string",
+      "description": "Special notes or requirements"
+    },
+    "is_rush": {
+      "type": "boolean",
+      "default": false,
+      "description": "Rush order flag"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_approval",
+        "finalized",
+        "in_production",
+        "quality_check",
+        "ready_pickup",
+        "completed",
+        "cancelled",
+        "archived"
+      ],
+      "default": "pending_approval",
+      "description": "Current job status"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email of assigned operator"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Email of approver"
+    },
+    "approved_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When job was approved"
+    },
+    "estimated_price": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Estimated job price"
+    },
+    "actual_price": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Final agreed price"
+    },
+    "production_notes": {
+      "type": "string",
+      "description": "Notes from production team"
+    },
+    "completion_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When job was completed"
+    },
+    "priority_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "normal",
+        "high",
+        "urgent"
+      ],
+      "default": "normal",
+      "description": "Job priority level"
+    },
+    "related_reminder_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Related reminder IDs"
+    }
+  },
+  "required": [
+    "title",
+    "client_name",
+    "client_phone",
+    "deadline"
+  ]
+}

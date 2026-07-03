@@ -1,0 +1,90 @@
+{
+  "name": "KeychainTemplate",
+  "type": "object",
+  "properties": {
+    "template_name": {
+      "type": "string",
+      "description": "Name of the template"
+    },
+    "description": {
+      "type": "string",
+      "description": "Template description"
+    },
+    "num_photos": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of photos for this template"
+    },
+    "width_inches": {
+      "type": "number",
+      "description": "Width of the keychain in inches"
+    },
+    "height_inches": {
+      "type": "number",
+      "description": "Height of the keychain in inches"
+    },
+    "orientation": {
+      "type": "string",
+      "enum": [
+        "landscape",
+        "portrait"
+      ],
+      "default": "portrait",
+      "description": "Photo orientation"
+    },
+    "photo_layout": {
+      "type": "string",
+      "enum": [
+        "horizontal",
+        "vertical"
+      ],
+      "default": "horizontal",
+      "description": "Photos arranged left to right (horizontal) or top to bottom (vertical)"
+    },
+    "back_to_back": {
+      "type": "string",
+      "enum": [
+        "same",
+        "different"
+      ],
+      "default": "same",
+      "description": "Whether both sides use same or different photos"
+    },
+    "photo_margin": {
+      "type": "integer",
+      "default": 4,
+      "description": "Margin between photos in pixels"
+    },
+    "photo_border_width": {
+      "type": "integer",
+      "default": 0,
+      "description": "Border width for photo frames in pixels"
+    },
+    "photo_border_color": {
+      "type": "string",
+      "default": "#000000",
+      "description": "Border color for photo frames"
+    },
+    "background_color": {
+      "type": "string",
+      "default": "#FFFFFF",
+      "description": "Background color for the keychain"
+    },
+    "background_image": {
+      "type": "string",
+      "format": "uri",
+      "description": "Background image URL"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this template is available for use"
+    }
+  },
+  "required": [
+    "template_name",
+    "num_photos",
+    "width_inches",
+    "height_inches"
+  ]
+}

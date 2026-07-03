@@ -1,0 +1,47 @@
+{
+  "name": "JobUpdate",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Reference to job ID"
+    },
+    "update_type": {
+      "type": "string",
+      "enum": [
+        "status_change",
+        "note_added",
+        "file_uploaded",
+        "assignment_change",
+        "delay_reported"
+      ],
+      "description": "Type of update"
+    },
+    "old_status": {
+      "type": "string",
+      "description": "Previous status (for status changes)"
+    },
+    "new_status": {
+      "type": "string",
+      "description": "New status (for status changes)"
+    },
+    "message": {
+      "type": "string",
+      "description": "Update message or note"
+    },
+    "updated_by": {
+      "type": "string",
+      "description": "Email of user who made update"
+    },
+    "is_internal": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether update is internal only"
+    }
+  },
+  "required": [
+    "job_id",
+    "update_type",
+    "message"
+  ]
+}

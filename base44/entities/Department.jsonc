@@ -1,0 +1,21 @@
+{
+  "name": "Department",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the department"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the department"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color code for visual identification"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

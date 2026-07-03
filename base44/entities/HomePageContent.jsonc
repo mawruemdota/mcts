@@ -1,0 +1,122 @@
+{
+  "name": "HomePageContent",
+  "type": "object",
+  "properties": {
+    "hero_background_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Background image for the hero section"
+    },
+    "pattern_background_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Pattern background for sections"
+    },
+    "main_logo_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Main MCTS logo"
+    },
+    "hero_title": {
+      "type": "string",
+      "description": "Hero section title"
+    },
+    "hero_subtitle": {
+      "type": "string",
+      "description": "Hero section subtitle"
+    },
+    "services_section_title": {
+      "type": "string",
+      "description": "Services section heading"
+    },
+    "services_section_subtitle": {
+      "type": "string",
+      "description": "Services section subtitle"
+    },
+    "homepage_services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Service card title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Service card description"
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional background image URL"
+          },
+          "icon_name": {
+            "type": "string",
+            "description": "Lucide React icon name if no image"
+          },
+          "icon_color": {
+            "type": "string",
+            "description": "Icon background color (e.g., bg-pink-500)"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Display order"
+          }
+        }
+      },
+      "description": "Array of 6 homepage service cards"
+    },
+    "contact_phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "contact_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Contact email address"
+    },
+    "contact_location": {
+      "type": "string",
+      "description": "Business location/address"
+    },
+    "facebook_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Facebook page URL"
+    },
+    "instagram_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Instagram profile URL"
+    },
+    "tiktok_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "TikTok profile URL"
+    },
+    "custom_social_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name for the link (e.g., LinkedIn, WhatsApp)"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The actual URL"
+          }
+        }
+      },
+      "description": "Custom social media or other links"
+    },
+    "company_description": {
+      "type": "string",
+      "description": "Brief company description for footer"
+    }
+  },
+  "required": []
+}

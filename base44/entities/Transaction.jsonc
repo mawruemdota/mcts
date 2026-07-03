@@ -1,0 +1,52 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "transaction_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "income",
+        "expense"
+      ]
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "job_payment",
+        "supplies",
+        "rent",
+        "utilities",
+        "salaries",
+        "marketing",
+        "equipment",
+        "other"
+      ],
+      "description": "Category of the transaction"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "description": {
+      "type": "string"
+    },
+    "related_invoice_id": {
+      "type": "string",
+      "description": "Link to an invoice if applicable"
+    },
+    "related_job_id": {
+      "type": "string",
+      "description": "Link to a job if applicable"
+    }
+  },
+  "required": [
+    "transaction_date",
+    "type",
+    "category",
+    "amount",
+    "description"
+  ]
+}

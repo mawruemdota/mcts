@@ -1,0 +1,50 @@
+{
+  "name": "CaptionTemplate",
+  "type": "object",
+  "properties": {
+    "template_name": {
+      "type": "string",
+      "description": "Name of the caption template"
+    },
+    "template_content": {
+      "type": "string",
+      "description": "The base template content with placeholders"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "promotional",
+        "informational",
+        "engagement",
+        "product",
+        "event",
+        "general"
+      ],
+      "default": "general",
+      "description": "Category of the caption template"
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of variables that can be customized in the template"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of when to use this template"
+    },
+    "sample_captions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3,
+      "description": "Up to 3 sample captions that demonstrate this template style"
+    }
+  },
+  "required": [
+    "template_name",
+    "template_content"
+  ]
+}

@@ -35,7 +35,7 @@ export default function ReportMaker({ isOpen, onClose, onSaved, editingReport = 
     { value: "completed", label: "Completed", editable: false }
   ];
   
-  const [selectedStatuses] = useState(["pending_approval", "in_production", "quality_check", "ready_pickup", "completed"]);
+  const [selectedStatuses, setSelectedStatuses] = useState(["pending_approval", "in_production", "quality_check", "ready_pickup", "completed"]);
   const [taskData, setTaskData] = useState({});
 
   useEffect(() => {

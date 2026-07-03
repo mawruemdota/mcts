@@ -1,0 +1,106 @@
+{
+  "name": "KeychainOrder",
+  "type": "object",
+  "properties": {
+    "client_name": {
+      "type": "string",
+      "description": "Name of the client placing the order"
+    },
+    "contact_number": {
+      "type": "string",
+      "description": "Client's contact number"
+    },
+    "orders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "description": "Template ID used"
+          },
+          "template_name": {
+            "type": "string",
+            "description": "Template name"
+          },
+          "keychain_type": {
+            "type": "string",
+            "description": "Type of keychain"
+          },
+          "keychain_size": {
+            "type": "string",
+            "description": "Size of keychain"
+          },
+          "num_photos": {
+            "type": "integer",
+            "description": "Number of photos"
+          },
+          "photo_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Individual photo URLs (optional)"
+          },
+          "photo_margin": {
+            "type": "integer",
+            "default": 4
+          },
+          "photo_border_width": {
+            "type": "integer",
+            "default": 0
+          },
+          "photo_border_color": {
+            "type": "string",
+            "default": "#000000"
+          },
+          "background_color": {
+            "type": "string",
+            "default": "#FFFFFF"
+          },
+          "background_image": {
+            "type": "string"
+          },
+          "width_inches": {
+            "type": "number"
+          },
+          "height_inches": {
+            "type": "number"
+          },
+          "orientation": {
+            "type": "string"
+          },
+          "photo_layout": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "generated_image_url": {
+            "type": "string",
+            "description": "Final generated keychain image URL"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "for_approval",
+        "for_payment",
+        "ongoing",
+        "done"
+      ],
+      "default": "new"
+    },
+    "admin_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_name",
+    "contact_number",
+    "orders"
+  ]
+}

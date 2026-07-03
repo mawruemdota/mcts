@@ -1,0 +1,67 @@
+{
+  "name": "DeliveryForm",
+  "type": "object",
+  "properties": {
+    "delivery_number": {
+      "type": "string",
+      "description": "Unique delivery form number"
+    },
+    "delivery_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of delivery"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Reference to client"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Name of recipient/client"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "is_from_pricelist": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Items being delivered"
+    },
+    "prepared_by": {
+      "type": "string",
+      "description": "Name of person who prepared the delivery"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "delivered",
+        "cancelled"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "delivery_number",
+    "client_name",
+    "items",
+    "prepared_by"
+  ]
+}

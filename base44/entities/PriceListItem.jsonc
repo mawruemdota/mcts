@@ -1,0 +1,88 @@
+{
+  "name": "PriceListItem",
+  "type": "object",
+  "properties": {
+    "item_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "item",
+        "service"
+      ]
+    },
+    "unit": {
+      "type": "string",
+      "description": "e.g., per sq. ft., per piece, per hour"
+    },
+    "description": {
+      "type": "string"
+    },
+    "material": {
+      "type": "string",
+      "description": "Specific material used for the item"
+    },
+    "dimension": {
+      "type": "string",
+      "description": "Default or common dimensions for the item"
+    },
+    "price_aggressive": {
+      "type": "number",
+      "minimum": 0,
+      "description": "The lowest competitive price"
+    },
+    "price_conservative": {
+      "type": "number",
+      "minimum": 0,
+      "description": "The standard, fair price"
+    },
+    "price_extreme": {
+      "type": "number",
+      "minimum": 0,
+      "description": "The premium, high-value price"
+    },
+    "service_image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Image for service display on homepage"
+    }
+  },
+  "required": [
+    "item_name",
+    "unit",
+    "price_conservative"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {},
+        {}
+      ]
+    },
+    "read": {
+      "$or": [
+        {},
+        {}
+      ]
+    },
+    "update": {
+      "$or": [
+        {},
+        {}
+      ]
+    },
+    "delete": {
+      "$or": [
+        {},
+        {}
+      ]
+    },
+    "write": {
+      "$or": [
+        {},
+        {}
+      ]
+    }
+  }
+}

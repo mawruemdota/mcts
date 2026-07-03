@@ -7,6 +7,7 @@ import { Search, UserCheck, Plus, Loader2, Package, Edit, User as UserIcon, Cale
 import { formatDistanceToNow, isToday } from 'date-fns';
 import JobDetails from '@/components/jobs/JobDetails';
 import NewTaskModal from '@/components/jobs/NewTaskModal';
+import InvoiceModal from '@/components/forms/InvoiceModal';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';

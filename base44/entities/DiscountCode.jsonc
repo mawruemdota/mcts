@@ -1,0 +1,38 @@
+{
+  "name": "DiscountCode",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "The actual discount code (e.g., AGGRESSIVE, SAVE10)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "aggressive_pricing",
+        "percentage_off"
+      ],
+      "description": "Type of discount: either uses aggressive prices or applies a percentage off conservative prices"
+    },
+    "value": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "The percentage value for percentage_off type (e.g., 10 for 10% off). Not used for aggressive_pricing."
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the discount or promotion"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the discount code is currently active"
+    }
+  },
+  "required": [
+    "code",
+    "type",
+    "is_active"
+  ]
+}

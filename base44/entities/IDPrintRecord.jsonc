@@ -1,0 +1,64 @@
+{
+  "name": "IDPrintRecord",
+  "type": "object",
+  "properties": {
+    "employee_name": {
+      "type": "string",
+      "description": "Name of the person getting the ID"
+    },
+    "id_number": {
+      "type": "string",
+      "description": "ID number or employee number"
+    },
+    "position": {
+      "type": "string",
+      "description": "Job position or title"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Reference to client entity"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Name of the company/client"
+    },
+    "print_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when ID was printed"
+    },
+    "unit_price": {
+      "type": "number",
+      "minimum": 0,
+      "default": 50,
+      "description": "Price per ID card"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "for_print",
+        "printed",
+        "invoiced"
+      ],
+      "default": "for_print",
+      "description": "Current status of the ID record"
+    },
+    "invoice_id": {
+      "type": "string",
+      "description": "Reference to invoice if already invoiced"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the ID print job"
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "Identifier for grouping IDs printed in the same batch"
+    }
+  },
+  "required": [
+    "employee_name",
+    "client_name",
+    "print_date"
+  ]
+}

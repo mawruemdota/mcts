@@ -1,0 +1,81 @@
+{
+  "name": "ReimbursementRequest",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this reimbursement is for"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Name of the client"
+    },
+    "requestor_name": {
+      "type": "string",
+      "description": "Name of the person requesting reimbursement"
+    },
+    "requestor_designation": {
+      "type": "string",
+      "description": "Job title or designation of the requestor"
+    },
+    "request_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the request"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "purchased_from": {
+            "type": "string",
+            "description": "Store or vendor name"
+          },
+          "item_description": {
+            "type": "string",
+            "description": "Description of the purchased item"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "total_amount": {
+      "type": "number",
+      "description": "Total reimbursement amount"
+    },
+    "reference_photos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "URLs of uploaded photos for reference (e.g., receipts)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "Approved",
+        "Rejected",
+        "Reimbursed"
+      ],
+      "default": "Pending"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes or comments"
+    }
+  },
+  "required": [
+    "client_name",
+    "requestor_name",
+    "request_date",
+    "total_amount"
+  ]
+}

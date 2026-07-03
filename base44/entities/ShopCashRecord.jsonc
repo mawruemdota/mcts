@@ -1,0 +1,57 @@
+{
+  "name": "ShopCashRecord",
+  "type": "object",
+  "properties": {
+    "transaction_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of cash transaction"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "cash_in",
+        "cash_out"
+      ],
+      "description": "Direction of cash flow"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "sales_payment",
+        "supplies_purchase",
+        "office_expenses",
+        "utilities",
+        "salaries",
+        "equipment",
+        "petty_cash",
+        "other"
+      ],
+      "description": "Category of cash transaction"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Amount of money"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the transaction"
+    },
+    "received_by": {
+      "type": "string",
+      "description": "Person who handled the cash"
+    },
+    "receipt_number": {
+      "type": "string",
+      "description": "Receipt or reference number"
+    }
+  },
+  "required": [
+    "transaction_date",
+    "type",
+    "category",
+    "amount",
+    "description"
+  ]
+}

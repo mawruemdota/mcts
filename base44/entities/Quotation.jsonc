@@ -1,0 +1,76 @@
+{
+  "name": "Quotation",
+  "type": "object",
+  "properties": {
+    "quotation_id": {
+      "type": "string"
+    },
+    "client_info": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "discount_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "promo_code": {
+      "type": "string"
+    },
+    "total_price": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_review",
+        "approved",
+        "rejected",
+        "converted"
+      ],
+      "default": "pending_review"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes or comments on the quotation"
+    }
+  },
+  "required": [
+    "quotation_id",
+    "client_info",
+    "items",
+    "total_price"
+  ]
+}

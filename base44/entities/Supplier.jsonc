@@ -1,0 +1,38 @@
+{
+  "name": "Supplier",
+  "type": "object",
+  "properties": {
+    "supplier_name": {
+      "type": "string"
+    },
+    "contact_person": {
+      "type": "string"
+    },
+    "phone_number": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "category": {
+      "type": "string",
+      "description": "e.g., Ink, Paper, Equipment"
+    },
+    "location": {
+      "type": "string",
+      "description": "Physical address of the supplier"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri",
+      "description": "Website or social media link"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "supplier_name"
+  ]
+}

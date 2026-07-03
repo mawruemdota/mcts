@@ -1,0 +1,122 @@
+{
+  "name": "InventoryItem",
+  "type": "object",
+  "properties": {
+    "item_name": {
+      "type": "string",
+      "description": "Name of inventory item or equipment"
+    },
+    "identifier": {
+      "type": "string",
+      "description": "SKU or unique identifier"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "paper",
+        "ink",
+        "materials",
+        "hardware",
+        "consumables",
+        "equipment"
+      ],
+      "description": "Item category"
+    },
+    "dimension": {
+      "type": "string",
+      "description": "Size or dimensions of the item"
+    },
+    "unit": {
+      "type": "string",
+      "enum": [
+        "pieces",
+        "rolls",
+        "sheets",
+        "ml",
+        "liters",
+        "kg",
+        "packs"
+      ],
+      "description": "Unit of measurement"
+    },
+    "current_quantity": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Current stock quantity"
+    },
+    "minimum_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Low stock alert threshold"
+    },
+    "critical_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Critical stock alert threshold"
+    },
+    "unit_cost": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Cost per unit"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Supplier name"
+    },
+    "last_restocked": {
+      "type": "string",
+      "format": "date",
+      "description": "Last restock date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "low",
+        "critical",
+        "out_of_stock",
+        "operational",
+        "maintenance",
+        "broken",
+        "retired"
+      ],
+      "default": "normal",
+      "description": "Stock status or equipment operational status"
+    },
+    "location": {
+      "type": "string",
+      "description": "Storage location"
+    },
+    "model": {
+      "type": "string",
+      "description": "Model of the equipment"
+    },
+    "serial_number": {
+      "type": "string",
+      "description": "Serial number of the equipment"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date equipment was purchased"
+    },
+    "warranty_expiry": {
+      "type": "string",
+      "format": "date",
+      "description": "Date equipment warranty expires"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes about the equipment"
+    },
+    "picture_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the equipment's picture"
+    }
+  },
+  "required": [
+    "item_name",
+    "category"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "name": "ContentPlanItem",
+  "type": "object",
+  "properties": {
+    "plan_id": {
+      "type": "string",
+      "description": "The ID of the parent ContentPlan"
+    },
+    "item_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Scheduled date for the content item"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Photo",
+        "Video",
+        "Other"
+      ],
+      "default": "Photo",
+      "description": "Type of content"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name or title of the content piece"
+    },
+    "content": {
+      "type": "string",
+      "description": "Detailed description or script for the content"
+    },
+    "approval": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "Approved",
+        "Rejected"
+      ],
+      "default": "Pending",
+      "description": "Approval status"
+    },
+    "assignee": {
+      "type": "string",
+      "description": "Email of the user this item is assigned to"
+    },
+    "photo_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of an uploaded photo for the content item"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri",
+      "description": "Link to the final asset or draft"
+    }
+  },
+  "required": [
+    "plan_id",
+    "name"
+  ]
+}

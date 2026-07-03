@@ -1,0 +1,93 @@
+{
+  "name": "ARStickerContent",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Descriptive name for the AR sticker (e.g., 'MCTS Logo Animation')"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the AR experience"
+    },
+    "marker_image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the image used as the AR marker (the physical sticker design)"
+    },
+    "ar_model_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the 3D model (.glb or .gltf) to display in AR"
+    },
+    "model_scale": {
+      "type": "number",
+      "default": 1,
+      "description": "Scale of the 3D model"
+    },
+    "model_position_x": {
+      "type": "number",
+      "default": 0,
+      "description": "X position offset"
+    },
+    "model_position_y": {
+      "type": "number",
+      "default": 0,
+      "description": "Y position offset"
+    },
+    "model_position_z": {
+      "type": "number",
+      "default": 0,
+      "description": "Z position offset"
+    },
+    "model_rotation_x": {
+      "type": "number",
+      "default": 0,
+      "description": "X rotation in degrees"
+    },
+    "model_rotation_y": {
+      "type": "number",
+      "default": 0,
+      "description": "Y rotation in degrees"
+    },
+    "model_rotation_z": {
+      "type": "number",
+      "default": 0,
+      "description": "Z rotation in degrees"
+    },
+    "animation_name": {
+      "type": "string",
+      "description": "Name of the animation to play (if model has animations)"
+    },
+    "loop_animation": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to loop the animation"
+    },
+    "auto_rotate": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the model should auto-rotate"
+    },
+    "qr_code_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the generated QR code image for this sticker"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this AR sticker content is currently active"
+    },
+    "view_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of times this AR experience has been viewed"
+    }
+  },
+  "required": [
+    "name",
+    "marker_image_url",
+    "ar_model_url"
+  ]
+}

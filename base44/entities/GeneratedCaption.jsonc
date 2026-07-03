@@ -1,0 +1,51 @@
+{
+  "name": "GeneratedCaption",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this caption is for"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Name of the client"
+    },
+    "template_id": {
+      "type": "string",
+      "description": "ID of the template used"
+    },
+    "custom_prompt": {
+      "type": "string",
+      "description": "Custom prompt provided by user"
+    },
+    "photo_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of uploaded photo"
+    },
+    "generated_caption": {
+      "type": "string",
+      "description": "The AI-generated caption"
+    },
+    "variations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Alternative caption variations"
+    },
+    "is_approved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the caption has been approved"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Email of user who created the caption"
+    }
+  },
+  "required": [
+    "client_name",
+    "generated_caption"
+  ]
+}

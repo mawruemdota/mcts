@@ -405,6 +405,13 @@ export default function CreativesPage() {
               </Button>
             </Link>
 
+            <Link to={createPageUrl("CreativeHub")}>
+              <Button variant="outline" size="sm">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Creative Hub
+              </Button>
+            </Link>
+
             {/* Main Action Buttons */}
             <Dialog open={showBatchDialog} onOpenChange={(open) => {
               setShowBatchDialog(open);

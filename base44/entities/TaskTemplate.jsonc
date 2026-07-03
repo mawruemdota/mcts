@@ -1,0 +1,79 @@
+{
+  "name": "TaskTemplate",
+  "type": "object",
+  "properties": {
+    "template_name": {
+      "type": "string",
+      "description": "Name of the task template"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of what this template is for"
+    },
+    "job_type": {
+      "type": "string",
+      "enum": [
+        "tarpaulin",
+        "sticker",
+        "invitation_card",
+        "calling_card",
+        "photocopy",
+        "photobooth",
+        "other"
+      ],
+      "default": "other",
+      "description": "The type of job or service"
+    },
+    "default_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "default": 1
+          },
+          "price": {
+            "type": "number",
+            "default": 0
+          }
+        }
+      },
+      "description": "Default items to include when using this template"
+    },
+    "default_checklist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "type": "string"
+          },
+          "completed": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Default checklist items for this template"
+    },
+    "default_instructions": {
+      "type": "string",
+      "description": "Default special instructions"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this template is active and available"
+    }
+  },
+  "required": [
+    "template_name"
+  ]
+}

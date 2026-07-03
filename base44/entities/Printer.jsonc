@@ -1,0 +1,49 @@
+{
+  "name": "Printer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name or model of the printer"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email of the person in charge of cleaning"
+    },
+    "last_cleaned_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The last date the printer was cleaned"
+    },
+    "maintenance_schedule": {
+      "type": "string",
+      "enum": [
+        "everyday",
+        "weekdays",
+        "custom"
+      ],
+      "default": "weekdays",
+      "description": "When maintenance reminders should be created"
+    },
+    "custom_days": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday"
+        ]
+      },
+      "description": "Specific days for custom schedule"
+    }
+  },
+  "required": [
+    "name",
+    "assigned_to"
+  ]
+}

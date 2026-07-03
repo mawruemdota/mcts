@@ -1,0 +1,39 @@
+{
+  "name": "TeamReport",
+  "type": "object",
+  "properties": {
+    "submitted_by": {
+      "type": "string",
+      "description": "Email of the user submitting the report"
+    },
+    "report_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "completed_jobs_summary": {
+      "type": "string",
+      "description": "Summary of tasks completed"
+    },
+    "problem_encountered": {
+      "type": "string"
+    },
+    "related_job_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A list of related task IDs"
+    },
+    "solution_applied": {
+      "type": "string"
+    },
+    "suggestions": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "submitted_by",
+    "report_date",
+    "completed_jobs_summary"
+  ]
+}

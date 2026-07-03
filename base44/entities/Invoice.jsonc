@@ -1,0 +1,126 @@
+{
+  "name": "Invoice",
+  "type": "object",
+  "properties": {
+    "invoice_number": {
+      "type": "string",
+      "description": "Unique invoice or receipt number"
+    },
+    "receipt_type": {
+      "type": "string",
+      "enum": [
+        "Collection Receipt",
+        "Official Receipt",
+        "Acknowledgement Receipt",
+        "Delivery Receipt",
+        "Invoice"
+      ],
+      "default": "Collection Receipt",
+      "description": "Type of receipt/invoice document"
+    },
+    "job_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of associated task IDs"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Reference to client entity"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "subtotal": {
+      "type": "number",
+      "minimum": 0
+    },
+    "discount": {
+      "type": "number",
+      "default": 0
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "unpaid",
+        "billed",
+        "paid",
+        "overdue",
+        "void",
+        "archived",
+        "consolidated"
+      ],
+      "default": "unpaid"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "prepared_by": {
+      "type": "string",
+      "description": "Name of the person who prepared the invoice"
+    },
+    "payment_footer_type": {
+      "type": "string",
+      "enum": [
+        "payment_options",
+        "social_media"
+      ],
+      "default": "payment_options",
+      "description": "Type of footer content to display on invoice"
+    },
+    "consolidated_from_invoice_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of invoices that were combined into this consolidated invoice"
+    },
+    "consolidated_to_invoice_id": {
+      "type": "string",
+      "description": "ID of the consolidated invoice this was merged into"
+    }
+  },
+  "required": [
+    "invoice_number",
+    "client_name",
+    "amount",
+    "issue_date"
+  ]
+}

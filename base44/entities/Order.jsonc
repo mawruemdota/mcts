@@ -1,0 +1,103 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "order_number": {
+      "type": "string",
+      "description": "Unique order identifier"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Name of the client placing the order"
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "Client's contact phone number"
+    },
+    "client_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Client's email address"
+    },
+    "client_company": {
+      "type": "string",
+      "description": "Client's company name (optional)"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "List of items ordered"
+    },
+    "total_amount": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total order amount"
+    },
+    "special_instructions": {
+      "type": "string",
+      "description": "Any special instructions or notes from the client"
+    },
+    "promo_code": {
+      "type": "string",
+      "description": "Promo code applied to the order"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewing",
+        "approved",
+        "converted_to_job",
+        "rejected"
+      ],
+      "default": "new",
+      "description": "Current status of the order"
+    },
+    "converted_job_id": {
+      "type": "string",
+      "description": "ID of the job created from this order"
+    }
+  },
+  "required": [
+    "client_name",
+    "client_phone",
+    "items",
+    "total_amount"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {},
+        {}
+      ]
+    },
+    "read": {
+      "$or": [
+        {},
+        {}
+      ]
+    },
+    "update": {
+      "$or": [
+        {},
+        {}
+      ]
+    }
+  }
+}

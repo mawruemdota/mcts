@@ -1,0 +1,73 @@
+{
+  "name": "Reminder",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed"
+      ],
+      "default": "pending"
+    },
+    "reminder_type": {
+      "type": "string",
+      "enum": [
+        "general",
+        "printer_maintenance",
+        "task_related"
+      ],
+      "default": "general"
+    },
+    "related_job_id": {
+      "type": "string",
+      "description": "Related job ID if this is a task-related reminder"
+    },
+    "related_printer_id": {
+      "type": "string",
+      "description": "Related printer ID for maintenance reminders"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this reminder repeats"
+    },
+    "recurrence_type": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "description": "How often the reminder repeats"
+    },
+    "maintenance_completed_today": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether printer maintenance was completed today"
+    },
+    "last_maintenance_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When maintenance was last completed"
+    }
+  },
+  "required": [
+    "user_email",
+    "title"
+  ]
+}

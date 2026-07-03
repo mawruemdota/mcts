@@ -1,0 +1,83 @@
+{
+  "name": "CreativeTask",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the creative task"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client associated with this task"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Name of the client for display purposes"
+    },
+    "assignee_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email of the user assigned to this task"
+    },
+    "assignee_name": {
+      "type": "string",
+      "description": "Name of the assignee for display purposes"
+    },
+    "request_description": {
+      "type": "string",
+      "description": "Detailed description of the creative request"
+    },
+    "additional_info": {
+      "type": "string",
+      "description": "Any additional notes or instructions for the task"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "The deadline for the creative task"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "ongoing",
+        "for_checking",
+        "done"
+      ],
+      "default": "pending",
+      "description": "Current status of the creative task"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "normal",
+        "high",
+        "urgent"
+      ],
+      "default": "normal",
+      "description": "Priority level of the task"
+    },
+    "file_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Attached files for the task"
+    },
+    "output_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Output/deliverable files"
+    }
+  },
+  "required": [
+    "title",
+    "client_name",
+    "assignee_email",
+    "request_description",
+    "deadline"
+  ]
+}

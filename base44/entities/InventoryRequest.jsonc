@@ -1,0 +1,47 @@
+{
+  "name": "InventoryRequest",
+  "type": "object",
+  "properties": {
+    "requested_by": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "existing_item_id": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "details": {
+      "type": "string"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri"
+    },
+    "assignee": {
+      "type": "string",
+      "default": "jonathan@mcts.com",
+      "description": "Person assigned to purchase the item"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "purchased",
+        "rejected"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "requested_by",
+    "item_name"
+  ]
+}

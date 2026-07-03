@@ -1,0 +1,28 @@
+{
+  "name": "GalleryImage",
+  "type": "object",
+  "properties": {
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Gallery image URL"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Image caption or title"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Display order in carousel"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to display this image"
+    }
+  },
+  "required": [
+    "image_url"
+  ]
+}

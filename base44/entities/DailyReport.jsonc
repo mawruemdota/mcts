@@ -1,0 +1,74 @@
+{
+  "name": "DailyReport",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the daily report"
+    },
+    "report_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the report was created"
+    },
+    "prepared_by_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email of the user who prepared the report"
+    },
+    "prepared_by_name": {
+      "type": "string",
+      "description": "Name of the user who prepared the report"
+    },
+    "report_content": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status_group": {
+            "type": "string",
+            "description": "Status of tasks in this group"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "job_id": {
+                  "type": "string"
+                },
+                "job_title": {
+                  "type": "string"
+                },
+                "client_name": {
+                  "type": "string"
+                },
+                "deadline": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "total_quantity": {
+                  "type": "number"
+                },
+                "completed_quantity": {
+                  "type": "number"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Structured content of the report including tasks grouped by status"
+    }
+  },
+  "required": [
+    "title",
+    "report_date",
+    "prepared_by_email",
+    "prepared_by_name",
+    "report_content"
+  ]
+}

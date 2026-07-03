@@ -1,0 +1,25 @@
+{
+  "name": "Team",
+  "type": "object",
+  "properties": {
+    "team_name": {
+      "type": "string",
+      "description": "Name of the team"
+    },
+    "description": {
+      "type": "string",
+      "description": "Team description"
+    },
+    "team_lead": {
+      "type": "string",
+      "description": "Email of team leader"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Email of user who created the team"
+    }
+  },
+  "required": [
+    "team_name"
+  ]
+}

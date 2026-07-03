@@ -1,0 +1,43 @@
+{
+  "name": "SocialMediaPost",
+  "type": "object",
+  "properties": {
+    "platform": {
+      "type": "string",
+      "enum": [
+        "facebook",
+        "instagram"
+      ],
+      "default": "facebook",
+      "description": "Platform this post is scheduled for"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the post is scheduled to go out"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Caption or copy for the post"
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Final (optionally watermarked) image for the post"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "scheduled",
+        "posted"
+      ],
+      "default": "draft",
+      "description": "Current status of the scheduled post"
+    }
+  },
+  "required": [
+    "platform",
+    "scheduled_date"
+  ]
+}

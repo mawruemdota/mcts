@@ -1,0 +1,40 @@
+{
+  "name": "SocialMediaExecution",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "client_id": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "social_links": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "asset_links": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "Links to assets like Google Drive, Dropbox, etc."
+    },
+    "assignee_email": {
+      "type": "string",
+      "format": "email"
+    }
+  },
+  "required": [
+    "title",
+    "client_id",
+    "client_name",
+    "assignee_email"
+  ]
+}

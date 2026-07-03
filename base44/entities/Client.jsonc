@@ -1,0 +1,41 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "client_name": {
+      "type": "string"
+    },
+    "contact_person": {
+      "type": "string"
+    },
+    "phone_number": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "address": {
+      "type": "string"
+    },
+    "tin": {
+      "type": "string",
+      "description": "Tax Identification Number"
+    },
+    "industry": {
+      "type": "string",
+      "description": "The client's industry or field"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri",
+      "description": "Website or social media link"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_name"
+  ]
+}

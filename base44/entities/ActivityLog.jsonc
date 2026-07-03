@@ -1,0 +1,50 @@
+{
+  "name": "ActivityLog",
+  "type": "object",
+  "properties": {
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "created",
+        "updated",
+        "deleted",
+        "status_changed",
+        "assigned"
+      ],
+      "description": "Type of action performed"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Type of entity affected (e.g., Job, CreativeTask, Invoice)"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the affected entity"
+    },
+    "entity_name": {
+      "type": "string",
+      "description": "Name or title of the affected entity for display"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who performed the action"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Display name of the user who performed the action"
+    },
+    "details": {
+      "type": "object",
+      "description": "Additional details about the action (e.g., old/new values)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the action"
+    }
+  },
+  "required": [
+    "action_type",
+    "entity_type",
+    "user_email"
+  ]
+}

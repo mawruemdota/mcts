@@ -1,0 +1,51 @@
+{
+  "name": "FormSubmission",
+  "type": "object",
+  "properties": {
+    "form_definition_id": {
+      "type": "string",
+      "description": "Reference to FormDefinition"
+    },
+    "form_name": {
+      "type": "string",
+      "description": "Name of the form for easy reference"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Name of the person submitting"
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "Contact number"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Email address"
+    },
+    "form_data": {
+      "type": "object",
+      "description": "Dynamic data submitted by the user"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewed",
+        "processed",
+        "archived"
+      ],
+      "default": "new",
+      "description": "Status of the submission"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes about this submission"
+    }
+  },
+  "required": [
+    "form_definition_id",
+    "form_name",
+    "client_name",
+    "client_phone"
+  ]
+}

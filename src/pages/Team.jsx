@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { User, Team, Department } from "@/entities/all";
 import { Link } from "react-router-dom";
@@ -268,7 +267,8 @@ export default function TeamPage() {
             position: user?.position || '',
             profile_picture_url: user?.profile_picture_url || '',
             is_active: user?.is_active !== false,
-            is_authorized_access: user?.is_authorized_access !== false
+            is_authorized_access: user?.is_authorized_access !== false,
+            has_creative_hub_access: user?.has_creative_hub_access === true
         });
         const [isUploading, setIsUploading] = useState(false);
         const { toast } = useToast();
@@ -455,6 +455,25 @@ export default function TeamPage() {
                         />
                         <Label htmlFor="authorizedAccess" className="text-sm text-amber-900">
                             {userData.is_authorized_access ? 'Authorized' : 'Pending'}
+                        </Label>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border border-purple-200 bg-purple-50 rounded-lg">
+                    <div className="space-y-1">
+                        <Label htmlFor="creativeHubAccess" className="font-medium text-purple-900">Creative Hub Access</Label>
+                        <p className="text-sm text-purple-700">
+                            {userData.has_creative_hub_access ? 'User can access the Creative Hub' : 'User cannot access the Creative Hub'}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            id="creativeHubAccess"
+                            checked={userData.has_creative_hub_access}
+                            onCheckedChange={v => setUserData({...userData, has_creative_hub_access: v})}
+                        />
+                        <Label htmlFor="creativeHubAccess" className="text-sm text-purple-900">
+                            {userData.has_creative_hub_access ? 'Allowed' : 'Blocked'}
                         </Label>
                     </div>
                 </div>
