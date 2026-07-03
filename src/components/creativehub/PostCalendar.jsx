@@ -9,8 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Plus, Loader2, Edit, Trash2, Download, Facebook, Instagram } from "lucide-react";
-import { format } from "date-fns";
+import { Plus, Loader2, Edit, Trash2, Download, Facebook, Instagram, ChevronLeft, ChevronRight, List, CalendarDays } from "lucide-react";
+import { format, addMonths, subMonths } from "date-fns";
+import { DragDropContext } from "@hello-pangea/dnd";
+import PostCalendarGrid from "@/components/creativehub/PostCalendarGrid";
 
 const emptyForm = {
   platform: "facebook",
@@ -27,6 +29,8 @@ export default function PostCalendar() {
   const [editingPost, setEditingPost] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
   const [uploading, setUploading] = useState(false);
+  const [viewMode, setViewMode] = useState("calendar");
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const { toast } = useToast();
 
   const loadPosts = useCallback(async () => {
@@ -120,10 +124,33 @@ export default function PostCalendar() {
     }
   };
 
+  const handleDragEnd = async (result) => {
+    const { destination, draggableId } = result;
+    if (!destination) return;
+    const newDate = destination.droppableId;
+    const post = posts.find(p => p.id === draggableId);
+    if (!post || post.scheduled_date === newDate) return;
+
+    const originalPosts = posts;
+    setPosts(prev => prev.map(p => p.id === draggableId ? { ...p, scheduled_date: newDate } : p));
+    try {
+      await base44.entities.SocialMediaPost.update(draggableId, { scheduled_date: newDate });
+      toast({ title: "Post rescheduled", description: format(new Date(newDate), "MMM dd, yyyy") });
+    } catch (error) {
+      setPosts(originalPosts);
+      toast({ variant: "destructive", title: "Failed to reschedule post" });
+    }
+  };
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
         <CardTitle>Post Schedule</CardTitle>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === "calendar" ? "list" : "calendar")}>
+            {viewMode === "calendar" ? <List className="w-4 h-4 mr-2" /> : <CalendarDays className="w-4 h-4 mr-2" />}
+            {viewMode === "calendar" ? "List View" : "Calendar View"}
+          </Button>
         <Dialog open={showDialog} onOpenChange={(open) => {
           setShowDialog(open);
           if (!open) { setEditingPost(null); setFormData(emptyForm); }
@@ -197,10 +224,26 @@ export default function PostCalendar() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin" /></div>
+        ) : viewMode === "calendar" ? (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Button variant="outline" size="icon" onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <span className="font-semibold">{format(currentMonth, "MMMM yyyy")}</span>
+              <Button variant="outline" size="icon" onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <PostCalendarGrid currentMonth={currentMonth} posts={posts} onPostClick={handleEdit} />
+            </DragDropContext>
+          </div>
         ) : posts.length === 0 ? (
           <p className="text-center text-muted-foreground py-12">No posts scheduled yet.</p>
         ) : (
