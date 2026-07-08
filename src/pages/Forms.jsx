@@ -1163,7 +1163,7 @@ const CombineInvoicesModal = ({ invoices, onCombine, onClose }) => {
                     <p>You are combining the following invoices for <span className="font-semibold">{invoices[0]?.client_name}</span>:</p>
                     <ul className="list-disc pl-5">
                         {invoices.map(inv => (
-                            <li key={inv.id}>{inv.invoice_number} (₱{inv.amount.toFixed(2)}) - {format(new Date(inv.issue_date), 'MMM d, yyyy')}</li>
+                            <li key={inv.id}>{inv.invoice_number} (₱{inv.amount.toFixed(2)}) - {inv.issue_date ? format(new Date(inv.issue_date), 'MMM d, yyyy') : '-'}</li>
                         ))}
                     </ul>
                     <div className="text-lg font-bold">New Combined Total: ₱{combinedTotal.toFixed(2)}</div>
@@ -1555,7 +1555,7 @@ MCTS Team`
                     </TableCell>
                     <TableCell className="font-medium text-foreground">{invoice.invoice_number}</TableCell>
                     <TableCell className="text-foreground">{invoice.client_name}</TableCell>
-                    <TableCell className="text-muted-foreground">{format(new Date(invoice.issue_date), 'MMM dd, yyyy')}</TableCell>
+                    <TableCell className="text-muted-foreground">{invoice.issue_date ? format(new Date(invoice.issue_date), 'MMM dd, yyyy') : '-'}</TableCell>
                     <TableCell className="text-muted-foreground">{invoice.due_date ? format(new Date(invoice.due_date), 'MMM dd, yyyy') : '-'}</TableCell>
                     <TableCell className="text-right text-foreground">₱{invoice.amount?.toFixed(2)}</TableCell>
                     <TableCell className="whitespace-nowrap">{getStatusBadge(invoice.status)}</TableCell>
@@ -1696,7 +1696,7 @@ const QuotationsList = ({ quotations, isLoading, loadQuotations }) => {
                                 <TableRow key={quote.id}>
                                     <TableCell className="font-medium text-foreground">{quote.quotation_id}</TableCell>
                                     <TableCell className="text-foreground">{quote.client_info?.name}</TableCell>
-                                    <TableCell className="text-muted-foreground">{format(new Date(quote.created_date), 'MMM dd, yyyy')}</TableCell>
+                                    <TableCell className="text-muted-foreground">{quote.created_date ? format(new Date(quote.created_date), 'MMM dd, yyyy') : '-'}</TableCell>
                                     <TableCell className="text-right text-foreground">₱{quote.total_price?.toFixed(2)}</TableCell>
                                     <TableCell>{getStatusBadge(quote.status)}</TableCell>
                                     <TableCell className="text-right">
@@ -1794,7 +1794,7 @@ const ReimbursementsList = ({ requests, isLoading, loadRequests, clients }) => {
                                     <TableCell className="whitespace-nowrap text-foreground">
                                         {clients.find(c => c.id === req.client_id)?.client_name || req.client_name}
                                     </TableCell>
-                                    <TableCell className="whitespace-nowrap text-muted-foreground">{format(new Date(req.request_date), 'MMM d, yyyy')}</TableCell>
+                                    <TableCell className="whitespace-nowrap text-muted-foreground">{req.request_date ? format(new Date(req.request_date), 'MMM d, yyyy') : '-'}</TableCell>
                                     <TableCell className="whitespace-nowrap">{getStatusBadge(req.status)}</TableCell>
                                     <TableCell className="text-right whitespace-nowrap text-foreground">₱{req.total_amount.toFixed(2)}</TableCell>
                                     <TableCell className="text-right">
@@ -2276,7 +2276,7 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
                                                 {getStatusBadge(order.status)}
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">
-                                                {format(new Date(order.created_date), 'MMM dd, yyyy')}
+                                                {order.created_date ? format(new Date(order.created_date), 'MMM dd, yyyy') : '-'}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <DropdownMenu>
@@ -2345,7 +2345,7 @@ const ClientOrdersTab = ({ orders, isLoading, onRefresh }) => {
                                 </div>
                                 <div>
                                     <Label className="text-xs text-muted-foreground">Date</Label>
-                                    <p className="font-semibold">{format(new Date(viewingOrder.created_date), 'MMM dd, yyyy')}</p>
+                                    <p className="font-semibold">{viewingOrder.created_date ? format(new Date(viewingOrder.created_date), 'MMM dd, yyyy') : '-'}</p>
                                 </div>
                                 <div>
                                     <Label className="text-xs text-muted-foreground">Client</Label>
@@ -2926,7 +2926,7 @@ const PurchaseOrdersList = ({ purchaseOrders, isLoading, loadPurchaseOrders, onE
                             <TableRow key={po.id}>
                                 <TableCell className="font-medium text-foreground">{po.po_number}</TableCell>
                                 <TableCell className="text-foreground">{po.supplier_name}</TableCell>
-                                <TableCell className="text-muted-foreground">{format(new Date(po.issue_date), 'MMM dd, yyyy')}</TableCell>
+                                <TableCell className="text-muted-foreground">{po.issue_date ? format(new Date(po.issue_date), 'MMM dd, yyyy') : '-'}</TableCell>
                                 <TableCell className="text-muted-foreground">{po.due_date ? format(new Date(po.due_date), 'MMM dd, yyyy') : '-'}</TableCell>
                                 <TableCell className="text-right text-foreground">₱{po.total_amount?.toFixed(2)}</TableCell>
                                 <TableCell>{getStatusBadge(po.status)}</TableCell>
@@ -3314,7 +3314,7 @@ export default function FormsPage() {
                                 <td>${record.employee_name}</td>
                                 <td>${record.id_number || '-'}</td>
                                 <td>${record.position || '-'}</td>
-                                <td>${format(new Date(record.print_date), 'MMM d, yyyy')}</td>
+                                <td>${record.print_date ? format(new Date(record.print_date), 'MMM d, yyyy') : '-'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -3721,7 +3721,7 @@ export default function FormsPage() {
                                                         <TableCell className="text-muted-foreground whitespace-nowrap">{record.id_number || '-'}</TableCell>
                                                         <TableCell className="text-muted-foreground whitespace-nowrap">{record.position || '-'}</TableCell>
                                                         <TableCell className="text-muted-foreground whitespace-nowrap">{record.client_name}</TableCell>
-                                                        <TableCell className="text-muted-foreground whitespace-nowrap">{format(new Date(record.print_date), 'MMM d, yyyy')}</TableCell>
+                                                        <TableCell className="text-muted-foreground whitespace-nowrap">{record.print_date ? format(new Date(record.print_date), 'MMM d, yyyy') : '-'}</TableCell>
                                                         <TableCell className="whitespace-nowrap">{getIdStatusBadge(record)}</TableCell>
                                                         <TableCell className="text-right">
                                                             <div className="flex items-center justify-end gap-1">
