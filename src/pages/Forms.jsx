@@ -41,7 +41,7 @@ import FormDefinitionManager from '@/components/forms/FormDefinitionManager';
 import FormSubmissionsViewer from '@/components/forms/FormSubmissionsViewer';
 import DeliveryFormManager from '@/components/forms/DeliveryFormManager';
 import { notifyPurchaseOrderApproval } from '@/components/utils/notificationService';
-import KeychainOrdersManager from '@/components/forms/KeychainOrdersManager';
+
 
 
 const EmailModal = ({ isOpen, onClose, recipient, subject, defaultBody, onSend }) => {
@@ -3001,7 +3001,7 @@ export default function FormsPage() {
     const [reimbursementRequests, setReimbursementRequests] = useState([]);
     const [orders, setOrders] = useState([]); // New state for client orders
     const [purchaseOrders, setPurchaseOrders] = useState([]); // New state for Purchase Orders
-    const [keychainOrders, setKeychainOrders] = useState([]); // New state for keychain orders
+
     const [clients, setClients] = useState([]);
     const [suppliers, setSuppliers] = useState([]); // New state for Suppliers
     const [pricelist, setPricelist] = useState([]); // Added pricelist state
@@ -3124,16 +3124,7 @@ export default function FormsPage() {
         }
     }, [toast]);
 
-    const loadKeychainOrders = useCallback(async () => {
-        try {
-            const { KeychainOrder } = await import('@/entities/all');
-            const keychainData = await KeychainOrder.list('-created_date');
-            setKeychainOrders(keychainData);
-        } catch (error) {
-            console.error('Error loading keychain orders:', error);
-            toast({ variant: "destructive", title: "Network Error", description: "Could not load keychain orders." });
-        }
-    }, [toast]);
+
 
     const loadAllData = useCallback(async () => {
         setIsLoading(true);
@@ -3147,15 +3138,14 @@ export default function FormsPage() {
                 loadPricelist(),
                 loadOrders(),
                 loadSuppliers(),
-                loadPurchaseOrders(),
-                loadKeychainOrders()
+                loadPurchaseOrders()
             ]);
         } catch (error) {
             // Error handling is already in individual load functions
         } finally {
             setIsLoading(false);
         }
-    }, [loadQuotations, loadInvoices, loadIdRecords, loadReimbursementRequests, loadClients, loadPricelist, loadOrders, loadSuppliers, loadPurchaseOrders, loadKeychainOrders]);
+    }, [loadQuotations, loadInvoices, loadIdRecords, loadReimbursementRequests, loadClients, loadPricelist, loadOrders, loadSuppliers, loadPurchaseOrders]);
     
     useEffect(() => {
         loadAllData();
@@ -3427,13 +3417,7 @@ export default function FormsPage() {
                             <FileText className="w-4 h-4 mr-2" />
                             Delivery Forms
                         </TabsTrigger>
-                        <TabsTrigger 
-                            value="keychain-orders"
-                            className="flex-1 data-[state=active]:bg-background"
-                        >
-                            <FileText className="w-4 h-4 mr-2" />
-                            Keychain Orders
-                        </TabsTrigger>
+
                     </TabsList>
                     
                     <TabsContent value="invoices" className="mt-6">
@@ -3774,13 +3758,7 @@ export default function FormsPage() {
                         <DeliveryFormManager />
                     </TabsContent>
 
-                    <TabsContent value="keychain-orders" className="mt-6">
-                        <KeychainOrdersManager 
-                            orders={keychainOrders}
-                            isLoading={isLoading}
-                            onRefresh={loadAllData}
-                        />
-                    </TabsContent>
+
                 </Tabs>
             </div>
              {/* Edit Invoice Dialog (moved here from InvoicesList) */}
