@@ -45,7 +45,7 @@ const JobCard = ({ job, onSelect, userMap, onArchive, onCreateInvoice }) => {
   const isCompleted = job.status === 'completed';
   const [invoiceChecked, setInvoiceChecked] = useState(false);
   const [postingChecked, setPostingChecked] = useState(false);
-  const showArchive = invoiceChecked || postingChecked;
+  const showArchive = invoiceChecked && postingChecked;
   const assignee = userMap.get(job.assigned_to);
   
   // Determine if task is urgent (overdue or due today or rush order)
