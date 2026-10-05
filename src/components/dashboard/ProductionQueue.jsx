@@ -11,6 +11,7 @@ import InvoiceModal from '@/components/forms/InvoiceModal';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -25,7 +26,7 @@ const statusConfig = {
   in_production: { label: 'Ongoing', color: 'bg-red-500', headerColor: 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200' },
   quality_check: { label: 'Quality Check', color: 'bg-sky-400', headerColor: 'bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-200' },
   ready_pickup: { label: 'For Pickup', color: 'bg-blue-500', headerColor: 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200' },
-  completed: { label: 'Completed', color: 'bg-green-500', headerColor: 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' },
+  completed: { label: 'Done - For Social Media Posting', color: 'bg-green-500', headerColor: 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' },
   cancelled: { label: 'Cancelled', color: 'bg-gray-500', headerColor: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }
 };
 
@@ -42,6 +43,9 @@ const getNextStatus = (currentStatus) => {
 const JobCard = ({ job, onSelect, userMap, onArchive, onCreateInvoice }) => {
   const isOverdue = job.deadline && new Date(job.deadline) < new Date();
   const isCompleted = job.status === 'completed';
+  const [invoiceChecked, setInvoiceChecked] = useState(false);
+  const [postingChecked, setPostingChecked] = useState(false);
+  const showArchive = invoiceChecked || postingChecked;
   const assignee = userMap.get(job.assigned_to);
   
   // Determine if task is urgent (overdue or due today or rush order)
@@ -77,6 +81,14 @@ const JobCard = ({ job, onSelect, userMap, onArchive, onCreateInvoice }) => {
             )}
             {isCompleted && (
               <>
+                <label className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox checked={invoiceChecked} onCheckedChange={setInvoiceChecked} />
+                  Invoice
+                </label>
+                <label className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox checked={postingChecked} onCheckedChange={setPostingChecked} />
+                  Posting
+                </label>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -86,15 +98,17 @@ const JobCard = ({ job, onSelect, userMap, onArchive, onCreateInvoice }) => {
                 >
                   <Receipt className="w-3.5 h-3.5" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onArchive(job)}
-                  className="h-7 w-7"
-                  title="Archive"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                </Button>
+                {showArchive && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onArchive(job)}
+                    className="h-7 w-7"
+                    title="Archive"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                  </Button>
+                )}
               </>
             )}
           </div>
