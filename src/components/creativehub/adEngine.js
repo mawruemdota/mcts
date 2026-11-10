@@ -40,6 +40,7 @@ export const STARTER_DESIGN = {
   showCta: true,
   showOffer: true,
   imageScale: 100,
+  imageFit: "contain",
   imageShiftX: 0,
   imageShiftY: 0,
   headlineSize: 100,
@@ -142,7 +143,13 @@ export function renderCreative(canvas, { brand, brief, design, photo, logo }) {
       roundRect(ctx, artX, artY, artW, artH, px(25)); ctx.fill();
       ctx.restore();
     }
-    coverImage(ctx, photo, artX, artY, artW, artH, design.imageScale, px(design.imageShiftX), px(design.imageShiftY));
+    if (design.imageFit === "cover") {
+      coverImage(ctx, photo, artX, artY, artW, artH, design.imageScale, px(design.imageShiftX), px(design.imageShiftY));
+    } else {
+      const factor = Math.min(artW / photo.naturalWidth, artH / photo.naturalHeight) * clip(design.imageScale, 60, 180) / 100;
+      const dw = photo.naturalWidth * factor, dh = photo.naturalHeight * factor;
+      ctx.drawImage(photo, artX + (artW - dw) / 2 + px(design.imageShiftX), artY + (artH - dh) / 2 + px(design.imageShiftY), dw, dh);
+    }
   } else if (!design.transparent && mode !== "clean") {
     // Deliberate graphic accent instead of inventing a product photo.
     ctx.save();
