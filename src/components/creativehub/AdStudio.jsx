@@ -117,7 +117,7 @@ export default function AdStudio() {
 
   useEffect(() => {
     renderCreative(canvasRef.current, { brand, brief, design, photo: photoImage, logo: logoImage });
-  }, [brand, brief, design, photoImage, logoImage]);
+  }, [brand, brief, design, photoImage, logoImage, section]);
 
   const uploadImage = (file, setter) => {
     try { fileToDataUrl(file, setter); } catch (err) { setStatus(err.message); }
