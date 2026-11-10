@@ -5,6 +5,7 @@ on:
       - "src/components/creativehub/**"
       - "src/pages/CreativeHub.jsx"
       - "src/entities/**"
+      - "src/integrations/**"
       - "api/facebook-posts.js"
       - "tests/adEngine.test.mjs"
       - "package.json"
