@@ -4,6 +4,7 @@ on:
     paths:
       - "src/components/creativehub/**"
       - "src/pages/CreativeHub.jsx"
+      - "src/entities/**"
       - "api/facebook-posts.js"
       - "tests/adEngine.test.mjs"
       - "package.json"
