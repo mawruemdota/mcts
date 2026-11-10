@@ -4,9 +4,10 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ShieldAlert, Sparkles, ArrowLeft, ImageIcon, CalendarDays } from "lucide-react";
+import { Loader2, ShieldAlert, Sparkles, ArrowLeft, ImageIcon, CalendarDays, Layers } from "lucide-react";
 import WatermarkTool from "@/components/creativehub/WatermarkTool";
 import PostCalendar from "@/components/creativehub/PostCalendar";
+import AdStudio from "@/components/creativehub/AdStudio";
 
 export default function CreativeHub() {
   const [user, setUser] = useState(null);
@@ -46,22 +47,22 @@ export default function CreativeHub() {
 
   return (
     <div className="p-6 bg-background min-h-screen">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
               <Sparkles className="w-8 h-8 text-purple-600" />
               Creative Hub
             </h1>
-            <p className="text-muted-foreground mt-1">Watermark images and schedule social media posts</p>
+            <p className="text-muted-foreground mt-1">Generate curated ads, refine captions, review Page insights, and schedule social media posts</p>
           </div>
           <Link to={createPageUrl("Creatives")}>
             <Button variant="outline"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button>
           </Link>
         </div>
 
-        <Tabs defaultValue="watermark" className="w-full">
-          <TabsList className="tabs-list bg-secondary">
+        <Tabs defaultValue="ads" className="w-full">
+          <TabsList className="tabs-list bg-secondary flex h-auto flex-wrap">\n            <TabsTrigger value="ads" className="tabs-trigger data-[state=active]:bg-background"><Layers className="w-4 h-4 mr-2" />Ad Studio</TabsTrigger>
             <TabsTrigger value="watermark" className="tabs-trigger data-[state=active]:bg-background">
               <ImageIcon className="w-4 h-4 mr-2" />
               Watermark Tool
@@ -72,7 +73,7 @@ export default function CreativeHub() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="watermark" className="mt-6">
+          <TabsContent value="ads" className="mt-6"><AdStudio /></TabsContent>\n\n          <TabsContent value="watermark" className="mt-6">
             <WatermarkTool />
           </TabsContent>
 
