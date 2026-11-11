@@ -1,11 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { AD_FORMATS, captionDrafts, parseCSV, normalizePosts, analyzePosts, MCTS_BRAND, STARTER_BRIEF } from "../src/components/creativehub/adEngine.js";
+import { MCTS_PALETTE, MCTS_STYLE_REFERENCES, enforceMctsPalette, buildMctsCreativePrompt } from "../src/components/creativehub/mctsBrandGuide.js";
 
 test("format dimensions and brand defaults", () => {
   assert.equal(AD_FORMATS.portrait.width, 1080);
   assert.equal(AD_FORMATS.story.height, 1920);
-  assert.equal(MCTS_BRAND.primary, "#02343D");
+  assert.equal(MCTS_BRAND.primary, "#2355E5");
 });
 
 test("CSV recognizes quoted commas and CRLF rows", () => {
@@ -43,4 +44,27 @@ test("offline captions respect provided facts", () => {
   assert.ok(captions.every(v => v.includes("Message us")));
   assert.ok(captions.every(v => !v.includes("50%")));
   assert.ok(captions.every(v => (v.match(/#MCTS/g) || []).length === 1));
+});
+
+
+test("brand references consistently preserve the MCTS color system", () => {
+  assert.equal(MCTS_STYLE_REFERENCES.length, 3);
+  assert.ok(MCTS_STYLE_REFERENCES.every(ref => ref.sourceName.endsWith(".jpeg")));
+  const locked = enforceMctsPalette({ name: "MCTS", primary: "#FF0000", accent: "#FFAA00" });
+  assert.equal(locked.primary, MCTS_PALETTE.primary);
+  assert.equal(locked.accent, MCTS_PALETTE.accent);
+  assert.equal(locked.text, "#FFFFFF");
+});
+
+test("generation prompt locks palette while allowing alternate style directions", () => {
+  const prompt = buildMctsCreativePrompt({
+    product: "Custom mug",
+    style: "Vintage sepia illustration; use a retro print layout",
+    headline: "CUSTOM MUGS",
+  });
+  assert.ok(prompt.includes(MCTS_PALETTE.primary));
+  assert.ok(prompt.includes("#FFFFFF"));
+  assert.match(prompt, /Do not replace MCTS colors with style reference colors/);
+  assert.match(prompt, /Vintage sepia illustration/);
+  assert.match(prompt, /do not render/i);
 });
