@@ -191,7 +191,7 @@ export function renderCreative(canvas, { brand, brief, design, photo, logo }) {
     const label = brief.offer.slice(0, 75);
     const pillWidth = Math.min(W - margin * 2, ctx.measureText(label).width + px(44));
     roundRect(ctx, margin, offerY, pillWidth, px(63), px(12)); ctx.fill();
-    ctx.fillStyle = primary; ctx.textBaseline = "middle";
+    ctx.fillStyle = MCTS_PALETTE.dark; ctx.textBaseline = "middle";
     ctx.fillText(label, margin + px(22), offerY + px(31));
     ctx.restore();
   }
@@ -210,7 +210,7 @@ export function renderCreative(canvas, { brand, brief, design, photo, logo }) {
     const boxW = Math.min(W - margin * 2, ctx.measureText(cta).width + px(64));
     ctx.fillStyle = accent;
     roundRect(ctx, margin, bY, boxW, px(76), px(15)); ctx.fill();
-    ctx.fillStyle = primary; ctx.textBaseline = "middle";
+    ctx.fillStyle = MCTS_PALETTE.dark; ctx.textBaseline = "middle";
     ctx.fillText(cta, margin + px(32), bY + px(38));
     ctx.restore();
   }
