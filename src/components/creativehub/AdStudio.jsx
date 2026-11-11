@@ -3,7 +3,7 @@ import { Download, Upload, Sparkles, Copy, RotateCcw, FileJson, Image as ImageIc
 import { base44 } from "@/api/base44Client";
 import { AD_FORMATS, MCTS_BRAND, STARTER_BRIEF, STARTER_DESIGN, renderCreative, captionDrafts, parseCSV, normalizePosts, analyzePosts } from "./adEngine";
 import BrandGuidePanel from "./BrandGuidePanel";
-import { MCTS_PALETTE, enforceMctsPalette, buildMctsCreativePrompt } from "./mctsBrandGuide";
+import { enforceMctsPalette, buildMctsCreativePrompt } from "./mctsBrandGuide";
 
 const input = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500";
 const label = "block text-xs font-bold tracking-wide text-slate-600 mb-1.5";
@@ -136,6 +136,23 @@ export default function AdStudio() {
   const uploadImage = (file, setter) => {
     try { fileToDataUrl(file, setter); } catch (err) { setStatus(err.message); }
   };
+  const addStyleReferences = async (list) => {
+    const files = Array.from(list || []).slice(0, 6);
+    const accepted = files.filter(file =>
+      ["image/png", "image/jpeg", "image/webp"].includes(file.type) && file.size <= 2 * 1024 * 1024
+    );
+    if (!accepted.length) { setStatus("Choose PNG/JPG/WebP references no larger than 2 MB each."); return; }
+    try {
+      const next = await Promise.all(accepted.map(file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({ name: file.name, data: String(reader.result || "") });
+        reader.onerror = () => reject(new Error("Unable to read " + file.name));
+        reader.readAsDataURL(file);
+      })));
+      setStyleReferences(prev => [...prev, ...next].slice(0, 6));
+      setStatus(`Added ${next.length} style reference(s). Their images are saved in exported project JSON, not sent to the image model.`);
+    } catch (err) { setStatus(err.message || "Unable to add references."); }
+  };
   const savePNG = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -208,7 +225,7 @@ export default function AdStudio() {
       if (!blob.type.startsWith("image/")) throw Error("Unexpected image format.");
       if (blob.size > 12 * 1024 * 1024) throw Error("Generated image too large.");
       fileToDataUrl(new File([blob], "generated.png", { type: blob.type }), setPhotoData);
-      setStatus("Concept image added. Replace with a real product photo for accurate advertising.");
+      setStatus("Concept image added from your written brief and style notes. Current image generation does not read uploaded reference pixels; replace with a real product photo for accurate advertising.");
     } catch(err) { setStatus("Image assistance unavailable: " + err.message + " Upload an image instead."); }
     finally { setBusy(false); }
   };
