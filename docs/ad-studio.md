@@ -2,15 +2,21 @@
 
 Brand-specific ad creation inside the existing **Creative Hub** (Creatives → Creative Hub → Ad Studio). The page uses the existing Creative Hub permission gate: administrators and users with `has_creative_hub_access`.
 
+## The MCTS visual identity
+
+The authoritative working reference for current MCTS campaigns is [MCTS Brand Guide v0.1](./MCTS-BRAND-GUIDE.md). It describes the **royal-blue and white** palette sampled from three uploaded references, logo treatment, typography directions, product-photography and cartoon layouts, and rules for accommodating future art styles. The brand-lock toggle defaults ON; if turned back on it restores the MCTS reference palette.
+
+The Ad Studio includes a **Brand Guide** tab with a color reference panel, text descriptions of the three example ads, a style-notes field and a small reference-image library. Uploaded style images remain in the browser until exported as part of a project JSON file. **They are not sent into Core.GenerateImage**: the current provider is text-driven. For actual uploaded-reference-conditioned image generation, implement an authorized ComfyUI or Base44 image-gateway workflow that accepts reference images.
+
 ## Working without additional accounts
 
-- Editable MCTS starter brand kit: palette, logo, font, brand voice and tagline. Change it for another brand/client.
+- Reference-derived MCTS royal-blue brand kit: palette, logo, font, brand voice and tagline. Colors are locked by default but can be unlocked for another brand/client.
 - Four responsive templates: Spotlight, Editorial, Offer, Minimal.
 - Square (1080×1080), feed portrait (1080×1350), story (1080×1920), landscape (1200×628).
 - Local image/logo upload and image fit, scale and position sliders.
 - **True-alpha PNG export**: enabling Transparent background clears the canvas; the gray checkerboard is preview-only. For isolated products, upload an image that already has transparent pixels. It does not remove a photo's existing background.
 - Offline caption templates in English/Taglish; edit and copy. Optional AI captions and AI concept imagery via the existing Base44 integrations.
-- Save/open a project JSON containing the design and image assets. Smaller text-based preferences also persist locally in the browser; image uploads are session-only unless you save a project.
+- Save/open a project JSON containing the design, product images, style references and style instructions. Smaller text-based preferences also persist locally in the browser; image uploads are session-only unless you save a project.
 - Import Meta Business Suite CSV files with post-level metrics. The app displays top and weak posts, format-level results, and caveated pattern suggestions.
 
 No new paid service is required for offline editing or CSV review. AI assistance requires the application's existing Base44 integration to work; errors fall back to offline captions.
@@ -60,4 +66,4 @@ This feature reuses current dependencies. It does not change the app's main rout
 
 ## Future enhancements
 
-Versioned brand kits per client, human approval workflow, Ads Manager campaign metrics, direct content scheduler integration, font and visual-reference libraries, accessibility preflight, custom layout drag handles, and source-backed variant testing can be added incrementally.
+Versioned brand kits per client, human approval workflow, Ads Manager campaign metrics, direct content scheduler integration, **actual image-conditioned inference from uploaded style references**, shared server-side reference library, accessibility preflight, custom layout drag handles, and source-backed variant testing can be added incrementally.
