@@ -62,7 +62,8 @@ export default function CreativeHub() {
         </div>
 
         <Tabs defaultValue="ads" className="w-full">
-          <TabsList className="tabs-list bg-secondary flex h-auto flex-wrap">\n            <TabsTrigger value="ads" className="tabs-trigger data-[state=active]:bg-background"><Layers className="w-4 h-4 mr-2" />Ad Studio</TabsTrigger>
+          <TabsList className="tabs-list bg-secondary flex h-auto flex-wrap">
+            <TabsTrigger value="ads" className="tabs-trigger data-[state=active]:bg-background"><Layers className="w-4 h-4 mr-2" />Ad Studio</TabsTrigger>
             <TabsTrigger value="watermark" className="tabs-trigger data-[state=active]:bg-background">
               <ImageIcon className="w-4 h-4 mr-2" />
               Watermark Tool
@@ -73,7 +74,9 @@ export default function CreativeHub() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="ads" className="mt-6"><AdStudio /></TabsContent>\n\n          <TabsContent value="watermark" className="mt-6">
+          <TabsContent value="ads" className="mt-6"><AdStudio /></TabsContent>
+
+          <TabsContent value="watermark" className="mt-6">
             <WatermarkTool />
           </TabsContent>
 
