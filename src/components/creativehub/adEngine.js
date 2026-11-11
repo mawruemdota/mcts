@@ -1,4 +1,5 @@
 // Client-only design and analysis helpers. No tokens or network calls here.
+import { MCTS_PALETTE, MCTS_GUIDE } from "./mctsBrandGuide.js";
 export const AD_FORMATS = {
   square: { label: "Square · 1080 × 1080", width: 1080, height: 1080 },
   portrait: { label: "Feed · 1080 × 1350", width: 1080, height: 1350 },
@@ -9,11 +10,11 @@ export const AD_FORMATS = {
 export const MCTS_BRAND = {
   name: "MCTS",
   tagline: "Marasigan Creatives & Tech Solutions",
-  voice: "Confident, concise, approachable. Natural English or Taglish. No exaggerated claims.",
-  primary: "#02343D",
-  accent: "#20B7B0",
-  text: "#FFFFFF",
-  light: "#F2F7F6",
+  voice: MCTS_GUIDE.voice,
+  primary: MCTS_PALETTE.primary,
+  accent: MCTS_PALETTE.accent,
+  text: MCTS_PALETTE.white,
+  light: MCTS_PALETTE.light,
   font: "Montserrat",
   pageUrl: "",
 };
@@ -25,7 +26,7 @@ export const STARTER_BRIEF = {
   headline: "MAKE IT YOURS.",
   benefit: "Print, branding, and event-ready creative work.",
   offer: "",
-  cta: "MESSAGE US",
+  cta: "MESSAGE MO NA KAMI!",
   details: "",
   hashtags: "#MCTS #CustomPrinting #CreativeSolutions",
   link: "",
@@ -116,10 +117,10 @@ export function renderCreative(canvas, { brand, brief, design, photo, logo }) {
   const ctx = canvas.getContext("2d", { alpha: true });
   const W = fmt.width, H = fmt.height, k = Math.min(W / 1080, H / 1080);
   const px = v => Math.round(v * k);
-  const primary = hexColor(brand.primary, "#02343D");
-  const accent = hexColor(brand.accent, "#20B7B0");
+  const primary = hexColor(brand.primary, MCTS_PALETTE.primary);
+  const accent = hexColor(brand.accent, MCTS_PALETTE.accent);
   const text = hexColor(brand.text, "#FFFFFF");
-  const light = hexColor(brand.light, "#F2F7F6");
+  const light = hexColor(brand.light, MCTS_PALETTE.light);
   const family = fontFamily(brand.font);
   const margin = Math.max(42, px(76));
   const mode = design.template;
@@ -139,7 +140,7 @@ export function renderCreative(canvas, { brand, brief, design, photo, logo }) {
   if (photo) {
     if (!design.transparent) {
       ctx.save();
-      ctx.fillStyle = mode === "clean" ? "#E0ECEA" : "rgba(255,255,255,.07)";
+      ctx.fillStyle = mode === "clean" ? "#E7EDFE" : "rgba(255,255,255,.07)";
       roundRect(ctx, artX, artY, artW, artH, px(25)); ctx.fill();
       ctx.restore();
     }
