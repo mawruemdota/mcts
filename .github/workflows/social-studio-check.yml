@@ -1,0 +1,24 @@
+name: Social Studio static checks
+on:
+  push:
+    branches: [gh-pages]
+  pull_request:
+    branches: [gh-pages]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check app.js
+      - run: node --check engine.mjs
+      - run: node --test tests/engine.test.mjs
+      - name: Confirm no legacy modules or leaked tokens
+        run: |
+          test -f .nojekyll
+          test ! -d src
+          test ! -d base44
+          test ! -d node_modules
+          test ! -d api

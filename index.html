@@ -1,13 +1,137 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Base44 APP</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2355E5">
+  <meta name="description" content="MCTS Social Studio — brand-guided ad creator, caption writer, content drafts and planning queue.">
+  <title>MCTS Social Studio</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-header">
+        <div class="brand-mark">M</div>
+        <div><strong>MCTS</strong><span>SOCIAL STUDIO</span></div>
+      </div>
+      <p class="nav-label">WORKSPACE</p>
+      <nav aria-label="Main navigation">
+        <button data-view="home" class="nav-link"><span class="nav-ico">◫</span> Overview</button>
+        <button data-view="create" class="nav-link active"><span class="nav-ico">✦</span> Create ads</button>
+        <button data-view="library" class="nav-link"><span class="nav-ico">▦</span> Content library</button>
+        <button data-view="queue" class="nav-link"><span class="nav-ico">▣</span> Posting queue</button>
+        <button data-view="brand" class="nav-link"><span class="nav-ico">◈</span> Brand guide</button>
+        <button data-view="insights" class="nav-link"><span class="nav-ico">⌁</span> Insights</button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="connection-dot"></div>
+        <div><b>Local workspace</b><small>No social account connected</small></div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button id="menu-toggle" class="mobile-toggle" aria-label="Toggle navigation">☰</button>
+        <div><span class="eyebrow">MCTS / CREATIVE OPERATIONS</span><h1 id="page-title">Create advertisements</h1></div>
+        <div class="header-actions"><span class="pill"><i></i> Brand guide active</span><button class="button button-primary" id="top-create">+ New creative</button></div>
+      </header>
+      <main class="content">
+        <section class="view" id="view-home" hidden>
+          <div class="welcome-hero"><div class="welcome-copy"><span class="hero-kicker">YOUR CREATIVE COMMAND CENTER</span><h2>Good ideas, made ready to post.</h2><p>Prepare branded designs, captions and a content plan from your own product photos. Review everything before publishing.</p><button class="button button-light" id="home-create">Create your next ad →</button></div><div class="hero-decoration"><div class="hero-circle">M</div><div class="hero-square"></div></div></div>
+          <div class="stat-grid" id="stat-grid"></div>
+          <div class="section-title"><h3>What you can do here</h3></div>
+          <div class="feature-grid">
+            <article class="feature-card"><div class="feature-icon">01</div><h4>Design four concepts</h4><p>Turn your real images into four distinct MCTS-branded compositions.</p></article>
+            <article class="feature-card"><div class="feature-icon">02</div><h4>Build a caption</h4><p>Get editable caption choices with your real product facts and offers.</p></article>
+            <article class="feature-card"><div class="feature-icon">03</div><h4>Approve and plan</h4><p>Store drafts and keep track of publishing dates for manual posting.</p></article>
+          </div>
+          <div class="notice"><b>Platform status:</b> This is the browser-only MVP. AI image synthesis and automatic Facebook/Instagram publishing require an external backend and are not active yet.</div>
+        </section>
+
+        <section class="view active" id="view-create">
+          <div class="page-intro"><div><span class="eyebrow royal">CREATE / NEW CAMPAIGN</span><h2>From a photo to a post.</h2><p>Upload your products, tell us the message, then compare four editable design directions.</p></div><button class="button button-outline" id="reset-brief">Start fresh</button></div>
+          <div class="create-grid">
+            <div class="editor-column">
+              <article class="panel">
+                <div class="panel-heading"><span class="step-num">1</span><div><h3>Provide your images</h3><p>Keep the actual product accurate. Choose one featured photo.</p></div></div>
+                <label class="upload-zone" id="upload-drop">
+                  <span class="upload-glyph">↥</span>
+                  <strong>Upload product images</strong>
+                  <small>PNG, JPG or WebP · Up to 8 images · Max 5 MB each</small>
+                  <input type="file" id="asset-input" accept="image/png,image/jpeg,image/webp" multiple hidden>
+                </label>
+                <div id="asset-grid" class="asset-grid"></div>
+                <div class="inline-uploads">
+                  <label class="mini-upload"><b>+ Brand logo</b><small>Use your official PNG/SVG</small><input type="file" id="logo-input" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden></label>
+                  <label class="mini-upload"><b>+ Style references</b><small>For your creative brief</small><input type="file" id="reference-input" accept="image/png,image/jpeg,image/webp" multiple hidden></label>
+                </div>
+                <div class="reference-list" id="reference-list"></div>
+                <p class="field-help">Uploaded style photos are saved with local drafts, but are not interpreted by an AI model in this browser-only build.</p>
+              </article>
+              <article class="panel">
+                <div class="panel-heading"><span class="step-num">2</span><div><h3>Describe the advertisement</h3><p>Use only real information—no invented offers or claims.</p></div></div>
+                <div class="form-grid">
+                  <label class="field"><span>Product / service</span><input id="brief-product" data-brief="product" maxlength="100" placeholder="e.g. custom mugs"></label>
+                  <label class="field"><span>Audience</span><input id="brief-audience" data-brief="audience" maxlength="160" placeholder="Who should see this?"></label>
+                  <label class="field full"><span>Headline</span><input id="brief-headline" data-brief="headline" maxlength="120" placeholder="Main message"></label>
+                  <label class="field full"><span>Supporting benefits</span><textarea id="brief-benefit" data-brief="benefit" rows="3" maxlength="300" placeholder="Confirmed features, separated by commas for the service layout"></textarea></label>
+                  <label class="field"><span>Offer / price <em>(optional)</em></span><input id="brief-offer" data-brief="offer" maxlength="70" placeholder="Only verified offers"></label>
+                  <label class="field"><span>Call to action</span><input id="brief-cta" data-brief="cta" maxlength="80"></label>
+                  <label class="field"><span>Content objective</span><select id="brief-objective" data-brief="objective"><option>Inquiries</option><option>Awareness</option><option>Sales</option><option>Engagement</option><option>Event registrations</option></select></label>
+                  <label class="field"><span>Format</span><select id="brief-format" data-brief="format"><option value="square">Square · 1080 × 1080</option><option value="portrait">Feed portrait · 1080 × 1350</option><option value="story">Story · 1080 × 1920</option><option value="landscape">Landscape · 1200 × 628</option></select></label>
+                  <label class="field full"><span>Desired style / reference notes</span><textarea id="brief-style" data-brief="style" maxlength="500" rows="2" placeholder="Illustrated, playful, minimalist, product photograph, etc."></textarea></label>
+                </div>
+                <div class="toggles"><label class="toggle-line"><input type="checkbox" id="preserve-product" checked> Preserve product image exactly</label><label class="toggle-line"><input type="checkbox" id="transparent-toggle"> Export on transparent canvas</label></div>
+                <button id="generate" class="button button-primary button-block">✦ Generate 4 ad layouts</button>
+                <p class="field-help">These samples are generated with the browser's Canvas engine using your original photos. AI-created scenes need an external image-generation service.</p>
+              </article>
+            </div>
+
+            <div class="results-column">
+              <article class="panel result-panel">
+                <div class="section-title tight"><div><span class="eyebrow royal">STEP 03 / REVIEW</span><h3>Choose a direction</h3></div><span class="pill subtle" id="sample-count">4 layout options</span></div>
+                <div id="sample-grid" class="sample-grid"></div>
+                <div class="preview-head"><h3 id="active-layout-name">Product Spotlight</h3><span id="output-dimensions">1080 × 1080</span></div>
+                <div class="preview-stage"><canvas id="main-canvas" aria-label="Selected advertisement preview" role="img"></canvas></div>
+                <div class="action-row"><button class="button button-primary" id="download-png">↓ Download PNG</button><button class="button button-outline" id="download-alpha">Transparent PNG</button><button class="button button-outline" id="save-draft">Save draft</button></div>
+              </article>
+              <article class="panel">
+                <div class="section-title tight"><div><span class="eyebrow royal">SOCIAL COPY</span><h3>Caption assistant</h3></div><button class="text-button" id="make-captions">Refresh options</button></div>
+                <div id="caption-tabs" class="caption-tabs"></div>
+                <label class="field"><span>Edit caption</span><textarea id="caption-editor" rows="7" placeholder="Write or generate your caption"></textarea></label>
+                <div class="action-row"><button id="copy-caption" class="button button-outline">Copy caption</button><button id="approve-draft" class="button button-primary">Approve draft</button></div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-library" hidden>
+          <div class="page-intro"><div><span class="eyebrow royal">YOUR WORK</span><h2>Content library</h2><p>Locally stored projects and approvals. Select a draft to continue editing.</p></div><button data-view="create" class="button button-primary">+ Create ad</button></div>
+          <div class="notice">Saved projects and image files are stored in this browser's IndexedDB only. They are not synced between devices or automatically backed up.</div>
+          <div id="library-grid" class="library-grid"></div>
+        </section>
+        <section class="view" id="view-queue" hidden>
+          <div class="page-intro"><div><span class="eyebrow royal">PLAN & APPROVE</span><h2>Posting queue</h2><p>Prepare a manual publishing schedule for approved content.</p></div></div>
+          <div class="notice"><b>Not automatic:</b> Dates below are planning reminders only. This website will not post to Facebook or Instagram in the background. Use the Copy Caption and Download actions to publish manually until Meta is connected through a secure backend.</div>
+          <div id="queue-list" class="queue-list"></div>
+        </section>
+        <section class="view" id="view-brand" hidden>
+          <div class="page-intro"><div><span class="eyebrow royal">BRAND IDENTITY</span><h2>MCTS Brand Guide</h2><p>Keep these brand anchors consistent, while allowing new creative styles.</p></div></div>
+          <div class="panel"><div class="section-title"><h3>Official working palette</h3><span class="pill subtle">Based on 3 references · provisional</span></div><div id="swatch-grid" class="swatch-grid"></div><p class="field-help">These colors are estimated from JPEG references, pending your original vector logo and brand specifications.</p></div>
+          <div class="brand-columns">
+            <div class="panel"><h3>Brand rules</h3><div id="brand-rules"></div></div>
+            <div class="panel"><h3>Art direction references</h3><div class="reference-card"><b>Product Showcase</b><p>Real product photo, blue benefits circle, lower CTA strip.</p></div><div class="reference-card"><b>Sticker Pack</b><p>Physical product photographed in hand, small price block and bright blue framing.</p></div><div class="reference-card"><b>Illustrated Services</b><p>Bold headline, modular blue panels and simplified character art.</p></div></div>
+          </div>
+        </section>
+        <section class="view" id="view-insights" hidden>
+          <div class="page-intro"><div><span class="eyebrow royal">CONTENT INTELLIGENCE</span><h2>Review your posts</h2><p>Import Facebook performance data without connecting your account.</p></div></div>
+          <div class="panel"><label class="upload-zone small-upload"><span class="upload-glyph">↥</span><strong>Import a Meta Business Suite CSV</strong><small>Post-level reach, reactions, comments or shares · Data stays in the browser</small><input id="csv-input" type="file" accept=".csv,text/csv" hidden></label><div id="insights-output" class="insights-output"><p class="empty-state">No data imported. Export post-level insights from Meta Business Suite to compare actual results.</p></div></div>
+        </section>
+      </main>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</body>
 </html>
