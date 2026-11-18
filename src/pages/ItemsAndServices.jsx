@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { PriceListItem } from "@/entities/all";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, Search, Calculator } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 import CostingCalculator from "../components/products/CostingCalculator";
+
+const PRICE_TIERS = [
+  { key: "loyal", field: "price_aggressive", label: "Loyal" },
+  { key: "standard", field: "price_conservative", label: "Standard" },
+  { key: "rush", field: "price_extreme", label: "Rush" },
+];
 
 const PricelistForm = ({ item, onSubmitted }) => {
   const [formData, setFormData] = useState(
@@ -120,15 +126,15 @@ const PricelistForm = ({ item, onSubmitted }) => {
           <Label>Pricing Tiers (₱)</Label>
           <div className="grid grid-cols-3 gap-2 mt-1">
               <div>
-                  <Label htmlFor="price_aggressive" className="text-xs text-muted-foreground">Aggressive</Label>
+                  <Label htmlFor="price_aggressive" className="text-xs text-muted-foreground">Loyal</Label>
                   <Input id="price_aggressive" type="number" step="0.01" placeholder="e.g., 80.00" value={formData.price_aggressive} onChange={(e) => handleInputChange("price_aggressive", e.target.value)} />
               </div>
               <div>
-                  <Label htmlFor="price_conservative" className="text-xs text-muted-foreground">Conservative *</Label>
+                  <Label htmlFor="price_conservative" className="text-xs text-muted-foreground">Standard *</Label>
                   <Input id="price_conservative" type="number" step="0.01" placeholder="e.g., 100.00" value={formData.price_conservative} onChange={(e) => handleInputChange("price_conservative", e.target.value)} required/>
               </div>
               <div>
-                  <Label htmlFor="price_extreme" className="text-xs text-muted-foreground">Extreme</Label>
+                  <Label htmlFor="price_extreme" className="text-xs text-muted-foreground">Rush</Label>
                   <Input id="price_extreme" type="number" step="0.01" placeholder="e.g., 120.00" value={formData.price_extreme} onChange={(e) => handleInputChange("price_extreme", e.target.value)} />
               </div>
           </div>
@@ -161,82 +167,52 @@ const PricelistForm = ({ item, onSubmitted }) => {
   );
 };
 
-const ItemsTable = ({ items, handleEdit, handleDelete }) => (
+const PriceTable = ({ rows, emptyLabel, handleEdit, handleDelete, showTiers }) => {
+  const tiers = PRICE_TIERS.filter((tier) => showTiers[tier.key]);
+
+  return (
     <div className="bg-card border-border rounded-lg">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-foreground">Item Name</TableHead>
+            <TableHead className="text-foreground">{emptyLabel} Name</TableHead>
             <TableHead className="text-foreground">Unit</TableHead>
-            <TableHead className="text-right text-foreground">Aggressive (₱)</TableHead>
-            <TableHead className="text-right text-foreground">Conservative (₱)</TableHead>
-            <TableHead className="text-right text-foreground">Extreme (₱)</TableHead>
+            {tiers.map((tier) => (
+              <TableHead key={tier.key} className="text-right text-foreground">{tier.label} (₱)</TableHead>
+            ))}
             <TableHead className="text-right text-foreground">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.length > 0 ? (
-            items.map((item) => (
-              <TableRow key={item.id} className="hover:bg-secondary/50">
-                <TableCell className="font-medium text-foreground">{item.item_name}</TableCell>
-                <TableCell className="text-muted-foreground">{item.unit}</TableCell>
-                <TableCell className="text-right text-foreground">{item.price_aggressive?.toFixed(2) ? `₱${item.price_aggressive.toFixed(2)}` : 'N/A'}</TableCell>
-                <TableCell className="text-right font-semibold text-foreground">{item.price_conservative?.toFixed(2) ? `₱${item.price_conservative.toFixed(2)}` : 'N/A'}</TableCell>
-                <TableCell className="text-right text-foreground">{item.price_extreme?.toFixed(2) ? `₱${item.price_extreme.toFixed(2)}` : 'N/A'}</TableCell>
+          {rows.length > 0 ? (
+            rows.map((row) => (
+              <TableRow key={row.id} className="hover:bg-secondary/50">
+                <TableCell className="font-medium text-foreground">{row.item_name}</TableCell>
+                <TableCell className="text-muted-foreground">{row.unit}</TableCell>
+                {tiers.map((tier) => (
+                  <TableCell
+                    key={tier.key}
+                    className={tier.key === "standard" ? "text-right font-semibold text-foreground" : "text-right text-foreground"}
+                  >
+                    {row[tier.field]?.toFixed(2) ? `₱${row[tier.field].toFixed(2)}` : 'N/A'}
+                  </TableCell>
+                ))}
                 <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}><Edit className="w-4 h-4"/></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}><Trash2 className="w-4 h-4 text-destructive"/></Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleEdit(row)}><Edit className="w-4 h-4"/></Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(row.id)}><Trash2 className="w-4 h-4 text-destructive"/></Button>
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">No items found.</TableCell>
+              <TableCell colSpan={3 + tiers.length} className="text-center h-24 text-muted-foreground">No {emptyLabel.toLowerCase()} found.</TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
     </div>
-);
-
-const ServicesTable = ({ services, handleEdit, handleDelete }) => (
-    <div className="bg-card border-border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-foreground">Service Name</TableHead>
-            <TableHead className="text-foreground">Unit</TableHead>
-            <TableHead className="text-right text-foreground">Aggressive (₱)</TableHead>
-            <TableHead className="text-right text-foreground">Conservative (₱)</TableHead>
-            <TableHead className="text-right text-foreground">Extreme (₱)</TableHead>
-            <TableHead className="text-right text-foreground">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {services.length > 0 ? (
-            services.map((service) => (
-              <TableRow key={service.id} className="hover:bg-secondary/50">
-                <TableCell className="font-medium text-foreground">{service.item_name}</TableCell>
-                <TableCell className="text-muted-foreground">{service.unit}</TableCell>
-                <TableCell className="text-right text-foreground">{service.price_aggressive?.toFixed(2) ? `₱${service.price_aggressive.toFixed(2)}` : 'N/A'}</TableCell>
-                <TableCell className="text-right font-semibold text-foreground">{service.price_conservative?.toFixed(2) ? `₱${service.price_conservative.toFixed(2)}` : 'N/A'}</TableCell>
-                <TableCell className="text-right text-foreground">{service.price_extreme?.toFixed(2) ? `₱${service.price_extreme.toFixed(2)}` : 'N/A'}</TableCell>
-                <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(service)}><Edit className="w-4 h-4"/></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(service.id)}><Trash2 className="w-4 h-4 text-destructive"/></Button>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">No services found.</TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
-);
-
+  );
+};
 
 export default function ItemsAndServicesPage() {
   const [items, setItems] = useState([]);
@@ -244,6 +220,7 @@ export default function ItemsAndServicesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showTiers, setShowTiers] = useState({ loyal: true, standard: true, rush: true });
   const { toast } = useToast();
 
   const loadItems = useCallback(async () => {
@@ -328,6 +305,19 @@ export default function ItemsAndServicesPage() {
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <span className="text-sm font-medium text-muted-foreground">Show price tiers:</span>
+          {PRICE_TIERS.map((tier) => (
+            <label key={tier.key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+              <Checkbox
+                checked={showTiers[tier.key]}
+                onCheckedChange={(checked) => setShowTiers((prev) => ({ ...prev, [tier.key]: !!checked }))}
+              />
+              {tier.label}
+            </label>
+          ))}
+        </div>
+
         <Tabs defaultValue="items" className="w-full">
             <TabsList className="tabs-list">
               <TabsTrigger value="items" className="tabs-trigger">Items</TabsTrigger>
@@ -339,12 +329,12 @@ export default function ItemsAndServicesPage() {
             </TabsList>
             <TabsContent value="items" className="mt-4">
                 {isLoading ? <p className="text-center text-muted-foreground">Loading...</p> : 
-                    <ItemsTable items={filteredItems} handleEdit={handleEdit} handleDelete={handleDelete} />
+                    <PriceTable rows={filteredItems} emptyLabel="Item" showTiers={showTiers} handleEdit={handleEdit} handleDelete={handleDelete} />
                 }
             </TabsContent>
             <TabsContent value="services" className="mt-4">
                  {isLoading ? <p className="text-center text-muted-foreground">Loading...</p> : 
-                    <ServicesTable services={filteredServices} handleEdit={handleEdit} handleDelete={handleDelete} />
+                    <PriceTable rows={filteredServices} emptyLabel="Service" showTiers={showTiers} handleEdit={handleEdit} handleDelete={handleDelete} />
                 }
             </TabsContent>
             <TabsContent value="costing" className="mt-4">

@@ -81,15 +81,15 @@ const SaveToPricelistForm = ({ productInfo, onSaveSuccess }) => {
             <h4 className="font-semibold mb-2">Calculated Prices (per unit)</h4>
             <div className="grid grid-cols-3 gap-2 text-sm">
                 <div>
-                    <p className="text-xs text-muted-foreground">Aggressive</p>
+                    <p className="text-xs text-muted-foreground">Loyal</p>
                     <p className="font-medium">₱{formData.price_aggressive.toFixed(2)}</p>
                 </div>
                 <div>
-                    <p className="text-xs text-muted-foreground">Conservative</p>
+                    <p className="text-xs text-muted-foreground">Standard</p>
                     <p className="font-medium">₱{formData.price_conservative.toFixed(2)}</p>
                 </div>
                 <div>
-                    <p className="text-xs text-muted-foreground">Extreme</p>
+                    <p className="text-xs text-muted-foreground">Rush</p>
                     <p className="font-medium">₱{formData.price_extreme.toFixed(2)}</p>
                 </div>
             </div>
@@ -269,15 +269,15 @@ export default function CostingCalculator({ onSaveSuccess }) {
         doc.setFontSize(12);
         
         doc.setTextColor(59, 130, 246);
-        doc.text(`Aggressive (${((pricingMultipliers.aggressive - 1) * 100).toFixed(0)}% markup): ₱${pricingStrategies.aggressive.toFixed(2)}`, 20, yPos);
+        doc.text(`Loyal (${((pricingMultipliers.aggressive - 1) * 100).toFixed(0)}% markup): ₱${pricingStrategies.aggressive.toFixed(2)}`, 20, yPos);
         yPos += 8;
         
         doc.setTextColor(34, 197, 94);
-        doc.text(`Conservative (${((pricingMultipliers.conservative - 1) * 100).toFixed(0)}% markup): ₱${pricingStrategies.conservative.toFixed(2)}`, 20, yPos);
+        doc.text(`Standard (${((pricingMultipliers.conservative - 1) * 100).toFixed(0)}% markup): ₱${pricingStrategies.conservative.toFixed(2)}`, 20, yPos);
         yPos += 8;
         
         doc.setTextColor(239, 68, 68);
-        doc.text(`Extreme (${((pricingMultipliers.extreme - 1) * 100).toFixed(0)}% markup): ₱${pricingStrategies.extreme.toFixed(2)}`, 20, yPos);
+        doc.text(`Rush (${((pricingMultipliers.extreme - 1) * 100).toFixed(0)}% markup): ₱${pricingStrategies.extreme.toFixed(2)}`, 20, yPos);
         
         doc.setTextColor(0, 0, 0);
         doc.save(`${productName || 'costing'}_computation.pdf`);
@@ -292,9 +292,9 @@ export default function CostingCalculator({ onSaveSuccess }) {
     ];
 
     const pricingConfig = [
-        { key: 'aggressive', label: 'Aggressive', icon: TrendingDown, color: 'text-blue-500' },
-        { key: 'conservative', label: 'Conservative', icon: Minus, color: 'text-green-500' },
-        { key: 'extreme', label: 'Extreme', icon: TrendingUp, color: 'text-red-500' }
+        { key: 'aggressive', label: 'Loyal', icon: TrendingDown, color: 'text-blue-500' },
+        { key: 'conservative', label: 'Standard', icon: Minus, color: 'text-green-500' },
+        { key: 'extreme', label: 'Rush', icon: TrendingUp, color: 'text-red-500' }
     ];
 
     return (
@@ -587,7 +587,7 @@ export default function CostingCalculator({ onSaveSuccess }) {
                                     <div className="flex justify-between items-center mb-2">
                                         <div className="flex items-center gap-1.5">
                                             <TrendingDown className="w-3 h-3 md:w-4 md:h-4 text-blue-500" />
-                                            <span className="text-sm md:text-base font-medium text-blue-700">Aggressive</span>
+                                            <span className="text-sm md:text-base font-medium text-blue-700">Loyal</span>
                                         </div>
                                         <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
                                             {((pricingMultipliers.aggressive - 1) * 100).toFixed(0)}% markup
@@ -601,7 +601,7 @@ export default function CostingCalculator({ onSaveSuccess }) {
                                     <div className="flex justify-between items-center mb-2">
                                         <div className="flex items-center gap-1.5">
                                             <Minus className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
-                                            <span className="text-sm md:text-base font-medium text-green-700">Conservative</span>
+                                            <span className="text-sm md:text-base font-medium text-green-700">Standard</span>
                                         </div>
                                         <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                                             {((pricingMultipliers.conservative - 1) * 100).toFixed(0)}% markup
@@ -615,7 +615,7 @@ export default function CostingCalculator({ onSaveSuccess }) {
                                     <div className="flex justify-between items-center mb-2">
                                         <div className="flex items-center gap-1.5">
                                             <TrendingUp className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
-                                            <span className="text-sm md:text-base font-medium text-red-700">Extreme</span>
+                                            <span className="text-sm md:text-base font-medium text-red-700">Rush</span>
                                         </div>
                                         <Badge variant="secondary" className="bg-red-100 text-red-800 text-xs">
                                             {((pricingMultipliers.extreme - 1) * 100).toFixed(0)}% markup

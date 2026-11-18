@@ -525,9 +525,9 @@ export default function NewTaskModal({ isOpen, onClose, onTaskCreated, user }) {
                             <Select value={item.pricing_tier} onValueChange={value => handleItemChange(index, 'pricing_tier', value)} disabled={item.is_custom}>
                                 <SelectTrigger><SelectValue/></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="aggressive">Aggressive</SelectItem>
-                                    <SelectItem value="conservative">Conservative</SelectItem>
-                                    <SelectItem value="extreme">Extreme</SelectItem>
+                                    <SelectItem value="aggressive">Loyal</SelectItem>
+                                    <SelectItem value="conservative">Standard</SelectItem>
+                                    <SelectItem value="extreme">Rush</SelectItem>
                                     <SelectItem value="custom">Custom</SelectItem>
                                 </SelectContent>
                             </Select>
