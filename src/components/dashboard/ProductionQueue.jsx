@@ -158,15 +158,20 @@ export default function ProductionQueue({ user, initialFilter }) {
   const fetchJobsAndUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const [jobData, userData] = await Promise.all([
-        Job.list('-created_date', 100),
-        User.list()
-      ]);
-      setJobs(jobData);
-      setAllUsers(userData);
-      const userMap = new Map();
-      userData.forEach((u) => userMap.set(u.email, u));
-      setUsersMap(userMap);
+      const jobData = await Job.list('-created_date', 100);
+      setJobs(Array.isArray(jobData) ? jobData : []);
+
+      // Assignee names are a nice-to-have: never let a user-list error hide the tasks.
+      try {
+        const userData = await User.list();
+        const safeUsers = Array.isArray(userData) ? userData : [];
+        setAllUsers(safeUsers);
+        const userMap = new Map();
+        safeUsers.forEach((u) => userMap.set(u.email, u));
+        setUsersMap(userMap);
+      } catch (userError) {
+        console.warn("Could not load user list for assignees:", userError);
+      }
     } catch (error) {
       console.error("Failed to fetch jobs or users:", error);
       toast({

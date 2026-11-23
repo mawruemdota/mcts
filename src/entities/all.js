@@ -46,5 +46,20 @@ export const TaskTemplate = base44.entities.TaskTemplate;
 export const Team = base44.entities.Team;
 export const TeamReport = base44.entities.TeamReport;
 export const Transaction = base44.entities.Transaction;
-export const User = base44.auth;
+// `User` is used for both session calls (me/logout) and record reads (list/filter).
+// The auth client has no list(), so delegate each call to the right client.
+export const User = {
+  list: (...args) => base44.entities.User.list(...args),
+  filter: (...args) => base44.entities.User.filter(...args),
+  get: (...args) => base44.entities.User.get(...args),
+  count: (...args) => base44.entities.User.count(...args),
+  aggregate: (...args) => base44.entities.User.aggregate(...args),
+  update: (...args) => base44.entities.User.update(...args),
+  delete: (...args) => base44.entities.User.delete(...args),
+  me: (...args) => base44.auth.me(...args),
+  updateMe: (...args) => base44.auth.updateMe(...args),
+  logout: (...args) => base44.auth.logout(...args),
+  isAuthenticated: (...args) => base44.auth.isAuthenticated(...args),
+  redirectToLogin: (...args) => base44.auth.redirectToLogin(...args),
+};
 export const Query = base44.entities.Query;

@@ -57,15 +57,19 @@ export default function JobsPage() {
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [jobsData, userData, teamData] = await Promise.all([
-        Job.list("-created_date", 100),
-        User.me(),
-        User.list()
-      ]);
-
+      const jobsData = await Job.list("-created_date", 100);
       setJobs(Array.isArray(jobsData) ? jobsData : []);
-      setUser(userData);
-      setTeam(Array.isArray(teamData) ? teamData : []);
+
+      try {
+        const [userData, teamData] = await Promise.all([
+          User.me(),
+          User.list()
+        ]);
+        setUser(userData);
+        setTeam(Array.isArray(teamData) ? teamData : []);
+      } catch (userError) {
+        console.warn("Could not load user/team data:", userError);
+      }
     } catch (error) {
       console.error("Error loading tasks data:", error);
       setJobs([]);
